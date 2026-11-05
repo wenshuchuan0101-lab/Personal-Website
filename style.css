@@ -1,9 +1,9 @@
 @font-face {
-  font-family: "Barlow Condensed";
+  font-family: "Cormorant Garamond";
   font-style: normal;
-  font-weight: 200;
+  font-weight: 400;
   font-display: swap;
-  src: url("./assets/barlow-condensed-200.ttf") format("truetype");
+  src: url("./assets/cormorant-garamond-400.ttf") format("truetype");
 }
 @font-face {
   font-family: "Noto Sans SC Title";
@@ -65,18 +65,18 @@ body { background: #0a1d37; }
 }
 .english {
   margin: 0 auto;
-  font-family: "Barlow Condensed", "Arial Narrow", sans-serif;
-  font-size: clamp(36px, 4.6vw, 76px);
-  font-weight: 200;
+  font-family: "Cormorant Garamond", "Times New Roman", serif;
+  font-size: clamp(28px, 4.3vw, 72px);
+  font-weight: 400;
   line-height: 1.05;
   letter-spacing: .018em;
   white-space: nowrap;
-  transform: scaleY(.8);
+  transform: scaleY(.72);
   transform-origin: top center;
 }
 @media (orientation: portrait) {
   .words { top: 19%; }
-  .english { font-size: clamp(24px, 7.4vw, 60px); }
+  .english { font-size: clamp(18px, 5.8vw, 48px); }
 }
 @media (max-height: 420px) and (orientation: landscape) {
   .words { top: 14%; }

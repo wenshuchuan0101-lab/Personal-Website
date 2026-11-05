@@ -6,4 +6,4 @@
 
 首图位于 `assets/moon.png`。天空轮廓按照该图片在 `app.js` 的 `moonEdge` 中设置。如果换用构图不同的图片，需要同步更新图片尺寸和月亮轮廓。
 
-英文字体 Barlow Condensed ExtraLight，中文标题使用 Noto Sans SC ExtraLight 字体子集。字体均随站点提供，许可见 `assets/Barlow-OFL.txt` 和 `assets/Noto-OFL.txt`。
+英文字体使用接近参考图衬线风格的 Cormorant Garamond，并压低字形高度。中文标题使用 Noto Sans SC ExtraLight 字体子集。字体均随站点提供，许可见 `assets/Cormorant-OFL.txt` 和 `assets/Noto-OFL.txt`。
