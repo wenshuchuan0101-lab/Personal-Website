@@ -1,0 +1,168 @@
+[hidden] { display: none !important; }
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+.enter-scene {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+.enter-scene:focus-visible { outline: 1px solid #e6e4d3; outline-offset: -12px; }
+.choice-scene {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  --selection-background: #0a1d37;
+  background: var(--selection-background);
+  color: #e3e8f0;
+}
+.ritual-stage {
+  position: relative;
+  width: min(94vw, 88svh, 850px);
+  aspect-ratio: 1;
+  isolation: isolate;
+  background: var(--selection-background);
+  overflow: hidden;
+}
+.ring-image {
+  position: absolute;
+  width: 104%;
+  height: 104%;
+  left: -2%;
+  top: 2.85%;
+  object-fit: contain;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  opacity: .86;
+  user-select: none;
+}
+.totem-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity .7s ease;
+  filter: drop-shadow(0 0 7px #d5e2f542);
+  pointer-events: none;
+}
+.is-aligning .totem-lines { opacity: .8; }
+.phase-arc {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  filter: drop-shadow(0 0 6px #e1eaff3d);
+}
+.crown {
+  position: absolute;
+  left: 50%;
+  top: 7.5%;
+  width: 10%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border: 1px solid #e1e8f0b3;
+  border-radius: 50%;
+  box-shadow: 0 0 14px #d7d5c919, inset 0 0 12px #d7d5c90c;
+  transition: border-color .6s, box-shadow .6s;
+  pointer-events: none;
+}
+.crown::after {
+  content: "";
+  position: absolute;
+  inset: -9px;
+  border: 1px solid #e1e8f02b;
+  border-radius: 50%;
+}
+.is-aligned .crown {
+  border-color: #f0f5ff;
+  box-shadow: 0 0 30px #dae7ff78, inset 0 0 22px #dae7ff38;
+}
+.celestial-orbit { position: absolute; inset: 0; }
+.celestial {
+  position: absolute;
+  top: 50%;
+  width: 22%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border: 0;
+  border-radius: 50%;
+  padding: 0;
+  background: transparent;
+  color: #e3e8f0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.sun-option { left: 32%; }
+.moon-option { left: 68%; }
+.celestial-icon, .celestial-icon img { display: block; width: 100%; height: 100%; }
+.celestial-icon { filter: drop-shadow(0 0 7px #e0e9ff6b) drop-shadow(0 0 22px #e0e9ff40); transition: filter .4s, scale .5s; }
+.celestial:hover .celestial-icon, .celestial:focus-visible .celestial-icon { filter: drop-shadow(0 0 18px #e0e9ff99); }
+.celestial:focus-visible { outline: 1px solid #d8cdb78c; outline-offset: 5px; }
+.celestial:disabled { cursor: default; }
+.choice-label {
+  position: absolute;
+  top: 105%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: "Noto Sans SC Title", "Microsoft YaHei Light", sans-serif;
+  font-size: clamp(15px, 1.6vw, 22px);
+  font-weight: 200;
+  letter-spacing: .2em;
+  white-space: nowrap;
+  text-shadow: 0 0 10px #dae7ff4d;
+  transition: opacity .5s;
+}
+html[lang="en"] .choice-label {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  letter-spacing: .04em;
+  font-size: clamp(18px, 2vw, 27px);
+}
+.is-aligning .choice-label { opacity: 0; }
+.is-aligned .celestial[aria-pressed="true"] .celestial-icon { scale: 1.02; }
+.language-star {
+  --star-center: #0a1d37;
+  position: fixed;
+  z-index: 10;
+  top: max(20px, env(safe-area-inset-top));
+  right: max(24px, env(safe-area-inset-right));
+  width: 48px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  padding: 5px 9px;
+  color: #eeeef3;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  transition: color 1.5s;
+}
+.language-star svg { width: 100%; height: 100%; filter: drop-shadow(0 0 5px #eef1ff66); transition: transform .5s; }
+.language-star:hover svg { transform: scale(1.12); }
+.language-star:focus-visible { outline: 1px solid currentColor; outline-offset: 3px; }
+.language-star[aria-pressed="true"] svg { transform: rotate(180deg); }
+body[data-destination="quick"] .language-star { color: #292720; --star-center: #faf8f2; }
+body[data-destination="showcase"] .language-star { --star-center: #000; }
+.screen-fade { position: fixed; z-index: 5; inset: 0; opacity: 0; pointer-events: none; }
+@media (max-height: 480px) and (orientation: landscape) {
+  .ritual-stage { width: 92svh; }
+  .choice-label { font-size: 14px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .totem-lines, .choice-label, .celestial-icon, .crown, .language-star, .language-star svg { transition: none; }
+}

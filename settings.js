@@ -5,4 +5,33 @@ const SCENE_SETTINGS = {
   chinese: "关于想象力的一切",
   englishLines: ["Tread softly because you tread", "on my dreams."],
   dawnSeconds: 180,
+  selection: {
+    ring: "./assets/eclipse-ring.png",
+    sun: "./assets/sun.svg",
+    moon: "./assets/moon-option.svg",
+    totem: "./assets/totem.svg",
+    phases: "./assets/phase-arc.svg",
+    language: "zh",
+    revealMilliseconds: 700,
+    rotationMilliseconds: 2400,
+    fadeMilliseconds: 2000,
+    labels: {
+      zh: {
+        title: "选择浏览方式",
+        quick: "快速浏览",
+        showcase: "观赏",
+        enter: "进入日月选择",
+        language: "Switch to English",
+        selected: "已选择",
+      },
+      en: {
+        title: "Choose your experience",
+        quick: "Quick View",
+        showcase: "Showcase",
+        enter: "Choose sun or moon",
+        language: "切换为中文",
+        selected: "Selected",
+      },
+    },
+  },
 };

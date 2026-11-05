@@ -40,6 +40,7 @@ let meteors = [];
 let meteorFrame = null;
 
 function resize() {
+  if (scene.hidden) return;
   const bounds = scene.getBoundingClientRect();
   const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
   const scale = Math.max(bounds.width / imageSize.width, bounds.height / imageSize.height);
@@ -90,7 +91,12 @@ function drawMeteors(now) {
 }
 
 scene.addEventListener("click", (event) => {
-  if (event.target.closest(".words")) return;
+  const overText = [chinese, english].some((node) => {
+    const bounds = node.getBoundingClientRect();
+    return event.clientX >= bounds.left && event.clientX <= bounds.right
+      && event.clientY >= bounds.top && event.clientY <= bounds.bottom;
+  });
+  if (overText) return;
   const bounds = scene.getBoundingClientRect();
   const { scale, offsetX, offsetY } = geometry;
   const x = (event.clientX - bounds.left - offsetX) / scale;
@@ -108,6 +114,7 @@ resize();
 const dawnStarted = performance.now();
 const dawnDuration = Math.max(1, settings.dawnSeconds) * 1000;
 function updateDawn(now) {
+  if (scene.hidden) return;
   const progress = Math.min(1, (now - dawnStarted) / dawnDuration);
   document.documentElement.style.setProperty("--dawn-progress", progress);
   // 黎明时同步加深文字，保持淡色天空上的可读性。

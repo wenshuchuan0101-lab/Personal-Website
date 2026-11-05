@@ -9,8 +9,10 @@
   <link rel="preload" href="./assets/moon.png" as="image">
   <link rel="preload" href="./assets/cormorant-garamond-400.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./journey.css">
   <script src="./settings.js" defer></script>
   <script src="./app.js" defer></script>
+  <script src="./journey.js" defer></script>
 </head>
 <body>
   <main class="scene" aria-labelledby="title">
@@ -31,6 +33,35 @@
       <p id="title" class="chinese">关于想象力的一切</p>
       <h1 class="english" lang="en">Tread softly because you tread<br>on my dreams.</h1>
     </div>
+    <button class="enter-scene" type="button" aria-label="进入日月选择"></button>
   </main>
+  <section class="choice-scene" aria-labelledby="choice-title" hidden>
+    <h2 id="choice-title" class="sr-only">选择浏览方式</h2>
+    <div class="ritual-stage">
+      <img class="ring-image" src="./assets/eclipse-ring.png" alt="" draggable="false">
+      <img class="phase-arc" src="./assets/phase-arc.svg" alt="" draggable="false">
+      <img class="totem-lines" src="./assets/totem.svg" alt="" draggable="false">
+      <div class="crown" aria-hidden="true"></div>
+      <div class="celestial-orbit">
+        <button class="celestial sun-option" data-mode="quick" type="button" disabled>
+          <span class="celestial-icon"><img src="./assets/sun.svg" alt="" draggable="false"></span>
+          <span class="choice-label">快速浏览</span>
+        </button>
+        <button class="celestial moon-option" data-mode="showcase" type="button" disabled>
+          <span class="celestial-icon"><img src="./assets/moon-option.svg" alt="" draggable="false"></span>
+          <span class="choice-label">观赏</span>
+        </button>
+      </div>
+    </div>
+  </section>
+  <button class="language-star" type="button" aria-label="Switch to English" title="English" hidden>
+    <svg viewBox="0 0 100 140" aria-hidden="true">
+      <path d="M50 2 55 53Q56 63 65 65L98 70 65 75Q56 77 55 87L50 138 45 87Q44 77 35 75L2 70 35 65Q44 63 45 53Z" fill="currentColor"/>
+      <path d="M50 59Q54 65 61 70 54 75 50 81 46 75 39 70 46 65 50 59Z" fill="var(--star-center)"/>
+      <path d="m50 67 2 3-2 3-2-3Z" fill="currentColor"/>
+    </svg>
+  </button>
+  <div class="screen-fade" aria-hidden="true" hidden></div>
+  <p class="journey-status sr-only" role="status" aria-live="polite"></p>
 </body>
 </html>
