@@ -13,7 +13,7 @@
   src: url("./assets/noto-sans-sc-subset.ttf") format("truetype");
 }
 :root {
-  --ink: 255, 106, 0;
+  --ink: 255, 152, 0;
 }
 * { box-sizing: border-box; }
 html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }

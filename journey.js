@@ -71,7 +71,6 @@ entry.addEventListener("click", async () => {
   });
   intro.hidden = true;
   chooser.hidden = false;
-  languageStar.hidden = false;
   await animate(chooser, [{ opacity: 0 }, { opacity: 1 }], 750);
   options.forEach((option) => { option.disabled = false; });
   setPhase("choice");

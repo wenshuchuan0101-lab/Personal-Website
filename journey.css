@@ -159,6 +159,15 @@ html[lang="en"] .choice-label {
 .language-star:hover svg { transform: scale(1.12); }
 .language-star:focus-visible { outline: 1px solid currentColor; outline-offset: 3px; }
 .language-star[aria-pressed="true"] svg { transform: rotate(180deg); }
+body[data-scene="intro"] .language-star,
+body[data-scene="entering"] .language-star {
+  color: rgb(var(--ink));
+  --star-center: #333;
+}
+body[data-scene="intro"] .language-star svg,
+body[data-scene="entering"] .language-star svg {
+  filter: drop-shadow(0 0 6px #ff980070);
+}
 body[data-destination="quick"] .language-star { color: #292720; --star-center: #faf8f2; }
 body[data-destination="showcase"] .language-star { --star-center: #000; }
 body[data-scene="quick"] .language-star {
