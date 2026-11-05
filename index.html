@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a1d37">
+  <meta name="description" content="关于想象力的一切。Tread softly because you tread on my dreams.">
+  <title>关于想象力的一切</title>
+  <link rel="preload" href="./assets/moon.png" as="image">
+  <link rel="preload" href="./assets/barlow-condensed-200.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="stylesheet" href="./style.css">
+  <script src="./settings.js" defer></script>
+  <script src="./app.js" defer></script>
+</head>
+<body>
+  <main class="scene" aria-labelledby="title">
+    <img class="moon-image" src="./assets/moon.png" alt="" draggable="false">
+    <svg class="dawn" viewBox="0 0 1671 941" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs>
+        <linearGradient id="dawn-colors" x1="0" y1="0" x2="0.35" y2="1">
+          <stop offset="0" stop-color="#8795b0"/>
+          <stop offset="0.48" stop-color="#c1bac3"/>
+          <stop offset="0.78" stop-color="#efd0b7"/>
+          <stop offset="1" stop-color="#ffdeb5"/>
+        </linearGradient>
+      </defs>
+      <path id="dawn-sky" fill="url(#dawn-colors)"/>
+    </svg>
+    <canvas class="meteors" aria-hidden="true"></canvas>
+    <div class="words">
+      <p id="title" class="chinese">关于想象力的一切</p>
+      <h1 class="english" lang="en">Tread softly because<br>you tread on my dreams.</h1>
+    </div>
+  </main>
+</body>
+</html>

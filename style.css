@@ -1,0 +1,82 @@
+@font-face {
+  font-family: "Barlow Condensed";
+  font-style: normal;
+  font-weight: 200;
+  font-display: swap;
+  src: url("./assets/barlow-condensed-200.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Noto Sans SC Title";
+  font-style: normal;
+  font-weight: 200;
+  font-display: swap;
+  src: url("./assets/noto-sans-sc-subset.ttf") format("truetype");
+}
+:root {
+  --dawn-progress: 0;
+  --ink: 222, 231, 241;
+}
+* { box-sizing: border-box; }
+html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+body { background: #0a1d37; }
+.scene {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  isolation: isolate;
+  overflow: hidden;
+  touch-action: manipulation;
+}
+.moon-image, .dawn, .meteors {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.moon-image { object-fit: cover; object-position: center; user-select: none; }
+.dawn { opacity: var(--dawn-progress); }
+.words {
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  width: calc(100% - 2.5rem);
+  transform: translateX(-50%);
+  text-align: center;
+  color: rgb(var(--ink));
+  font-weight: 200;
+  text-shadow: 0 1px 16px #091c3826;
+  pointer-events: none;
+}
+.words > * {
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
+  pointer-events: auto;
+}
+.chinese {
+  margin: 0 0 .65rem;
+  font-family: "Noto Sans SC Title", "Microsoft YaHei Light", sans-serif;
+  font-size: clamp(16px, 1.6vw, 26px);
+  font-weight: 200;
+  line-height: 1.6;
+  letter-spacing: .2em;
+  padding-left: .2em;
+}
+.english {
+  margin: 0;
+  font-family: "Barlow Condensed", "Arial Narrow", sans-serif;
+  font-size: clamp(36px, 4.6vw, 76px);
+  font-weight: 200;
+  line-height: 1.05;
+  letter-spacing: .018em;
+}
+@media (orientation: portrait) {
+  .words { top: 19%; }
+  .english { font-size: clamp(32px, 7.8vw, 60px); }
+}
+@media (max-height: 420px) and (orientation: landscape) {
+  .words { top: 14%; }
+  .chinese { font-size: 14px; margin-bottom: .3rem; }
+  .english { font-size: clamp(28px, 5.5vh, 40px); }
+}
