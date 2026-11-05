@@ -55,28 +55,31 @@ body { background: #0a1d37; }
   pointer-events: auto;
 }
 .chinese {
-  margin: 0 0 .65rem;
+  margin: 0 auto .75rem;
   font-family: "Noto Sans SC Title", "Microsoft YaHei Light", sans-serif;
-  font-size: clamp(16px, 1.6vw, 26px);
+  font-size: clamp(24px, 2.8vw, 44px);
   font-weight: 200;
   line-height: 1.6;
   letter-spacing: .2em;
   padding-left: .2em;
 }
 .english {
-  margin: 0;
+  margin: 0 auto;
   font-family: "Barlow Condensed", "Arial Narrow", sans-serif;
   font-size: clamp(36px, 4.6vw, 76px);
   font-weight: 200;
   line-height: 1.05;
   letter-spacing: .018em;
+  white-space: nowrap;
+  transform: scaleY(.8);
+  transform-origin: top center;
 }
 @media (orientation: portrait) {
   .words { top: 19%; }
-  .english { font-size: clamp(32px, 7.8vw, 60px); }
+  .english { font-size: clamp(24px, 7.4vw, 60px); }
 }
 @media (max-height: 420px) and (orientation: landscape) {
   .words { top: 14%; }
-  .chinese { font-size: 14px; margin-bottom: .3rem; }
+  .chinese { font-size: 22px; margin-bottom: .3rem; }
   .english { font-size: clamp(28px, 5.5vh, 40px); }
 }

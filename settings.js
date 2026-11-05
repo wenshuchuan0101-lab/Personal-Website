@@ -3,6 +3,6 @@
 const SCENE_SETTINGS = {
   image: "./assets/moon.png",
   chinese: "关于想象力的一切",
-  englishLines: ["Tread softly because", "you tread on my dreams."],
+  englishLines: ["Tread softly because you tread", "on my dreams."],
   dawnSeconds: 180,
 };
