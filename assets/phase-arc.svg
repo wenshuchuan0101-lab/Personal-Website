@@ -16,10 +16,6 @@
 <mask id="phase-6" maskUnits="userSpaceOnUse" x="-40" y="-40" width="80" height="80"><circle r="32" fill="#fff"/><circle cx="-25" cy="-3" r="32" fill="#000"/></mask>
 <mask id="phase-7" maskUnits="userSpaceOnUse" x="-40" y="-40" width="80" height="80"><circle r="32" fill="#fff"/><circle cx="-11" cy="-3" r="32" fill="#000"/></mask>
 </defs>
-<g fill="none" stroke="#d4dfed" opacity=".35">
-<path d="M37.15 418.39A470 470 0 0 1 962.85 418.39" stroke-width="1" stroke-dasharray="48 10"/>
-<path d="M48.97 420.48A458 458 0 0 1 951.03 420.48" stroke-width=".6"/>
-</g>
 <g transform="translate(95.80 368.67)"><circle r="32" fill="url(#phase-silver)" mask="url(#phase-0)" filter="url(#phase-print)"/></g>
 <g transform="translate(156.17 250.19)"><circle r="32" fill="url(#phase-silver)" mask="url(#phase-1)" filter="url(#phase-print)"/></g>
 <g transform="translate(250.19 156.17)"><circle r="32" fill="url(#phase-silver)" mask="url(#phase-2)" filter="url(#phase-print)"/></g>
