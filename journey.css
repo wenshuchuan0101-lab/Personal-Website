@@ -158,6 +158,76 @@ html[lang="en"] .choice-label {
 .language-star[aria-pressed="true"] svg { transform: rotate(180deg); }
 body[data-destination="quick"] .language-star { color: #292720; --star-center: #faf8f2; }
 body[data-destination="showcase"] .language-star { --star-center: #000; }
+body[data-scene="quick"] .language-star { color: #fff; --star-center: #0735b3; transition: none; }
+.quick-view {
+  --section-blue: #0735b3;
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  background: #faf8f2;
+  color: #17315c;
+}
+.quick-header {
+  background: var(--section-blue);
+  padding: max(20px, env(safe-area-inset-top)) 96px 20px clamp(20px, 6vw, 90px);
+}
+.section-tabs {
+  display: flex;
+  align-items: stretch;
+  max-width: 1060px;
+  min-height: 56px;
+  margin: 0 auto;
+}
+.section-tab {
+  flex: 1;
+  position: relative;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font-family: "Noto Sans SC Title", "Microsoft YaHei Light", sans-serif;
+  font-size: clamp(16px, 1.6vw, 23px);
+  font-weight: 200;
+  letter-spacing: .12em;
+  cursor: pointer;
+}
+.section-tab + .section-tab { border-left: 1px solid #ffffff38; }
+.section-tab::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 25%;
+  right: 25%;
+  height: 1px;
+  background: #fff;
+  opacity: 0;
+}
+.section-tab[aria-selected="true"]::after { opacity: 1; }
+.section-tab:hover { background: #ffffff0d; }
+.section-tab:focus-visible { outline: 1px solid #fff; outline-offset: -4px; }
+html[lang="en"] .section-tab {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: clamp(18px, 2vw, 28px);
+  letter-spacing: .02em;
+}
+.quick-panel { padding: clamp(28px, 6vw, 84px); overflow: auto; }
+.quick-panel h2 {
+  margin: 0;
+  font-family: "Noto Sans SC Title", "Microsoft YaHei Light", sans-serif;
+  font-size: clamp(26px, 3vw, 44px);
+  font-weight: 200;
+  letter-spacing: .12em;
+}
+html[lang="en"] .quick-panel h2 { font-family: "Cormorant Garamond", Georgia, serif; letter-spacing: .02em; }
+@media (max-width: 600px) {
+  .quick-header { padding-left: 12px; padding-right: 68px; }
+  .section-tab { padding-inline: 5px; font-size: 15px; letter-spacing: .04em; }
+  .section-tabs { min-height: 58px; }
+  body[data-scene="quick"] .language-star { right: max(12px, env(safe-area-inset-right)); }
+  html[lang="en"] .section-tab { font-size: 17px; }
+}
 .screen-fade { position: fixed; z-index: 5; inset: 0; opacity: 0; pointer-events: none; }
 @media (max-height: 480px) and (orientation: landscape) {
   .ritual-stage { width: 92svh; }

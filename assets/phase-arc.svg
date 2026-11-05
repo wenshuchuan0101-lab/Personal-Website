@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000">
+<!-- 完整月相链。顶部位置由页面中的空环占据。 -->
 <defs>
 <radialGradient id="phase-silver"><stop stop-color="#f0f3f7"/><stop offset="1" stop-color="#adb9c9"/></radialGradient>
 <filter id="phase-print" x="-12%" y="-12%" width="124%" height="124%">
@@ -7,29 +8,50 @@
 <feComposite in="gray" in2="SourceAlpha" operator="in" result="grain"/>
 <feBlend in="SourceGraphic" in2="grain" mode="soft-light"/>
 </filter>
-<mask id="phase-0" maskUnits="userSpaceOnUse" x="-40" y="-40" width="80" height="80"><circle r="32" fill="#fff"/><circle cx="11" cy="-3" r="32" fill="#000"/></mask>
-<mask id="phase-1" maskUnits="userSpaceOnUse" x="-40" y="-40" width="80" height="80"><circle r="32" fill="#fff"/><circle cx="25" cy="-3" r="32" fill="#000"/></mask>
-<mask id="phase-2" maskUnits="userSpaceOnUse" x="-40" y="-40" width="80" height="80"><circle r="32" fill="#fff"/><circle cx="43" cy="-3" r="32" fill="#000"/></mask>
-<mask id="phase-3" maskUnits="userSpaceOnUse" x="-40" y="-40" width="80" height="80"><circle r="32" fill="#fff"/></mask>
-<mask id="phase-4" maskUnits="userSpaceOnUse" x="-40" y="-40" width="80" height="80"><circle r="32" fill="#fff"/></mask>
-<mask id="phase-5" maskUnits="userSpaceOnUse" x="-40" y="-40" width="80" height="80"><circle r="32" fill="#fff"/><circle cx="-43" cy="-3" r="32" fill="#000"/></mask>
-<mask id="phase-6" maskUnits="userSpaceOnUse" x="-40" y="-40" width="80" height="80"><circle r="32" fill="#fff"/><circle cx="-25" cy="-3" r="32" fill="#000"/></mask>
-<mask id="phase-7" maskUnits="userSpaceOnUse" x="-40" y="-40" width="80" height="80"><circle r="32" fill="#fff"/><circle cx="-11" cy="-3" r="32" fill="#000"/></mask>
+<mask id="phase-1" maskUnits="userSpaceOnUse" x="-40" y="-40" width="80" height="80"><circle r="32" fill="#fff"/></mask>
+<mask id="phase-2" maskUnits="userSpaceOnUse" x="-40" y="-40" width="80" height="80"><circle r="32" fill="#fff"/><circle cx="-44" cy="-3" r="32" fill="#000"/></mask>
+<mask id="phase-3" maskUnits="userSpaceOnUse" x="-40" y="-40" width="80" height="80"><circle r="32" fill="#fff"/><circle cx="-26" cy="-3" r="32" fill="#000"/></mask>
+<mask id="phase-4" maskUnits="userSpaceOnUse" x="-40" y="-40" width="80" height="80"><circle r="32" fill="#fff"/><circle cx="-11" cy="-3" r="32" fill="#000"/></mask>
+<mask id="phase-5" maskUnits="userSpaceOnUse" x="-40" y="-40" width="80" height="80"><circle r="32" fill="#fff"/><circle cx="-26" cy="-3" r="32" fill="#000"/></mask>
+<mask id="phase-6" maskUnits="userSpaceOnUse" x="-40" y="-40" width="80" height="80"><circle r="32" fill="#fff"/><circle cx="-44" cy="-3" r="32" fill="#000"/></mask>
+<mask id="phase-7" maskUnits="userSpaceOnUse" x="-40" y="-40" width="80" height="80"><circle r="32" fill="#fff"/></mask>
+<mask id="phase-8" maskUnits="userSpaceOnUse" x="-40" y="-40" width="80" height="80"><circle r="32" fill="#fff"/></mask>
+<mask id="phase-9" maskUnits="userSpaceOnUse" x="-40" y="-40" width="80" height="80"><circle r="32" fill="#fff"/><circle cx="44" cy="-3" r="32" fill="#000"/></mask>
+<mask id="phase-10" maskUnits="userSpaceOnUse" x="-40" y="-40" width="80" height="80"><circle r="32" fill="#fff"/><circle cx="26" cy="-3" r="32" fill="#000"/></mask>
+<mask id="phase-11" maskUnits="userSpaceOnUse" x="-40" y="-40" width="80" height="80"><circle r="32" fill="#fff"/><circle cx="11" cy="-3" r="32" fill="#000"/></mask>
+<mask id="phase-12" maskUnits="userSpaceOnUse" x="-40" y="-40" width="80" height="80"><circle r="32" fill="#fff"/><circle cx="26" cy="-3" r="32" fill="#000"/></mask>
+<mask id="phase-13" maskUnits="userSpaceOnUse" x="-40" y="-40" width="80" height="80"><circle r="32" fill="#fff"/><circle cx="44" cy="-3" r="32" fill="#000"/></mask>
+<mask id="phase-14" maskUnits="userSpaceOnUse" x="-40" y="-40" width="80" height="80"><circle r="32" fill="#fff"/></mask>
 </defs>
-<g transform="translate(95.80 368.67)"><circle r="32" fill="url(#phase-silver)" mask="url(#phase-0)" filter="url(#phase-print)"/></g>
-<g transform="translate(156.17 250.19)"><circle r="32" fill="url(#phase-silver)" mask="url(#phase-1)" filter="url(#phase-print)"/></g>
-<g transform="translate(250.19 156.17)"><circle r="32" fill="url(#phase-silver)" mask="url(#phase-2)" filter="url(#phase-print)"/></g>
-<g transform="translate(368.67 95.80)"><circle r="32" fill="url(#phase-silver)" mask="url(#phase-3)" filter="url(#phase-print)"/></g>
-<g transform="translate(631.33 95.80)"><circle r="32" fill="url(#phase-silver)" mask="url(#phase-4)" filter="url(#phase-print)"/></g>
-<g transform="translate(749.81 156.17)"><circle r="32" fill="url(#phase-silver)" mask="url(#phase-5)" filter="url(#phase-print)"/></g>
-<g transform="translate(843.83 250.19)"><circle r="32" fill="url(#phase-silver)" mask="url(#phase-6)" filter="url(#phase-print)"/></g>
-<g transform="translate(904.20 368.67)"><circle r="32" fill="url(#phase-silver)" mask="url(#phase-7)" filter="url(#phase-print)"/></g>
-<g fill="#e9eff7" opacity=".85"><path d="M0-8 2-2 8 0 2 2 0 8-2 2-8 0-2-2Z" transform="translate(121.32 307.05)"/>
-<path d="M0-8 2-2 8 0 2 2 0 8-2 2-8 0-2-2Z" transform="translate(199.48 199.48)"/>
-<path d="M0-8 2-2 8 0 2 2 0 8-2 2-8 0-2-2Z" transform="translate(307.05 121.32)"/>
-<path d="M0-8 2-2 8 0 2 2 0 8-2 2-8 0-2-2Z" transform="translate(433.52 80.23)"/>
-<path d="M0-8 2-2 8 0 2 2 0 8-2 2-8 0-2-2Z" transform="translate(566.48 80.23)"/>
-<path d="M0-8 2-2 8 0 2 2 0 8-2 2-8 0-2-2Z" transform="translate(692.95 121.32)"/>
-<path d="M0-8 2-2 8 0 2 2 0 8-2 2-8 0-2-2Z" transform="translate(800.52 199.48)"/>
-<path d="M0-8 2-2 8 0 2 2 0 8-2 2-8 0-2-2Z" transform="translate(878.68 307.05)"/></g>
+<g transform="translate(672.86 111.74)"><circle r="32" fill="url(#phase-silver)" mask="url(#phase-1)" filter="url(#phase-print)"/></g>
+<g transform="translate(815.84 215.62)"><circle r="32" fill="url(#phase-silver)" mask="url(#phase-2)" filter="url(#phase-print)"/></g>
+<g transform="translate(904.20 368.67)"><circle r="32" fill="url(#phase-silver)" mask="url(#phase-3)" filter="url(#phase-print)"/></g>
+<g transform="translate(922.67 544.42)"><circle r="32" fill="url(#phase-silver)" mask="url(#phase-4)" filter="url(#phase-print)"/></g>
+<g transform="translate(868.06 712.50)"><circle r="32" fill="url(#phase-silver)" mask="url(#phase-5)" filter="url(#phase-print)"/></g>
+<g transform="translate(749.81 843.83)"><circle r="32" fill="url(#phase-silver)" mask="url(#phase-6)" filter="url(#phase-print)"/></g>
+<g transform="translate(588.36 915.71)"><circle r="32" fill="url(#phase-silver)" mask="url(#phase-7)" filter="url(#phase-print)"/></g>
+<g transform="translate(411.64 915.71)"><circle r="32" fill="url(#phase-silver)" mask="url(#phase-8)" filter="url(#phase-print)"/></g>
+<g transform="translate(250.19 843.83)"><circle r="32" fill="url(#phase-silver)" mask="url(#phase-9)" filter="url(#phase-print)"/></g>
+<g transform="translate(131.94 712.50)"><circle r="32" fill="url(#phase-silver)" mask="url(#phase-10)" filter="url(#phase-print)"/></g>
+<g transform="translate(77.33 544.42)"><circle r="32" fill="url(#phase-silver)" mask="url(#phase-11)" filter="url(#phase-print)"/></g>
+<g transform="translate(95.80 368.67)"><circle r="32" fill="url(#phase-silver)" mask="url(#phase-12)" filter="url(#phase-print)"/></g>
+<g transform="translate(184.16 215.62)"><circle r="32" fill="url(#phase-silver)" mask="url(#phase-13)" filter="url(#phase-print)"/></g>
+<g transform="translate(327.14 111.74)"><circle r="32" fill="url(#phase-silver)" mask="url(#phase-14)" filter="url(#phase-print)"/></g>
+<g fill="#e9eff7" opacity=".85">
+<path d="M0-8 2-2 8 0 2 2 0 8-2 2-8 0-2-2Z" transform="translate(588.36 84.29)"/>
+<path d="M0-8 2-2 8 0 2 2 0 8-2 2-8 0-2-2Z" transform="translate(749.81 156.17)"/>
+<path d="M0-8 2-2 8 0 2 2 0 8-2 2-8 0-2-2Z" transform="translate(868.06 287.50)"/>
+<path d="M0-8 2-2 8 0 2 2 0 8-2 2-8 0-2-2Z" transform="translate(922.67 455.58)"/>
+<path d="M0-8 2-2 8 0 2 2 0 8-2 2-8 0-2-2Z" transform="translate(904.20 631.33)"/>
+<path d="M0-8 2-2 8 0 2 2 0 8-2 2-8 0-2-2Z" transform="translate(815.84 784.38)"/>
+<path d="M0-8 2-2 8 0 2 2 0 8-2 2-8 0-2-2Z" transform="translate(672.86 888.26)"/>
+<path d="M0-8 2-2 8 0 2 2 0 8-2 2-8 0-2-2Z" transform="translate(500.00 925.00)"/>
+<path d="M0-8 2-2 8 0 2 2 0 8-2 2-8 0-2-2Z" transform="translate(327.14 888.26)"/>
+<path d="M0-8 2-2 8 0 2 2 0 8-2 2-8 0-2-2Z" transform="translate(184.16 784.38)"/>
+<path d="M0-8 2-2 8 0 2 2 0 8-2 2-8 0-2-2Z" transform="translate(95.80 631.33)"/>
+<path d="M0-8 2-2 8 0 2 2 0 8-2 2-8 0-2-2Z" transform="translate(77.33 455.58)"/>
+<path d="M0-8 2-2 8 0 2 2 0 8-2 2-8 0-2-2Z" transform="translate(131.94 287.50)"/>
+<path d="M0-8 2-2 8 0 2 2 0 8-2 2-8 0-2-2Z" transform="translate(250.19 156.17)"/>
+<path d="M0-8 2-2 8 0 2 2 0 8-2 2-8 0-2-2Z" transform="translate(411.64 84.29)"/>
+</g>
 </svg>

@@ -8,6 +8,9 @@ const options = [...document.querySelectorAll(".celestial")];
 const languageStar = document.querySelector(".language-star");
 const fade = document.querySelector(".screen-fade");
 const status = document.querySelector(".journey-status");
+const quickView = document.querySelector(".quick-view");
+const sectionTabs = [...document.querySelectorAll(".section-tab")];
+const panels = [...document.querySelectorAll(".quick-panel")];
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 let language = selection.language;
 let phase = "intro";
@@ -32,6 +35,13 @@ function applyLanguage() {
   languageStar.setAttribute("aria-label", labels.language);
   languageStar.setAttribute("title", labels.language);
   languageStar.setAttribute("aria-pressed", String(language === "en"));
+  quickView.setAttribute("aria-label", labels.quick);
+  document.querySelector(".section-tabs").setAttribute("aria-label", labels.sections);
+  sectionTabs.forEach((tab) => {
+    const label = labels[tab.dataset.section];
+    tab.textContent = label;
+    document.getElementById(tab.getAttribute("aria-controls")).querySelector("h2").textContent = label;
+  });
 }
 
 function setPhase(next) {
@@ -109,7 +119,37 @@ async function choose(option) {
     delay: reduceMotion.matches ? 0 : 500,
   });
   chooser.hidden = true;
+  if (mode === "quick") {
+    quickView.hidden = false;
+    fade.hidden = true;
+  }
   setPhase(mode);
 }
 options.forEach((option) => option.addEventListener("click", () => choose(option)));
+
+function switchSection(tab) {
+  sectionTabs.forEach((button) => {
+    const selected = button === tab;
+    button.setAttribute("aria-selected", String(selected));
+    button.tabIndex = selected ? 0 : -1;
+  });
+  panels.forEach((panel) => { panel.hidden = panel.id !== tab.getAttribute("aria-controls"); });
+}
+
+sectionTabs.forEach((tab, index) => {
+  tab.addEventListener("click", () => switchSection(tab));
+  tab.addEventListener("keydown", (event) => {
+    const destinations = {
+      ArrowRight: (index + 1) % sectionTabs.length,
+      ArrowLeft: (index + sectionTabs.length - 1) % sectionTabs.length,
+      Home: 0,
+      End: sectionTabs.length - 1,
+    };
+    if (!(event.key in destinations)) return;
+    event.preventDefault();
+    const target = sectionTabs[destinations[event.key]];
+    switchSection(target);
+    target.focus();
+  });
+});
 applyLanguage();
