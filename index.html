@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>个人作品集 · Personal Portfolio</title>
+  <link rel="stylesheet" href="./style.css">
+  <script src="./content.js" defer></script>
+  <script src="./app.js" defer></script>
+</head>
+<body>
+  <header class="mast">
+    <a class="brand" href="#home"><span class="mark" aria-hidden="true">✦</span> <span id="brand"></span></a>
+    <div class="controls">
+      <div class="switcher" id="modes"></div>
+      <div class="switcher" id="languages" aria-label="Language">
+        <button type="button" data-lang="zh" lang="zh-CN">中文</button>
+        <button type="button" data-lang="en" lang="en">EN</button>
+      </div>
+    </div>
+  </header>
+  <main id="home">
+    <section class="hero" aria-labelledby="name">
+      <div class="sky" aria-hidden="true"></div>
+      <div class="hero-copy">
+        <p class="kicker"><span aria-hidden="true"></span><span id="label"></span></p>
+        <h1 id="name"></h1>
+        <p class="tagline" id="tagline"></p>
+        <a class="enter" href="#works"><span id="enter"></span><span aria-hidden="true">↓</span></a>
+      </div>
+      <button type="button" class="dial" id="dial">
+        <span class="wheel" aria-hidden="true"><span>☼</span><span>☾</span></span>
+        <span class="dial-caption" id="dial-caption"></span>
+      </button>
+    </section>
+    <section class="works" id="works" aria-labelledby="works-title">
+      <div class="section-head">
+        <div><p class="kicker"><span aria-hidden="true"></span><span id="index-label"></span></p><h2 id="works-title"></h2></div>
+        <div class="switcher" id="categories"></div>
+      </div>
+      <div class="gallery">
+        <nav class="chapters" id="chapters" aria-label="作品导航"></nav>
+        <div class="cards" id="cards"></div>
+      </div>
+    </section>
+  </main>
+  <footer><a href="#home"><span aria-hidden="true">✦</span> <span id="footer-name"></span></a><a href="#home" id="back"></a></footer>
+</body>
+</html>
