@@ -158,37 +158,48 @@ html[lang="en"] .choice-label {
 .language-star[aria-pressed="true"] svg { transform: rotate(180deg); }
 body[data-destination="quick"] .language-star { color: #292720; --star-center: #faf8f2; }
 body[data-destination="showcase"] .language-star { --star-center: #000; }
-body[data-scene="quick"] .language-star { color: #fff; --star-center: #0735b3; transition: none; }
+body[data-scene="quick"] .language-star {
+  color: #fff;
+  --star-center: #071f67;
+  top: env(safe-area-inset-top, 0px);
+  width: 32px;
+  height: 32px;
+  padding: 3px 6px;
+  transition: none;
+}
 .quick-view {
-  --section-blue: #0735b3;
+  --section-blue: #071f67;
+  --section-mint: #dcf0e5;
+  --section-peach: #ffe1c9;
   position: fixed;
   inset: 0;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
-  background: #faf8f2;
+  background: var(--section-mint);
   color: #17315c;
 }
 .quick-header {
   background: var(--section-blue);
-  padding: max(20px, env(safe-area-inset-top)) 96px 20px clamp(20px, 6vw, 90px);
+  padding: env(safe-area-inset-top, 0px) 72px 0 clamp(12px, 6vw, 90px);
 }
 .section-tabs {
   display: flex;
   align-items: stretch;
   max-width: 1060px;
-  min-height: 56px;
+  height: 32px;
   margin: 0 auto;
 }
 .section-tab {
   flex: 1;
   position: relative;
   min-width: 0;
-  padding: 10px 12px;
+  padding: 3px 12px;
   border: 0;
   background: transparent;
   color: #fff;
   font-family: "Noto Sans SC Title", "Microsoft YaHei Light", sans-serif;
-  font-size: clamp(16px, 1.6vw, 23px);
+  font-size: clamp(14px, 1.2vw, 17px);
+  line-height: 1.2;
   font-weight: 200;
   letter-spacing: .12em;
   cursor: pointer;
@@ -209,10 +220,26 @@ body[data-scene="quick"] .language-star { color: #fff; --star-center: #0735b3; t
 .section-tab:focus-visible { outline: 1px solid #fff; outline-offset: -4px; }
 html[lang="en"] .section-tab {
   font-family: "Cormorant Garamond", Georgia, serif;
-  font-size: clamp(18px, 2vw, 28px);
+  font-size: clamp(15px, 1.4vw, 20px);
   letter-spacing: .02em;
 }
-.quick-panel { padding: clamp(28px, 6vw, 84px); overflow: auto; }
+.quick-panel {
+  position: relative;
+  isolation: isolate;
+  padding: clamp(28px, 6vw, 84px);
+  overflow: auto;
+}
+.quick-panel::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 34%;
+  z-index: -1;
+  background: var(--section-peach);
+  pointer-events: none;
+}
 .quick-panel h2 {
   margin: 0;
   font-family: "Noto Sans SC Title", "Microsoft YaHei Light", sans-serif;
@@ -222,11 +249,10 @@ html[lang="en"] .section-tab {
 }
 html[lang="en"] .quick-panel h2 { font-family: "Cormorant Garamond", Georgia, serif; letter-spacing: .02em; }
 @media (max-width: 600px) {
-  .quick-header { padding-left: 12px; padding-right: 68px; }
-  .section-tab { padding-inline: 5px; font-size: 15px; letter-spacing: .04em; }
-  .section-tabs { min-height: 58px; }
+  .quick-header { padding-left: 12px; padding-right: 56px; }
+  .section-tab { padding-inline: 4px; font-size: 14px; letter-spacing: .04em; }
   body[data-scene="quick"] .language-star { right: max(12px, env(safe-area-inset-right)); }
-  html[lang="en"] .section-tab { font-size: 17px; }
+  html[lang="en"] .section-tab { font-size: 13px; white-space: nowrap; }
 }
 .screen-fade { position: fixed; z-index: 5; inset: 0; opacity: 0; pointer-events: none; }
 @media (max-height: 480px) and (orientation: landscape) {
