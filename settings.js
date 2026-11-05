@@ -12,20 +12,15 @@ const SCENE_SETTINGS = {
     sizeRange: [0.45, 1.8],
   },
   selection: {
-    ring: "./assets/eclipse-ring.png",
-    sun: "./assets/sun.svg",
-    moon: "./assets/moon-option.svg",
-    totem: "./assets/totem.svg",
     phases: "./assets/phase-arc.svg",
     language: "zh",
     revealMilliseconds: 700,
-    rotationMilliseconds: 2400,
     fadeMilliseconds: 2000,
     labels: {
       zh: {
         title: "选择浏览方式",
         quick: "快速浏览",
-        showcase: "观赏",
+        showcase: "观赏模式",
         enter: "进入日月选择",
         language: "Switch to English",
         selected: "已选择",

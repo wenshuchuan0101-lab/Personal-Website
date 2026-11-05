@@ -2,9 +2,7 @@ const selection = SCENE_SETTINGS.selection;
 const intro = document.querySelector(".scene");
 const entry = document.querySelector(".enter-scene");
 const chooser = document.querySelector(".choice-scene");
-const stage = document.querySelector(".ritual-stage");
-const orbit = document.querySelector(".celestial-orbit");
-const options = [...document.querySelectorAll(".celestial")];
+const options = [...document.querySelectorAll(".mode-option")];
 const languageStar = document.querySelector(".language-star");
 const fade = document.querySelector(".screen-fade");
 const status = document.querySelector(".journey-status");
@@ -15,11 +13,7 @@ const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 let language = selection.language;
 let phase = "intro";
 
-document.querySelector(".ring-image").src = selection.ring;
-document.querySelector(".totem-lines").src = selection.totem;
 document.querySelector(".phase-arc").src = selection.phases;
-document.querySelector(".sun-option img").src = selection.sun;
-document.querySelector(".moon-option img").src = selection.moon;
 document.body.dataset.scene = phase;
 
 function applyLanguage() {
@@ -85,29 +79,16 @@ languageStar.addEventListener("click", () => {
 
 async function choose(option) {
   if (phase !== "choice") return;
-  setPhase("aligning");
+  setPhase("selecting");
   options.forEach((button) => {
     button.disabled = true;
     button.setAttribute("aria-pressed", String(button === option));
   });
   option.blur();
-  stage.classList.add("is-aligning");
-  await animate(document.querySelector(".totem-lines"), [{ opacity: 0 }, { opacity: .8 }], selection.revealMilliseconds);
-  const angle = option.dataset.mode === "quick" ? 90 : -90;
-  const rotation = animate(orbit, [
-    { transform: "rotate(0deg)" },
-    { transform: "rotate(" + angle + "deg)" },
-  ], selection.rotationMilliseconds, { easing: "cubic-bezier(.42,0,.18,1)" });
-  const symbols = options.map((button) => animate(button.querySelector(".celestial-icon"), [
-    { transform: "rotate(0deg)" },
-    { transform: "rotate(" + (-angle) + "deg)" },
-  ], selection.rotationMilliseconds, { easing: "cubic-bezier(.42,0,.18,1)" }));
-  const positions = options.map((button) => animate(button, [
-    { left: button.dataset.mode === "quick" ? "32%" : "68%" },
-    { left: button.dataset.mode === "quick" ? "7.5%" : "92.5%" },
-  ], selection.rotationMilliseconds, { easing: "cubic-bezier(.42,0,.18,1)" }));
-  await Promise.all([rotation, ...symbols, ...positions]);
-  stage.classList.add("is-aligned");
+  await animate(option, [
+    { backgroundColor: "rgba(255, 215, 168, 0)", borderColor: "#d6b99d" },
+    { backgroundColor: "rgba(255, 215, 168, .1)", borderColor: "#ffddb4" },
+  ], selection.revealMilliseconds);
   const mode = option.dataset.mode;
   document.body.dataset.destination = mode;
   status.textContent = selection.labels[language].selected + " · " + selection.labels[language][mode];
