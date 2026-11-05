@@ -69,7 +69,7 @@ function drawMeteors(now) {
   meteors.forEach((meteor) => {
     const progress = (now - meteor.started) / meteor.duration;
     const headX = meteor.startX + (meteor.endX - meteor.startX) * progress;
-    const tailX = headX - 160 / scale;
+    const tailX = headX - meteor.tailPixels / scale;
     const headAngle = angleAtX(headX, meteor.radius);
     const tailAngle = angleAtX(tailX, meteor.radius);
     const headY = horizon.y + Math.sin(headAngle) * meteor.radius;
@@ -78,18 +78,18 @@ function drawMeteors(now) {
     glow.addColorStop(0, "#b9d6ff00");
     glow.addColorStop(.8, "#dceaffad");
     glow.addColorStop(1, "#fff9ec");
-    context.globalAlpha = Math.min(1, progress * 8, (1 - progress) * 8);
+    context.globalAlpha = meteor.brightness * Math.min(1, progress * 8, (1 - progress) * 8);
     context.shadowColor = "#a6caffb0";
-    context.shadowBlur = 7 * pixelRatio;
+    context.shadowBlur = 7 * meteor.size * pixelRatio;
     context.strokeStyle = glow;
-    context.lineWidth = 1.6 / scale;
+    context.lineWidth = 1.6 * meteor.size / scale;
     context.lineCap = "round";
     context.beginPath();
     context.arc(horizon.x, horizon.y, meteor.radius, tailAngle, headAngle);
     context.stroke();
     context.fillStyle = "#fffdf2";
     context.beginPath();
-    context.arc(headX, headY, 1.4 / scale, 0, Math.PI * 2);
+    context.arc(headX, headY, 1.4 * meteor.size / scale, 0, Math.PI * 2);
     context.fill();
   });
   context.restore();
@@ -99,14 +99,20 @@ function drawMeteors(now) {
 function emitMeteor() {
   if (scene.hidden || document.hidden) return;
   const { scale, offsetX, width } = geometry;
+  const [minimumSize, maximumSize] = settings.meteor.sizeRange;
+  const size = minimumSize + Math.random() * (maximumSize - minimumSize);
+  const altitude = settings.meteor.altitudePixels + Math.random() * settings.meteor.altitudeSpreadPixels;
   meteors.push({
     startX: -offsetX / scale - 80 / scale,
     endX: (width - offsetX) / scale + 180 / scale,
-    radius: horizon.radius + settings.meteor.altitudePixels / scale,
+    radius: horizon.radius + altitude / scale,
     started: performance.now(),
-    duration: settings.meteor.flightMilliseconds,
+    duration: settings.meteor.flightMilliseconds * (.8 + Math.random() * .55),
+    size,
+    tailPixels: 160 * size * (.7 + Math.random() * .6),
+    brightness: .5 + Math.random() * .5,
   });
-  meteors = meteors.slice(-4);
+  meteors = meteors.slice(-16);
   if (meteorFrame === null) meteorFrame = requestAnimationFrame(drawMeteors);
 }
 
@@ -126,11 +132,10 @@ scene.addEventListener("click", (event) => {
 });
 window.addEventListener("resize", resize);
 resize();
-setTimeout(emitMeteor, 800);
-const ambientTimer = setInterval(() => {
-  if (scene.hidden) {
-    clearInterval(ambientTimer);
-    return;
-  }
+function scheduleMeteor() {
+  if (scene.hidden) return;
   emitMeteor();
-}, settings.meteor.intervalMilliseconds);
+  const delay = settings.meteor.intervalMilliseconds * (.45 + Math.random() * 1.2);
+  setTimeout(scheduleMeteor, delay);
+}
+setTimeout(scheduleMeteor, 250);

@@ -5,9 +5,11 @@ const SCENE_SETTINGS = {
   chinese: "关于想象力的一切",
   englishLines: ["Tread softly because you tread", "on my dreams."],
   meteor: {
-    intervalMilliseconds: 5200,
+    intervalMilliseconds: 420,
     flightMilliseconds: 1900,
     altitudePixels: 70,
+    altitudeSpreadPixels: 140,
+    sizeRange: [0.45, 1.8],
   },
   selection: {
     ring: "./assets/eclipse-ring.png",

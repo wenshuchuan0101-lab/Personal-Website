@@ -12,7 +12,7 @@
 
 > Use case: precise-object-edit. This is an edit target, not merely a style reference. Repair only the missing short arc around the lower-left/bottom section of this glowing lunar-texture ring, at about 6 to 7 o'clock. Complete the ring into a continuous closed circle. Seamlessly continue the exact silver-white cratered lunar texture, variable rim thickness, grain and soft white bloom of the neighboring rim. Keep the original composition, exact center, original size and square framing, original black background and empty black center. Preserve the rest of the ring. No extra circles, no symbols, no text, no stars, no other objects. The resulting ring must have no gap at the bottom.
 
-文案、图片路径、流星速度、间隔和轨道高度集中在 `settings.js`。字体、字号、文字位置和橙色文字在 `style.css`。
+文案、图片路径、流星速度、间隔、大小范围和轨道高度集中在 `settings.js`。流星同时出现多颗，尺寸、尾迹、亮度及出现间隔随机变化，方向统一沿圆弧从左向右。字体、字号、文字位置和橙色文字在 `style.css`。
 
 首图位于 `assets/hero-orbit.png`。图片尺寸和天体的圆弧在 `app.js` 的 `imageSize`、`horizon` 中设置。如果换用构图不同的图片，需要同步更新图片尺寸和圆弧。
 
