@@ -13,12 +13,11 @@
   src: url("./assets/noto-sans-sc-subset.ttf") format("truetype");
 }
 :root {
-  --dawn-progress: 0;
-  --ink: 222, 231, 241;
+  --ink: 255, 106, 0;
 }
 * { box-sizing: border-box; }
 html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
-body { background: #0a1d37; }
+body { background: #333; }
 .scene {
   position: relative;
   width: 100%;
@@ -27,7 +26,7 @@ body { background: #0a1d37; }
   overflow: hidden;
   touch-action: manipulation;
 }
-.moon-image, .dawn, .meteors {
+.moon-image, .meteors {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -35,7 +34,6 @@ body { background: #0a1d37; }
   pointer-events: none;
 }
 .moon-image { object-fit: cover; object-position: center; user-select: none; }
-.dawn { opacity: var(--dawn-progress); }
 .words {
   position: absolute;
   top: 20%;

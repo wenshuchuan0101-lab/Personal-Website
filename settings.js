@@ -1,10 +1,14 @@
-// 修改文案、首图路径及黎明渐变的时长。
-// 换用构图不同的首图时，需要在 app.js 中重新设置月亮轮廓。
+// 修改文案、首图路径及流星的速度、间隔和轨道高度。
+// 换用构图不同的首图时，需要在 app.js 中重新设置圆弧的位置和半径。
 const SCENE_SETTINGS = {
-  image: "./assets/moon.png",
+  image: "./assets/hero-orbit.png",
   chinese: "关于想象力的一切",
   englishLines: ["Tread softly because you tread", "on my dreams."],
-  dawnSeconds: 180,
+  meteor: {
+    intervalMilliseconds: 5200,
+    flightMilliseconds: 1900,
+    altitudePixels: 70,
+  },
   selection: {
     ring: "./assets/eclipse-ring.png",
     sun: "./assets/sun.svg",

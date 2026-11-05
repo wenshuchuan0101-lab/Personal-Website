@@ -15,25 +15,22 @@ settings.englishLines.forEach((line, index) => {
   english.append(document.createTextNode(line));
 });
 
-// 首图的原始坐标。轮廓沿月亮边缘略向天空内收，避免特效覆盖月面。
-const imageSize = { width: 1671, height: 941 };
-const moonEdge = [
-  [0, 448], [50, 447], [100, 449], [150, 451], [200, 456],
-  [250, 461], [300, 468], [350, 476], [400, 485], [450, 495],
-  [500, 506], [550, 519], [600, 533], [650, 548], [700, 565],
-  [750, 582], [800, 602], [850, 623], [900, 645], [950, 669],
-  [1000, 696], [1050, 724], [1100, 755], [1150, 788], [1200, 823],
-  [1250, 861], [1300, 902], [1345, 941],
-];
-const skyOutline = [
-  "M 0 0",
-  "H " + imageSize.width,
-  "V " + imageSize.height,
-  ...moonEdge.toReversed().map(([x, y]) => "L " + x + " " + y),
-  "Z",
-].join(" ");
-const skyPath = new Path2D(skyOutline);
-document.getElementById("dawn-sky").setAttribute("d", skyOutline);
+// 首图的原始尺寸和天体边缘。流星轨道与该圆弧同心。
+const imageSize = { width: 1698, height: 926 };
+const horizon = { x: -349.2, y: 4869.1, radius: 4504.7 };
+
+function angleAtX(x, radius) {
+  const ratio = Math.max(-1, Math.min(1, (x - horizon.x) / radius));
+  return Math.asin(ratio) - Math.PI / 2;
+}
+
+// 略向天空内收，确保流星不会覆盖月面。
+const skyRadius = horizon.radius + 4;
+const skyPath = new Path2D();
+skyPath.moveTo(0, 0);
+skyPath.lineTo(imageSize.width, 0);
+skyPath.arc(horizon.x, horizon.y, skyRadius, angleAtX(imageSize.width, skyRadius), angleAtX(0, skyRadius), true);
+skyPath.closePath();
 
 let geometry;
 let meteors = [];
@@ -49,16 +46,21 @@ function resize() {
     offsetX: (bounds.width - imageSize.width * scale) / 2,
     offsetY: (bounds.height - imageSize.height * scale) / 2,
     pixelRatio,
+    width: bounds.width,
   };
   canvas.width = Math.round(bounds.width * pixelRatio);
   canvas.height = Math.round(bounds.height * pixelRatio);
-  // 尺寸变化后清理旧轨迹，后续点击采用新的图片坐标。
   meteors = [];
 }
 
 function drawMeteors(now) {
   context.setTransform(1, 0, 0, 1, 0, 0);
   context.clearRect(0, 0, canvas.width, canvas.height);
+  if (scene.hidden) {
+    meteors = [];
+    meteorFrame = null;
+    return;
+  }
   const { scale, offsetX, offsetY, pixelRatio } = geometry;
   context.save();
   context.setTransform(scale * pixelRatio, 0, 0, scale * pixelRatio, offsetX * pixelRatio, offsetY * pixelRatio);
@@ -66,28 +68,46 @@ function drawMeteors(now) {
   meteors = meteors.filter((meteor) => now - meteor.started < meteor.duration);
   meteors.forEach((meteor) => {
     const progress = (now - meteor.started) / meteor.duration;
-    const x = meteor.x + (150 - progress * 400) / scale;
-    const y = meteor.y + (-150 + progress * 400) / scale;
-    const tail = 105 / scale;
-    const glow = context.createLinearGradient(x, y, x + tail, y - tail);
-    glow.addColorStop(0, "#fff9e9");
-    glow.addColorStop(0.15, "#d5e9ffc0");
-    glow.addColorStop(1, "#c8e3ff00");
-    context.globalAlpha = Math.sin(Math.PI * progress);
+    const headX = meteor.startX + (meteor.endX - meteor.startX) * progress;
+    const tailX = headX - 160 / scale;
+    const headAngle = angleAtX(headX, meteor.radius);
+    const tailAngle = angleAtX(tailX, meteor.radius);
+    const headY = horizon.y + Math.sin(headAngle) * meteor.radius;
+    const tailY = horizon.y + Math.sin(tailAngle) * meteor.radius;
+    const glow = context.createLinearGradient(tailX, tailY, headX, headY);
+    glow.addColorStop(0, "#b9d6ff00");
+    glow.addColorStop(.8, "#dceaffad");
+    glow.addColorStop(1, "#fff9ec");
+    context.globalAlpha = Math.min(1, progress * 8, (1 - progress) * 8);
+    context.shadowColor = "#a6caffb0";
+    context.shadowBlur = 7 * pixelRatio;
     context.strokeStyle = glow;
     context.lineWidth = 1.6 / scale;
     context.lineCap = "round";
     context.beginPath();
-    context.moveTo(x, y);
-    context.lineTo(x + tail, y - tail);
+    context.arc(horizon.x, horizon.y, meteor.radius, tailAngle, headAngle);
     context.stroke();
-    context.fillStyle = "#fffdf0";
+    context.fillStyle = "#fffdf2";
     context.beginPath();
-    context.arc(x, y, 1.4 / scale, 0, Math.PI * 2);
+    context.arc(headX, headY, 1.4 / scale, 0, Math.PI * 2);
     context.fill();
   });
   context.restore();
   meteorFrame = meteors.length ? requestAnimationFrame(drawMeteors) : null;
+}
+
+function emitMeteor() {
+  if (scene.hidden || document.hidden) return;
+  const { scale, offsetX, width } = geometry;
+  meteors.push({
+    startX: -offsetX / scale - 80 / scale,
+    endX: (width - offsetX) / scale + 180 / scale,
+    radius: horizon.radius + settings.meteor.altitudePixels / scale,
+    started: performance.now(),
+    duration: settings.meteor.flightMilliseconds,
+  });
+  meteors = meteors.slice(-4);
+  if (meteorFrame === null) meteorFrame = requestAnimationFrame(drawMeteors);
 }
 
 scene.addEventListener("click", (event) => {
@@ -101,27 +121,16 @@ scene.addEventListener("click", (event) => {
   const { scale, offsetX, offsetY } = geometry;
   const x = (event.clientX - bounds.left - offsetX) / scale;
   const y = (event.clientY - bounds.top - offsetY) / scale;
-  // 恢复单位坐标后检测同一片天空，月面点击不会触发流星。
   context.setTransform(1, 0, 0, 1, 0, 0);
-  if (!context.isPointInPath(skyPath, x, y)) return;
-  meteors.push({ x, y, started: performance.now(), duration: 1100 });
-  meteors = meteors.slice(-12);
-  if (meteorFrame === null) meteorFrame = requestAnimationFrame(drawMeteors);
+  if (context.isPointInPath(skyPath, x, y)) emitMeteor();
 });
 window.addEventListener("resize", resize);
 resize();
-
-const dawnStarted = performance.now();
-const dawnDuration = Math.max(1, settings.dawnSeconds) * 1000;
-function updateDawn(now) {
-  if (scene.hidden) return;
-  const progress = Math.min(1, (now - dawnStarted) / dawnDuration);
-  document.documentElement.style.setProperty("--dawn-progress", progress);
-  // 黎明时同步加深文字，保持淡色天空上的可读性。
-  const night = [222, 231, 241];
-  const dawn = [48, 55, 74];
-  const ink = night.map((channel, index) => Math.round(channel + (dawn[index] - channel) * progress));
-  document.documentElement.style.setProperty("--ink", ink.join(", "));
-  if (progress < 1) requestAnimationFrame(updateDawn);
-}
-requestAnimationFrame(updateDawn);
+setTimeout(emitMeteor, 800);
+const ambientTimer = setInterval(() => {
+  if (scene.hidden) {
+    clearInterval(ambientTimer);
+    return;
+  }
+  emitMeteor();
+}, settings.meteor.intervalMilliseconds);
