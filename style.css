@@ -10,7 +10,7 @@
   font-style: normal;
   font-weight: 200;
   font-display: swap;
-  src: url("./assets/noto-sans-sc-subset.ttf") format("truetype");
+  src: url("./assets/noto-sans-sc-portfolio.ttf") format("truetype");
 }
 :root {
   --ink: 255, 152, 0;

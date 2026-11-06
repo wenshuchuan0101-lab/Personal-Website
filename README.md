@@ -2,7 +2,35 @@
 
 单屏首页使用提供的蓝白天体图片，中英文同屏以高饱和橙色显示。背景保持原图颜色。流星定时从左向右沿天体边缘外侧的圆弧划过，点击天空空白处也会触发，并进入日月选择幕。月面和文字区域不触发流星。
 
-点击首页进入模式选择幕。中央上下排列「快速浏览」和「观赏模式」两个细线框按钮。确认后快速浏览渐白、观赏模式渐黑。快速浏览在渐白后进入内容界面，上方深蓝导航提供「个人介绍、图像影视、游戏」三个分区，点击直接切换，内容区目前预留标题位置。右上角四芒星可切换界面中英文。
+点击首页进入模式选择幕。中央上下排列「快速浏览」和「观赏模式」两个细线框按钮。确认后快速浏览渐白、观赏模式渐黑。右上角四芒星可切换界面中英文。
+
+快速浏览按照提供的《孟紫幽》文档，连续向下展示个人介绍、14 条成长记录、4 个图片影像作品和 3 个交互／游戏作品。左侧为窄幅半透明导航，可定位分区，并随滚动更新指示。页面采用蓝、橙、米白的整块配色。作品封面及独立详情目前留空，没有编写文档中尚未提供的作品简介。观赏模式仍保留原有空幕。
+
+## 修改快速浏览
+
+- `portfolio-data.js`：全部个人资料、成长记录、作品标题、分类、职责、工具、制作周期和奖项，均提供中英文。新增或删除 `timeline` 条目及 `projects` 条目即可调整数量，编号与作品数量自动更新。
+- `portfolio.css`：开头的 `--portfolio-blue`、`--portfolio-navy`、`--portfolio-orange`、`--portfolio-paper` 调整配色；`--portfolio-side` 和 `--portfolio-gutter` 调整正文留白。侧栏宽度、字号、作品比例和动效也在此文件修改。
+- `portfolio.js`：内容渲染、滚动定位、分区高亮、淡入、作品详情空位及语言联动。
+
+将封面文件放在 `assets/` 下，在相应作品中填写 `cover: "./assets/文件名.jpg"`；`coverPosition` 控制裁切位置，例如 `"center"` 或 `"50% 30%"`。封面路径为空时保留带编号的色块，不请求不存在的图片。
+
+每个作品的 `detail` 对象预留后续素材：
+
+```js
+detail: {
+  description: { zh: "", en: "" },
+  images: [],          // 例如 ["./assets/作品名-概念图-01.jpg"]
+  video: "",           // 例如 "./assets/作品名.mp4"
+  posterImages: [],    // 海报图片路径数组
+  playUrl: "",         // 完整游玩地址
+}
+```
+
+本次所有详情字段保持为空，点击作品只打开标题和空白展示区域。填写素材路径后会自动显示相应内容。详情支持关闭按钮、Esc 和键盘焦点返回；尊重系统减少动态效果的设置。
+
+`slots` 只记录文档里的素材需求，不会在页面生成假内容：`conceptImages`、`videos`、`posters` 分别记录概念图、视频和海报数量，`descriptionCharacters` 记录预留简介字数。`null` 表示原文的 n 张、数量待定。
+
+文档影像分区标题写“3个”，实际列出 4 个作品，本次按逐项清单保留 4 个；工具名称 `Thres JS` 和奖项 `S1 S100` 沿用原文，可以直接在内容文件更改。
 
 选择幕使用均匀的深蓝背景。外围日食样式的月相环位于 `assets/phase-arc.svg`，位置沿用之前的圆周，顶部正中为空环。
 
@@ -12,4 +40,6 @@
 
 首图位于 `assets/hero-orbit.png`。图片尺寸和天体的圆弧在 `app.js` 的 `imageSize`、`horizon` 中设置。如果换用构图不同的图片，需要同步更新图片尺寸和圆弧。
 
-英文字体使用接近参考图衬线风格的 Cormorant Garamond，并压低字形高度。中文标题使用 Noto Sans SC ExtraLight 字体子集。字体均随站点提供，许可见 `assets/Cormorant-OFL.txt` 和 `assets/Noto-OFL.txt`。
+英文字体使用接近参考图衬线风格的 Cormorant Garamond，并压低大标题字形高度。中文使用 Noto Sans SC ExtraLight 字体子集，已覆盖本次文档和界面文案，文件为 `assets/noto-sans-sc-portfolio.ttf`。新增子集之外的文字时会使用系统细体回退，也可以重新生成字形子集。字体均随站点提供，许可见 `assets/Cormorant-OFL.txt` 和 `assets/Noto-OFL.txt`。
+
+排版参考：[Brittany Chiang](https://brittanychiang.com/) 的页内定位方式、[Tobias van Schneider](https://vanschneider.com/) 的作品展示层级。仅借鉴排版，没有复制他人的文案或作品素材。

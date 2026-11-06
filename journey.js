@@ -7,8 +7,6 @@ const languageStar = document.querySelector(".language-star");
 const fade = document.querySelector(".screen-fade");
 const status = document.querySelector(".journey-status");
 const quickView = document.querySelector(".quick-view");
-const sectionTabs = [...document.querySelectorAll(".section-tab")];
-const panels = [...document.querySelectorAll(".quick-panel")];
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 let language = selection.language;
 let phase = "intro";
@@ -18,6 +16,7 @@ document.body.dataset.scene = phase;
 
 function applyLanguage() {
   const labels = selection.labels[language];
+  const quickPosition = window.PortfolioQuick.getPosition();
   document.documentElement.lang = language === "zh" ? "zh-CN" : "en";
   document.getElementById("choice-title").textContent = labels.title;
   entry.setAttribute("aria-label", labels.enter);
@@ -30,12 +29,7 @@ function applyLanguage() {
   languageStar.setAttribute("title", labels.language);
   languageStar.setAttribute("aria-pressed", String(language === "en"));
   quickView.setAttribute("aria-label", labels.quick);
-  document.querySelector(".section-tabs").setAttribute("aria-label", labels.sections);
-  sectionTabs.forEach((tab) => {
-    const label = labels[tab.dataset.section];
-    tab.textContent = label;
-    document.getElementById(tab.getAttribute("aria-controls")).querySelector("h2").textContent = label;
-  });
+  window.PortfolioQuick.setLanguage(language, quickPosition);
 }
 
 function setPhase(next) {
@@ -102,34 +96,10 @@ async function choose(option) {
   if (mode === "quick") {
     quickView.hidden = false;
     fade.hidden = true;
+    window.PortfolioQuick.enter();
   }
   setPhase(mode);
 }
 options.forEach((option) => option.addEventListener("click", () => choose(option)));
 
-function switchSection(tab) {
-  sectionTabs.forEach((button) => {
-    const selected = button === tab;
-    button.setAttribute("aria-selected", String(selected));
-    button.tabIndex = selected ? 0 : -1;
-  });
-  panels.forEach((panel) => { panel.hidden = panel.id !== tab.getAttribute("aria-controls"); });
-}
-
-sectionTabs.forEach((tab, index) => {
-  tab.addEventListener("click", () => switchSection(tab));
-  tab.addEventListener("keydown", (event) => {
-    const destinations = {
-      ArrowRight: (index + 1) % sectionTabs.length,
-      ArrowLeft: (index + sectionTabs.length - 1) % sectionTabs.length,
-      Home: 0,
-      End: sectionTabs.length - 1,
-    };
-    if (!(event.key in destinations)) return;
-    event.preventDefault();
-    const target = sectionTabs[destinations[event.key]];
-    switchSection(target);
-    target.focus();
-  });
-});
 applyLanguage();
