@@ -14,6 +14,7 @@
   let language = "zh";
   let activeSection = "about";
   let openedProject = null;
+  let nameFlipped = false;
   let revealObserver;
   let scrollPending = false;
   const text = (value) => typeof value === "string" ? value : value?.[language] ?? value?.zh ?? "";
@@ -39,6 +40,20 @@
     </article>`;
   }
 
+  function namePage(value, className, hidden) {
+    const alternateLanguage = language === "zh" ? "en" : "zh";
+    return `<span class="name-page ${className}" aria-hidden="${hidden}"><span class="name-main">${escape(text(value))}</span><span class="profile-roman" lang="${alternateLanguage === "zh" ? "zh-CN" : "en"}">${escape(value[alternateLanguage])}</span></span>`;
+  }
+
+  function setNameFlipped(flipped) {
+    nameFlipped = flipped;
+    const button = root.querySelector(".profile-name-flip");
+    button.dataset.flipped = String(flipped);
+    button.setAttribute("aria-pressed", String(flipped));
+    button.querySelector(".name-primary").setAttribute("aria-hidden", String(flipped));
+    button.querySelector(".name-alias").setAttribute("aria-hidden", String(!flipped));
+  }
+
   function render() {
     const profile = data.profile;
     navigation.setAttribute("aria-label", labels[language].nav);
@@ -47,7 +62,7 @@
     content.innerHTML = `
       <section id="about" class="portfolio-section profile-section" aria-labelledby="profile-name">
         <div class="profile-topline"><span>${labels[language].about}</span><span lang="en">2024 — 2026</span></div>
-        <div class="profile-composition"><div class="profile-copy"><p class="profile-alias">${escape(text(profile.alias))}</p><h1 id="profile-name" class="profile-name">${escape(text(profile.name))}</h1>${language === "zh" ? `<p class="profile-roman" lang="en">${escape(profile.name.en)}</p>` : `<p class="profile-roman" lang="zh-CN">${escape(profile.name.zh)}</p>`}<p class="profile-education">${escape(text(profile.education))}</p></div><div class="profile-orbit" aria-hidden="true"><span class="orbit-outline"></span>${star}<span class="orbit-coordinate">01 / 04</span></div></div>
+        <div class="profile-composition"><div class="profile-copy"><h1 id="profile-name" class="profile-name"><button class="profile-name-flip" type="button" data-flipped="${nameFlipped}" aria-pressed="${nameFlipped}" aria-label="${escape(text(profile.name))} / ${escape(text(profile.alias))}">${namePage(profile.name, "name-primary", nameFlipped)}${namePage(profile.alias, "name-alias", !nameFlipped)}</button></h1><p class="profile-education">${escape(text(profile.education))}</p></div><div class="profile-orbit" aria-hidden="true"><span class="orbit-outline"></span>${star}<span class="orbit-coordinate">01 / 04</span></div></div>
         <div class="profile-bottom"><p class="profile-roles">${profile.roles.map((role) => `<span>${escape(text(role))}</span>`).join('<span class="role-slash" aria-hidden="true">/</span>')}</p><a href="#growth" class="scroll-cue" data-scroll="growth" aria-label="${labels[language].growth}">↓</a></div>
       </section>
       <section id="growth" class="portfolio-section growth-section" aria-labelledby="growth-heading">
@@ -66,6 +81,14 @@
         image.remove();
       }, { once: true });
     });
+    const nameButton = content.querySelector(".profile-name-flip");
+    nameButton.addEventListener("pointerenter", (event) => {
+      if (event.pointerType === "mouse") setNameFlipped(true);
+    });
+    nameButton.addEventListener("pointerleave", (event) => {
+      if (event.pointerType === "mouse") setNameFlipped(false);
+    });
+    nameButton.addEventListener("click", () => setNameFlipped(!nameFlipped));
     observeReveals();
     updateScrollState();
     if (openedProject) renderDetail(openedProject);
