@@ -63,10 +63,9 @@
     const historyShare = clamp(Number(settings.historyShare) || 1 / 3, .2, .5);
     const width = last.x / historyShare;
     const remaining = width - last.x - 80;
-    const hills = [[.09, 18], [.21, 4], [.4, 215], [.52, 140], [.72, 370], [.86, 445], [.95, 540], [1, 540]];
+    const hills = [[.075, 90], [.19, 32], [.4, 215], [.52, 140], [.7, 300], [.84, 410], [1.02, 640], [1.2, 1080]];
     const futureRise = (last.y - 55) / 540;
     const future = [last, ...hills.map(([position, rise]) => ({ x: last.x + remaining * position, y: last.y - rise * futureRise }))];
-    future.push({ x: width + 1200, y: future.at(-1).y });
     const ridge = [...points, ...future.slice(1)];
     const segments = makeCurve(ridge);
     const lowerPoints = ridge.map((point, index) => {
