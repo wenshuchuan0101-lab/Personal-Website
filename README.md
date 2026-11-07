@@ -78,9 +78,9 @@ detail: {
 }
 ```
 
-点击「进入」打开独立详情页；《鱼龙舞》已接入作品展示、概念设计、白盒搭建三个部分，其余未提供详情的作品仍保留空白展示区域。详情页支持返回对应作品及中英文切换；预览轮盘与淡入尊重系统减少动态效果的设置。
+点击「进入」打开独立详情页；《鱼龙舞》已接入三张作品展示图，其余未提供详情的作品仍保留空白展示区域。详情页支持返回对应作品及中英文切换；预览轮盘与淡入尊重系统减少动态效果的设置。
 
-《鱼龙舞》的三张展示图按文件名倒序排列为「鱼龙舞.png → 鱼龙舞.jpg → 鱼龙舞 (2).png」，最后一张为较大的放灯笼画面，前两张稍小。桌面每张图旁边保留空文字列，手机上文字区域排在图片下方；未加入占位说明文字。五张概念草图以小图网格显示，`22.jpg` 只进入「白盒搭建」。所有图片保持完整比例，点击可查看原图，支持关闭按钮、Esc 及点击图片外围关闭。
+《鱼龙舞》的三张展示图按文件名倒序排列为「鱼龙舞.png → 鱼龙舞.jpg → 鱼龙舞 (2).png」，最后一张为较大的放灯笼画面，前两张稍小。桌面每张图旁边保留空文字列，手机上文字区域排在图片下方；未加入占位说明文字。所有图片保持完整比例，点击可查看原图，支持关闭按钮、Esc 及点击图片外围关闭。
 
 结构与素材继续在 `portfolio-data.js` 相应作品的 `detail` 中编辑：
 
@@ -90,11 +90,9 @@ showcase: [
   { src: "./assets/yulong-showcase-02.jpg", sourceName: "鱼龙舞.jpg", text: { zh: "", en: "" } },
   { src: "./assets/yulong-showcase-03.png", sourceName: "鱼龙舞 (2).png", emphasis: true, text: { zh: "", en: "" } },
 ],
-conceptImages: ["./assets/yulong-concept-01.jpg"], // 实际配置共五张，可增删与调整顺序
-whiteboxImages: ["./assets/yulong-whitebox-22.jpg"],
 ```
 
-`showcase` 数组控制展示顺序，`emphasis: true` 控制较大的图片，`text` 填入对应图片旁边的中英文文案。第一张直接复用与原图一致的既有海报文件，其余原图存放在 `assets/yulong-showcase-*`、`assets/yulong-concept-*` 和 `assets/yulong-whitebox-22.jpg`。`project-detail.css` 的 `.case-spread`、`.case-copy`、`.case-concept-grid` 控制图片大小、文字留白和小图列数，分区标题在 `project-detail.js` 的中英文标签中修改。
+`showcase` 数组控制展示顺序，`emphasis: true` 控制较大的图片，`text` 填入对应图片旁边的中英文文案。第一张直接复用与原图一致的既有海报文件，其余两张原图存放在 `assets/yulong-showcase-*`。`project-detail.css` 的 `.case-spread`、`.case-copy` 控制图片大小和文字留白，分区标题在 `project-detail.js` 的中英文标签中修改。
 
 `slots` 只记录文档及后续要求里的素材需求，不会在页面生成假内容：`conceptImages`、`videos`、`posters` 分别记录概念图、视频和海报数量，`descriptionCharacters` 记录预留简介字数。`null` 表示原文的 n 张、数量待定。
 

@@ -35,7 +35,7 @@
     figure.append(button, number);
     return figure;
   }
-  function caseSection(kind, index) {
+  function caseSection(kind, index, total) {
     const section = document.createElement("section");
     section.className = `case-section case-${kind}`;
     section.dataset.caseSection = kind;
@@ -43,7 +43,7 @@
     heading.className = "case-section-heading";
     const number = document.createElement("span");
     number.className = "case-section-index";
-    number.textContent = `${String(index).padStart(2, "0")} / 03`;
+    number.textContent = `${String(index).padStart(2, "0")} / ${String(total).padStart(2, "0")}`;
     const title = document.createElement("h2");
     title.id = `case-${kind}-title`;
     title.textContent = labels[language][kind];
@@ -60,8 +60,10 @@
     return section;
   }
   function renderCaseStudy(detail) {
+    const total = [detail.showcase, detail.conceptImages, detail.whiteboxImages].filter((images) => images?.length).length;
+    let index = 0;
     if (detail.showcase?.length) {
-      const section = caseSection("showcase", 1);
+      const section = caseSection("showcase", ++index, total);
       const spreads = document.createElement("div");
       spreads.className = "case-spreads";
       detail.showcase.forEach((item, index) => {
@@ -83,7 +85,7 @@
       body.append(section);
     }
     if (detail.conceptImages?.length) {
-      const section = caseSection("concept", 2);
+      const section = caseSection("concept", ++index, total);
       const grid = document.createElement("div");
       grid.className = "case-concept-grid";
       detail.conceptImages.forEach((source, index) => grid.append(imageFigure(source, labels[language].concept, index)));
@@ -91,7 +93,7 @@
       body.append(section);
     }
     if (detail.whiteboxImages?.length) {
-      const section = caseSection("whitebox", 3);
+      const section = caseSection("whitebox", ++index, total);
       const images = document.createElement("div");
       images.className = "case-whitebox-images";
       detail.whiteboxImages.forEach((source, index) => images.append(imageFigure(source, labels[language].whitebox, index)));
