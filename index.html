@@ -25,23 +25,9 @@
       <p id="title" class="chinese">关于想象力的一切</p>
       <h1 class="english" lang="en">Tread softly because you tread<br>on my dreams.</h1>
     </div>
-    <button class="enter-scene" type="button" aria-label="进入日月选择"></button>
+    <button class="enter-scene" type="button" aria-label="进入个人介绍"></button>
   </main>
-  <section class="choice-scene" aria-labelledby="choice-title" hidden>
-    <h2 id="choice-title" class="sr-only">选择浏览方式</h2>
-    <div class="ritual-stage">
-      <img class="phase-arc" src="./assets/phase-arc.svg" alt="" draggable="false">
-      <div class="mode-options">
-        <button class="mode-option" data-mode="quick" type="button" disabled>
-          <span class="choice-label">快速浏览</span>
-        </button>
-        <button class="mode-option" data-mode="showcase" type="button" disabled>
-          <span class="choice-label">观赏模式</span>
-        </button>
-      </div>
-    </div>
-  </section>
-  <main class="quick-view" aria-label="快速浏览" hidden>
+  <main class="quick-view" data-view="profile" aria-label="个人介绍" hidden>
     <aside class="quick-rail">
       <a class="rail-monogram" href="#about" aria-label="个人介绍">M<span>✦</span></a>
       <nav class="quick-navigation" aria-label="内容分区"></nav>
@@ -49,6 +35,9 @@
     </aside>
     <div class="portfolio-content"></div>
   </main>
+  <section class="showcase-view" aria-label="观赏模式" hidden>
+    <button class="return-profile" type="button">返回个人介绍</button>
+  </section>
   <dialog class="project-detail" aria-labelledby="detail-title">
     <div class="detail-toolbar">
       <span class="detail-category"></span>

@@ -25,6 +25,9 @@
 .quick-view button { font: inherit; }
 .quick-view a:focus-visible, .project-detail button:focus-visible { outline: 2px solid currentColor; outline-offset: 6px; }
 .portfolio-content { position: relative; }
+.quick-view[data-view="profile"] { overflow: clip; background: var(--portfolio-blue); overscroll-behavior: none; touch-action: pan-x pinch-zoom; }
+.quick-view[data-view="profile"] .portfolio-content { height: 100%; }
+.quick-view[data-view="profile"] .profile-section { height: 100%; min-height: 0; max-height: 100%; }
 .portfolio-section {
   position: relative;
   padding: clamp(60px, 7vw, 110px) var(--portfolio-gutter) clamp(70px, 8vw, 130px) var(--portfolio-side);
@@ -57,8 +60,8 @@
 .rail-link[aria-current]::before { opacity: 1; transform: translateY(-50%) scaleY(1); }
 .rail-progress { width: 1px; height: 54px; margin-bottom: 24px; background: #f5efe43b; }
 .rail-progress > span { display: block; width: 100%; height: 100%; background: var(--portfolio-orange); transform: scaleY(.03); transform-origin: top; }
-body[data-scene="quick"] .language-star { --star-center: #123fce; top: max(22px, env(safe-area-inset-top)); right: max(25px, env(safe-area-inset-right)); width: 44px; height: 52px; padding: 5px 9px; color: #ff9b45; transition: color .3s; }
-body[data-scene="quick"] .language-star svg { filter: none; }
+body[data-scene="quick"] .language-star, body[data-scene="profile"] .language-star { --star-center: #123fce; top: max(22px, env(safe-area-inset-top)); right: max(25px, env(safe-area-inset-right)); width: 44px; height: 52px; padding: 5px 9px; color: #ff9b45; transition: color .3s; }
+body[data-scene="quick"] .language-star svg, body[data-scene="profile"] .language-star svg { filter: none; }
 body[data-scene="quick"][data-quick-backdrop="growth"] .language-star { color: #123fce; --star-center: #f5efe4; }
 body[data-scene="quick"][data-quick-backdrop="visual"] .language-star { color: #0a204e; --star-center: #ff9b45; }
 body[data-scene="quick"][data-quick-backdrop="games"] .language-star { --star-center: #0a204e; }
@@ -66,7 +69,7 @@ body[data-scene="quick"][data-quick-backdrop="games"] .language-star { --star-ce
 .profile-topline { display: flex; justify-content: space-between; gap: 24px; padding: 0 64px 21px 0; border-bottom: 1px solid #ff9b4566; font-size: 15px; letter-spacing: .12em; }
 .profile-topline [lang="en"] { font: 18px/1.4 "Cormorant Garamond", Georgia, serif; letter-spacing: .08em; }
 .profile-topline, .profile-education, .profile-roles { color: #ffe3bd; }
-.profile-composition { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(160px, 27%); align-items: center; gap: 24px; padding-block: 80px; }
+.profile-composition { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 36%); align-items: center; gap: 24px; padding-block: clamp(18px, 5vh, 80px); }
 .profile-copy { min-width: 0; position: relative; z-index: 1; }
 .profile-name { margin: 0; font-size: clamp(65px, 8.4vw, 138px); font-weight: 200; line-height: 1.35; letter-spacing: .09em; white-space: nowrap; }
 .quick-view .profile-name-flip { display: grid; width: fit-content; max-width: 100%; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; letter-spacing: inherit; text-align: left; perspective: 1200px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
@@ -79,17 +82,28 @@ body[data-scene="quick"][data-quick-backdrop="games"] .language-star { --star-ce
 .profile-name-flip[data-flipped="true"] .name-alias { transform: rotateY(0deg); opacity: 1; }
 .profile-name:focus, .portfolio-heading h2:focus { outline: none; }
 .profile-roman { display: block; margin: 0; font: clamp(39px, 5.2vw, 86px)/1.05 "Cormorant Garamond", Georgia, serif; letter-spacing: -.025em; transform: scaleY(.8); transform-origin: left top; }
-.profile-education { max-width: 500px; margin: 36px 0 0; font-size: clamp(16px, 1.6vw, 21px); line-height: 1.9; letter-spacing: .08em; }
-.profile-orbit { position: relative; aspect-ratio: 1; display: grid; place-items: center; }
-.orbit-outline { position: absolute; inset: 0; border: 1px solid #ff9b4566; border-radius: 50%; }
-.orbit-outline::before { content: ""; position: absolute; width: 8px; height: 8px; top: 13%; left: 13%; background: var(--portfolio-orange); border-radius: 50%; }
-.profile-orbit > svg { width: 68%; height: 110%; transform: rotate(18deg); }
-.orbit-coordinate { position: absolute; bottom: -32px; font: 14px "Cormorant Garamond", Georgia, serif; letter-spacing: .12em; }
+.profile-education { max-width: 500px; margin: 36px 0 0; font-size: clamp(16px, 1.6vw, 21px); line-height: 1.9; letter-spacing: .08em; text-wrap: balance; }
+.mode-console { position: relative; width: 100%; max-width: 440px; aspect-ratio: 1; justify-self: center; color: var(--portfolio-orange); }
+.console-diagram { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.console-line, .console-inner, .console-orbits { fill: none; stroke: currentColor; stroke-width: .9; opacity: .42; }
+.console-inner { stroke-dasharray: 2 9; opacity: .7; }
+.console-ticks { stroke: currentColor; stroke-width: 1; opacity: .65; animation: console-turn 120s linear infinite; transform-origin: 250px 250px; }
+.console-orbits { animation: console-turn 150s linear infinite reverse; transform-origin: 250px 250px; }
+.console-orbits circle { fill: currentColor; }
+.console-star { fill: var(--portfolio-orange); transform: rotate(18deg); transform-origin: 250px 250px; }
+.console-points { fill: currentColor; }
+.console-options { position: absolute; top: 50%; left: 50%; width: 66%; transform: translate(-50%, -50%); display: grid; gap: clamp(16px, 2vw, 24px); }
+.quick-view .mode-option { display: flex; justify-content: space-between; align-items: center; gap: 10px; min-height: 54px; padding: 12px 14px; border-color: #ff9b4580; background: var(--portfolio-blue); color: #ffe3bd; }
+.quick-view .mode-option:hover { background: #244bc6; border-color: #ffe3bd; }
+.mode-number { font: 14px/1 "Cormorant Garamond", Georgia, serif; color: var(--portfolio-orange); }
+.mode-arrow { font: 22px/1 "Cormorant Garamond", Georgia, serif; color: var(--portfolio-orange); transition: transform .25s; }
+.mode-option:hover .mode-arrow { transform: translate(2px, -2px); }
+.quick-view .choice-label { font-size: clamp(15px, 1.35vw, 21px); letter-spacing: .12em; }
+html[lang="en"] .quick-view .choice-label { font-size: clamp(19px, 1.75vw, 27px); letter-spacing: .01em; }
+@keyframes console-turn { to { transform: rotate(360deg); } }
 .profile-bottom { display: flex; justify-content: space-between; align-items: end; gap: 20px; border-top: 1px solid #ff9b4566; padding-top: 22px; }
 .profile-roles { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 0; max-width: 90%; font-size: clamp(14px, 1.25vw, 18px); line-height: 1.8; letter-spacing: .05em; }
 .role-slash { opacity: .5; }
-.scroll-cue { display: grid; place-items: center; flex-shrink: 0; width: 40px; height: 48px; font-size: 30px; transition: transform .3s; }
-.scroll-cue:hover { transform: translateY(5px); }
 .section-index { display: flex; justify-content: space-between; margin-bottom: 25px; padding-bottom: 14px; border-bottom: 1px solid currentColor; font: 16px/1.2 "Cormorant Garamond", Georgia, serif; letter-spacing: .1em; opacity: .65; }
 .portfolio-heading { margin-bottom: clamp(38px, 5vw, 72px); }
 .portfolio-heading h2 { margin: 0; font-size: clamp(30px, 3.2vw, 48px); font-weight: 200; line-height: 1.5; letter-spacing: .12em; }
@@ -148,6 +162,11 @@ body[data-scene="quick"][data-quick-backdrop="games"] .language-star { --star-ce
 .detail-body img, .detail-body video { width: 100%; height: auto; }
 .detail-description { max-width: 760px; line-height: 2; white-space: pre-line; }
 .detail-body a { color: inherit; }
+.showcase-view { position: fixed; inset: 0; display: grid; align-items: end; justify-items: start; padding: 32px; background: #000; }
+.return-profile { padding: 12px 20px; border: 1px solid #ffe3bd66; border-radius: 12px; color: #ffe3bd; background: transparent; font: 200 15px/1.6 "Noto Sans SC Title", "Microsoft YaHei Light", sans-serif; cursor: pointer; }
+.return-profile:hover, .return-profile:focus-visible { border-color: #ff9b45; color: #ff9b45; }
+html[lang="en"] .return-profile { font: 21px/1.2 "Cormorant Garamond", Georgia, serif; }
+body[data-scene="showcase"] .language-star { color: #ff9b45; --star-center: #000; }
 html[lang="en"] .quick-view, html[lang="en"] .project-detail { font-family: "Cormorant Garamond", Georgia, serif; }
 html[lang="en"] .rail-link { font-size: 14px; line-height: 1.15; letter-spacing: 0; }
 html[lang="en"] .profile-name { font: clamp(70px, 9.5vw, 155px)/.9 "Cormorant Garamond", Georgia, serif; letter-spacing: -.04em; white-space: normal; }
@@ -168,7 +187,7 @@ html[lang="en"] #detail-title { font: clamp(34px, 5vw, 68px)/1 "Cormorant Garamo
 }
 @media (max-width: 1000px) {
   .quick-view { --portfolio-side: 116px; --portfolio-gutter: 32px; }
-  .profile-composition { grid-template-columns: minmax(0, 1fr) 150px; gap: 15px; }
+  .profile-composition { gap: 18px; }
   .profile-name { font-size: 76px; }
   .growth-item { grid-template-columns: 165px minmax(0, 1fr); gap: 10px 20px; }
   .growth-works { grid-column: 2; text-align: left; }
@@ -185,20 +204,23 @@ html[lang="en"] #detail-title { font: clamp(34px, 5vw, 68px)/1 "Cormorant Garamo
   .rail-number { font-size: 15px; }
   html[lang="en"] .rail-link { font-size: 12px; }
   html[lang="en"] .rail-link > span:last-child { max-width: 100%; overflow-wrap: normal; }
-  body[data-scene="quick"] .language-star { top: max(17px, env(safe-area-inset-top)); right: max(16px, env(safe-area-inset-right)); width: 34px; height: 43px; padding: 4px 6px; }
+  body[data-scene="quick"] .language-star, body[data-scene="profile"] .language-star { top: max(17px, env(safe-area-inset-top)); right: max(16px, env(safe-area-inset-right)); width: 34px; height: 43px; padding: 4px 6px; }
   .profile-section { min-height: min(800px, 100svh); padding-top: 29px; padding-bottom: 25px; }
   .profile-topline { padding: 0 36px 19px 0; font-size: 12px; gap: 12px; }
   .profile-topline [lang="en"] { font-size: 13px; letter-spacing: 0; }
-  .profile-composition { position: relative; display: block; padding-top: 105px; padding-bottom: 80px; }
+  .profile-composition { display: flex; flex-direction: column; align-items: start; justify-content: center; gap: clamp(16px, 3svh, 30px); padding-block: 16px; }
   .profile-name { font-size: clamp(45px, 11.5vw, 72px); letter-spacing: .04em; }
   .profile-roman { font-size: clamp(35px, 8.4vw, 58px); margin-top: 8px; }
-  .profile-education { font-size: 15px; margin-top: 25px; line-height: 1.9; letter-spacing: .03em; max-width: 240px; }
-  .profile-orbit { position: absolute; width: 85px; right: 0; top: 20px; opacity: .8; }
-  .profile-orbit > svg { width: 50%; height: 80%; }
-  .orbit-coordinate { display: none; }
+  .profile-education { font-size: 15px; margin-top: 15px; line-height: 1.7; letter-spacing: .03em; max-width: 280px; }
+  .mode-console { flex-shrink: 0; align-self: center; width: min(100%, 32svh, 300px); }
+  .console-options { width: 72%; gap: 14px; }
+  .quick-view .mode-option { gap: 6px; min-height: 43px; padding: 8px 10px; }
+  .quick-view .choice-label { font-size: 15px; letter-spacing: .06em; }
+  .mode-number { font-size: 12px; }
+  .mode-arrow { font-size: 18px; }
   .profile-bottom { gap: 8px; padding-top: 18px; }
-  .profile-roles { gap: 6px; font-size: 12px; max-width: 85%; line-height: 1.7; }
-  .scroll-cue { width: 26px; height: 36px; font-size: 27px; }
+  .profile-roles { display: block; font-size: 12px; max-width: 100%; line-height: 1.7; }
+  .profile-roles .role-slash { margin-inline: 6px; }
   .portfolio-heading { margin-bottom: 32px; }
   .portfolio-heading h2 { font-size: 28px; letter-spacing: .07em; }
   .heading-english { font-size: clamp(42px, 10vw, 65px); line-height: 1; margin-top: 8px; }
@@ -221,15 +243,23 @@ html[lang="en"] #detail-title { font: clamp(34px, 5vw, 68px)/1 "Cormorant Garamo
   .project-detail { width: calc(100vw - 30px); max-height: 94svh; padding: 22px; }
   .detail-toolbar { font-size: 12px; }
   #detail-title { margin-block: 25px; }
-  html[lang="en"] .profile-name { font-size: clamp(52px, 14vw, 90px); line-height: .86; }
-  html[lang="en"] .profile-roman { font-size: 20px; }
-  html[lang="en"] .profile-education { font-size: 22px; max-width: 260px; }
+  html[lang="en"] .profile-name { font-size: clamp(42px, 12vw, 72px); line-height: .95; }
+  html[lang="en"] .profile-roman { font-size: 20px; margin-top: 14px; }
+  html[lang="en"] .profile-education { font-size: 20px; line-height: 1.3; max-width: 280px; }
   html[lang="en"] .profile-roles { font-size: 16px; line-height: 1.2; }
   html[lang="en"] .portfolio-heading h2 { font-size: clamp(43px, 11vw, 70px); }
   html[lang="en"] .growth-item h3 { font-size: 24px; }
   html[lang="en"] .project-heading h3 { font-size: 34px; }
   html[lang="en"] .project-meta { font-size: 18px; }
   html[lang="en"] .project-award { font-size: 17px; }
+}
+@media (max-width: 700px) and (max-height: 740px) {
+  .profile-section { padding-top: 22px; padding-bottom: 18px; }
+  .profile-topline { padding-bottom: 12px; }
+  .profile-composition { gap: 12px; padding-block: 10px; }
+  .profile-bottom { padding-top: 12px; }
+  .profile-education { margin-top: 12px; }
+  .mode-console { width: min(100%, 30svh, 260px); }
 }
 @media (max-height: 520px) and (orientation: landscape) {
   .quick-rail { top: 8px; bottom: 8px; }
@@ -238,9 +268,27 @@ html[lang="en"] #detail-title { font: clamp(34px, 5vw, 68px)/1 "Cormorant Garamo
   .rail-link { gap: 3px; padding-block: 3px; }
   .rail-progress { height: 20px; margin-bottom: 10px; }
   .profile-section { min-height: 510px; }
-  .profile-composition { padding-block: 60px; }
+  .profile-section { padding-top: 20px; padding-bottom: 18px; }
+  .profile-composition { padding-block: 8px; }
+  .profile-name, html[lang="en"] .profile-name { font-size: clamp(38px, 6vw, 64px); }
+  .profile-roman { font-size: 34px; }
+  .profile-education { font-size: 14px; line-height: 1.5; margin-top: 12px; }
+  .profile-roles { display: block; max-width: 100%; font-size: 12px; }
+  .role-slash { margin-inline: 6px; }
+  .profile-bottom { padding-top: 12px; }
+  .mode-console { max-width: 52svh; }
+  .console-options { gap: 12px; }
+  .quick-view .mode-option { min-height: 43px; padding: 8px; gap: 6px; }
+  .quick-view .choice-label { font-size: 15px; }
+  .mode-number { font-size: 12px; }
+  .mode-arrow { font-size: 18px; }
+  html[lang="en"] .profile-roman { font-size: 16px; line-height: 1.4; margin-top: 6px; }
+  html[lang="en"] .profile-education { font-size: 18px; line-height: 1.2; margin-top: 10px; }
+  html[lang="en"] .profile-roles { font-size: 16px; line-height: 1.2; }
+  html[lang="en"] .quick-view .choice-label { font-size: 18px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .reveal { opacity: 1; transform: none; transition: none; }
   .quick-view *, .project-detail * { scroll-behavior: auto !important; transition: none !important; }
+  .console-ticks, .console-orbits { animation: none; }
 }

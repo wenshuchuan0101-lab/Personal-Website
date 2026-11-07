@@ -23,38 +23,6 @@
   cursor: pointer;
 }
 .enter-scene:focus-visible { outline: 1px solid #e6e4d3; outline-offset: -12px; }
-.choice-scene {
-  position: fixed;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-  --selection-background: #0a1d37;
-  background: var(--selection-background);
-  color: #f3d9be;
-}
-.ritual-stage {
-  position: relative;
-  width: min(94vw, 88svh, 850px);
-  aspect-ratio: 1;
-}
-.phase-arc {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  filter: drop-shadow(0 0 4px #ffd8a336);
-}
-.mode-options {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: clamp(160px, 42%, 320px);
-  transform: translate(-50%, -50%);
-  display: grid;
-  gap: clamp(22px, 4vw, 38px);
-}
 .mode-option {
   width: 100%;
   min-height: 48px;
@@ -117,7 +85,6 @@ body[data-destination="quick"] .language-star { color: #292720; --star-center: #
 body[data-destination="showcase"] .language-star { --star-center: #000; }
 .screen-fade { position: fixed; z-index: 5; inset: 0; opacity: 0; pointer-events: none; }
 @media (max-height: 480px) and (orientation: landscape) {
-  .ritual-stage { width: 92svh; }
   .choice-label { font-size: 14px; }
 }
 @media (prefers-reduced-motion: reduce) {

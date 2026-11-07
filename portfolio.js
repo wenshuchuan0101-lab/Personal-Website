@@ -12,6 +12,7 @@
     en: { about: "About", growth: "Growth", visual: "Images & Film", games: "Interaction & Games", nav: "Sections", close: "Close project details", detail: "Project details", play: "Play", empty: "Reserved project presentation area" },
   };
   let language = "zh";
+  let view = "profile";
   let activeSection = "about";
   let openedProject = null;
   let nameFlipped = false;
@@ -20,7 +21,27 @@
   const text = (value) => typeof value === "string" ? value : value?.[language] ?? value?.zh ?? "";
   const escape = (value) => String(value ?? "").replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]);
   const count = (number) => String(number).padStart(2, "0");
-  const star = '<svg viewBox="0 0 100 140" aria-hidden="true"><path d="M50 2 55 53Q56 63 65 65L98 70 65 75Q56 77 55 87L50 138 45 87Q44 77 35 75L2 70 35 65Q44 63 45 53Z" fill="currentColor"/></svg>';
+
+  function modeConsole() {
+    const modeLabels = SCENE_SETTINGS.selection.labels[language];
+    const ticks = Array.from({ length: 72 }, (_, index) => {
+      const angle = index * Math.PI / 36;
+      const inner = index % 6 === 0 ? 221 : 229;
+      return `<line x1="${250 + Math.cos(angle) * inner}" y1="${250 + Math.sin(angle) * inner}" x2="${250 + Math.cos(angle) * 237}" y2="${250 + Math.sin(angle) * 237}"/>`;
+    }).join("");
+    return `<div class="mode-console" role="group" aria-label="${escape(modeLabels.title)}">
+      <svg class="console-diagram" viewBox="0 0 500 500" aria-hidden="true">
+        <g class="console-ticks">${ticks}</g>
+        <circle class="console-line" cx="250" cy="250" r="246"/>
+        <circle class="console-line" cx="250" cy="250" r="207"/>
+        <circle class="console-inner" cx="250" cy="250" r="174"/>
+        <g class="console-orbits"><ellipse cx="250" cy="250" rx="217" ry="155" transform="rotate(-35 250 250)"/><ellipse cx="250" cy="250" rx="217" ry="155" transform="rotate(35 250 250)"/><circle cx="95" cy="105" r="4"/><circle cx="405" cy="395" r="4"/></g>
+        <path class="console-star" d="M250 58 269 203Q273 226 296 231L431 250 296 269Q273 274 269 297L250 442 231 297Q227 274 204 269L69 250 204 231Q227 226 231 203Z"/>
+        <path class="console-points" d="m250 20 4 8-4 8-4-8Zm0 444 4 8-4 8-4-8ZM20 250l8-4 8 4-8 4Zm444 0 8-4 8 4-8 4Z"/>
+      </svg>
+      <div class="console-options">${["quick", "showcase"].map((mode, index) => `<button class="mode-option" data-mode="${mode}" type="button"><span class="mode-number" aria-hidden="true">${count(index + 1)}</span><span class="choice-label">${escape(modeLabels[mode])}</span><span class="mode-arrow" aria-hidden="true">↗</span></button>`).join("")}</div>
+    </div>`;
+  }
 
   function sectionHeading(title, english, index, total) {
     return `<header class="portfolio-heading reveal"><div class="section-index"><span>${count(index)} / 04</span>${total ? `<span>${count(total)}</span>` : ""}</div><h2>${escape(text(title))}</h2>${language === "zh" ? `<p class="heading-english" lang="en">${escape(english)}</p>` : ""}</header>`;
@@ -56,14 +77,17 @@
 
   function render() {
     const profile = data.profile;
+    root.dataset.view = view;
+    root.setAttribute("aria-label", view === "profile" ? labels[language].about : SCENE_SETTINGS.selection.labels[language].quick);
     navigation.setAttribute("aria-label", labels[language].nav);
-    navigation.innerHTML = ["about", "growth", "visual", "games"].map((id, index) => `<a class="rail-link" href="#${id}" data-scroll="${id}"><span class="rail-number">${count(index + 1)}</span><span>${labels[language][id]}</span></a>`).join("");
+    navigation.innerHTML = ["about", "growth", "visual", "games"].map((id, index) => `<a class="rail-link" href="#${id}" data-scroll="${id}"${view === "profile" && id !== "about" ? " hidden" : ""}><span class="rail-number">${count(index + 1)}</span><span>${labels[language][id]}</span></a>`).join("");
+    root.querySelector(".rail-progress").hidden = view === "profile";
     root.querySelector(".rail-monogram").setAttribute("aria-label", labels[language].about);
     content.innerHTML = `
       <section id="about" class="portfolio-section profile-section" aria-labelledby="profile-name">
         <div class="profile-topline"><span>${labels[language].about}</span><span lang="en">2024 — 2026</span></div>
-        <div class="profile-composition"><div class="profile-copy"><h1 id="profile-name" class="profile-name"><button class="profile-name-flip" type="button" data-flipped="${nameFlipped}" aria-pressed="${nameFlipped}" aria-label="${escape(text(profile.name))} / ${escape(text(profile.alias))}">${namePage(profile.name, "name-primary", nameFlipped)}${namePage(profile.alias, "name-alias", !nameFlipped)}</button></h1><p class="profile-education">${escape(text(profile.education))}</p></div><div class="profile-orbit" aria-hidden="true"><span class="orbit-outline"></span>${star}<span class="orbit-coordinate">01 / 04</span></div></div>
-        <div class="profile-bottom"><p class="profile-roles">${profile.roles.map((role) => `<span>${escape(text(role))}</span>`).join('<span class="role-slash" aria-hidden="true">/</span>')}</p><a href="#growth" class="scroll-cue" data-scroll="growth" aria-label="${labels[language].growth}">↓</a></div>
+        <div class="profile-composition"><div class="profile-copy"><h1 id="profile-name" class="profile-name"><button class="profile-name-flip" type="button" data-flipped="${nameFlipped}" aria-pressed="${nameFlipped}" aria-label="${escape(text(profile.name))} / ${escape(text(profile.alias))}">${namePage(profile.name, "name-primary", nameFlipped)}${namePage(profile.alias, "name-alias", !nameFlipped)}</button></h1><p class="profile-education">${escape(text(profile.education))}</p></div>${modeConsole()}</div>
+        <div class="profile-bottom"><p class="profile-roles">${profile.roles.map((role) => `<span>${escape(text(role))}</span>`).join('<span class="role-slash" aria-hidden="true">/</span>')}</p></div>
       </section>
       <section id="growth" class="portfolio-section growth-section" aria-labelledby="growth-heading">
         ${sectionHeading({ zh: labels.zh.growth, en: labels.en.growth }, "Growth", 2)}
@@ -74,6 +98,9 @@
     for (const section of content.querySelectorAll(".portfolio-section:not(.profile-section)")) {
       section.querySelector("h2").id = `${section.id}-heading`;
     }
+    content.querySelectorAll(".portfolio-section").forEach((section) => {
+      section.hidden = section.id === "about" ? view !== "profile" : view !== "quick";
+    });
     content.querySelectorAll(".project-cover img").forEach((image) => {
       image.addEventListener("error", () => {
         const cover = image.parentElement;
@@ -114,7 +141,7 @@
 
   function updateScrollState() {
     if (root.hidden) return;
-    const sections = [...content.querySelectorAll(".portfolio-section")];
+    const sections = [...content.querySelectorAll(".portfolio-section:not([hidden])")];
     const offset = root.scrollTop + root.clientHeight * .3;
     const current = sections.filter((section) => section.offsetTop <= offset).at(-1) || sections[0];
     activeSection = current.id;
@@ -131,8 +158,12 @@
   }
 
   function navigate(id) {
+    if (id === "about" && view === "quick") {
+      root.dispatchEvent(new CustomEvent("portfolio:profile"));
+      return;
+    }
     const target = document.getElementById(id);
-    if (!target || !root.contains(target)) return;
+    if (!target || target.hidden || !root.contains(target)) return;
     root.scrollTo({ top: target.offsetTop, behavior: motion.matches ? "instant" : "smooth" });
     // 焦点跟随页内导航，阅读顺序与视觉位置一致。
     const heading = target.querySelector("h1, h2");
@@ -233,11 +264,16 @@
         updateScrollState();
       }
     },
-    enter() {
+    setView(next) {
+      view = next === "quick" ? "quick" : "profile";
+      activeSection = view === "profile" ? "about" : "growth";
+      nameFlipped = false;
+      render();
       root.scrollTop = 0;
       updateScrollState();
-      document.getElementById("profile-name").tabIndex = -1;
-      document.getElementById("profile-name").focus({ preventScroll: true });
+      const heading = document.getElementById(activeSection).querySelector("h1, h2");
+      heading.tabIndex = -1;
+      heading.focus({ preventScroll: true });
     },
   };
 })();

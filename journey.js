@@ -1,35 +1,29 @@
 const selection = SCENE_SETTINGS.selection;
 const intro = document.querySelector(".scene");
 const entry = document.querySelector(".enter-scene");
-const chooser = document.querySelector(".choice-scene");
-const options = [...document.querySelectorAll(".mode-option")];
 const languageStar = document.querySelector(".language-star");
 const fade = document.querySelector(".screen-fade");
 const status = document.querySelector(".journey-status");
 const quickView = document.querySelector(".quick-view");
+const showcaseView = document.querySelector(".showcase-view");
+const returnProfileButton = document.querySelector(".return-profile");
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 let language = selection.language;
 let phase = "intro";
 
-document.querySelector(".phase-arc").src = selection.phases;
 document.body.dataset.scene = phase;
 
 function applyLanguage() {
   const labels = selection.labels[language];
-  const quickPosition = window.PortfolioQuick.getPosition();
+  const position = window.PortfolioQuick.getPosition();
   document.documentElement.lang = language === "zh" ? "zh-CN" : "en";
-  document.getElementById("choice-title").textContent = labels.title;
   entry.setAttribute("aria-label", labels.enter);
-  options.forEach((option) => {
-    const label = labels[option.dataset.mode];
-    option.querySelector(".choice-label").textContent = label;
-    option.setAttribute("aria-label", label);
-  });
   languageStar.setAttribute("aria-label", labels.language);
   languageStar.setAttribute("title", labels.language);
   languageStar.setAttribute("aria-pressed", String(language === "en"));
-  quickView.setAttribute("aria-label", labels.quick);
-  window.PortfolioQuick.setLanguage(language, quickPosition);
+  returnProfileButton.textContent = labels.back;
+  showcaseView.setAttribute("aria-label", labels.showcase);
+  window.PortfolioQuick.setLanguage(language, position);
 }
 
 function setPhase(next) {
@@ -37,17 +31,21 @@ function setPhase(next) {
   document.body.dataset.scene = next;
 }
 
-function duration(milliseconds) {
-  return reduceMotion.matches ? Math.min(120, milliseconds) : milliseconds;
-}
-
 function animate(node, frames, milliseconds, options = {}) {
   return node.animate(frames, {
-    duration: duration(milliseconds),
+    duration: reduceMotion.matches ? Math.min(120, milliseconds) : milliseconds,
     easing: "ease-in-out",
     fill: "forwards",
     ...options,
   }).finished;
+}
+
+function showProfile() {
+  showcaseView.hidden = true;
+  quickView.hidden = false;
+  window.PortfolioQuick.setView("profile");
+  document.body.dataset.destination = "profile";
+  setPhase("profile");
 }
 
 entry.addEventListener("click", async () => {
@@ -55,15 +53,11 @@ entry.addEventListener("click", async () => {
   setPhase("entering");
   entry.disabled = true;
   await animate(intro, [{ opacity: 1 }, { opacity: 0 }], 850, {
-    delay: reduceMotion.matches ? 0 : 350,
+    delay: reduceMotion.matches ? 0 : 200,
   });
   intro.hidden = true;
-  chooser.hidden = false;
-  await animate(chooser, [{ opacity: 0 }, { opacity: 1 }], 750);
-  options.forEach((option) => { option.disabled = false; });
-  setPhase("choice");
-  // 键盘进入时移动焦点，鼠标及触屏进入时保持画面无焦点框。
-  if (document.activeElement === entry) options[0].focus({ preventScroll: true });
+  showProfile();
+  await animate(quickView, [{ opacity: 0 }, { opacity: 1 }], 650);
 });
 
 languageStar.addEventListener("click", () => {
@@ -72,34 +66,48 @@ languageStar.addEventListener("click", () => {
 });
 
 async function choose(option) {
-  if (phase !== "choice") return;
+  if (phase !== "profile") return;
+  const mode = option.dataset.mode;
+  if (mode !== "quick" && mode !== "showcase") return;
   setPhase("selecting");
-  options.forEach((button) => {
+  languageStar.disabled = true;
+  quickView.querySelectorAll(".mode-option").forEach((button) => {
     button.disabled = true;
     button.setAttribute("aria-pressed", String(button === option));
   });
   option.blur();
   await animate(option, [
-    { backgroundColor: "rgba(255, 215, 168, 0)", borderColor: "#d6b99d" },
-    { backgroundColor: "rgba(255, 215, 168, .1)", borderColor: "#ffddb4" },
+    { backgroundColor: "#123fce", borderColor: "#ff9b4580" },
+    { backgroundColor: "#254dc9", borderColor: "#ffe3bd" },
   ], selection.revealMilliseconds);
-  const mode = option.dataset.mode;
-  document.body.dataset.destination = mode;
   status.textContent = selection.labels[language].selected + " · " + selection.labels[language][mode];
-  fade.style.backgroundColor = mode === "quick" ? "#faf8f2" : "#000";
+  document.body.dataset.destination = mode;
+  fade.style.backgroundColor = mode === "quick" ? "#f5efe4" : "#000";
   fade.hidden = false;
   setPhase("fading");
-  await animate(fade, [{ opacity: 0 }, { opacity: 1 }], selection.fadeMilliseconds, {
-    delay: reduceMotion.matches ? 0 : 500,
-  });
-  chooser.hidden = true;
+  await animate(fade, [{ opacity: 0 }, { opacity: 1 }], selection.fadeMilliseconds);
   if (mode === "quick") {
-    quickView.hidden = false;
-    fade.hidden = true;
-    window.PortfolioQuick.enter();
+    window.PortfolioQuick.setView("quick");
+  } else {
+    quickView.hidden = true;
+    showcaseView.hidden = false;
+    returnProfileButton.focus({ preventScroll: true });
   }
+  fade.hidden = true;
+  languageStar.disabled = false;
   setPhase(mode);
 }
-options.forEach((option) => option.addEventListener("click", () => choose(option)));
+
+quickView.addEventListener("click", (event) => {
+  const option = event.target.closest(".mode-option");
+  if (option) choose(option);
+});
+quickView.addEventListener("portfolio:profile", () => {
+  if (phase === "quick") showProfile();
+});
+returnProfileButton.addEventListener("click", showProfile);
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && phase === "showcase") showProfile();
+});
 
 applyLanguage();
