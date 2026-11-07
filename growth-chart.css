@@ -29,19 +29,11 @@ html[lang="en"] .growth-stage .portfolio-heading h2 { font-size: clamp(56px, 6vw
 .growth-svg, .growth-list { position: absolute; inset: 0; width: 100%; height: 100%; }
 .growth-svg { overflow: visible; }
 .growth-grid path { fill: none; stroke: #c6c4f2; stroke-width: .6; opacity: .1; stroke-dasharray: 2 8; }
-.mountain-distant { fill: #413a82; opacity: .42; }
-.mountain-mid { fill: #343a9b; opacity: .55; }
-.mountain-main { fill: #5750b2; opacity: .43; }
-.mountain-facet { opacity: .3; }
-.facet-0 { fill: #a39ae5; }
-.facet-1 { fill: #464ed4; }
-.facet-2 { fill: #797ad9; }
-#growth-hatching path { fill: none; stroke: #b6b0fa; stroke-width: .65; opacity: .27; }
-.mountain-hatching { fill: url(#growth-hatching); }
-.mountain-contour { fill: none; stroke: #b0a6fa; stroke-width: .65; opacity: .16; vector-effect: non-scaling-stroke; }
+.mountain-main { fill: url(#growth-soft-slope); opacity: .92; }
+.mountain-base { fill: none; stroke: none; }
 .growth-ridge, .growth-future, .growth-now-line { fill: none; vector-effect: non-scaling-stroke; stroke-linejoin: round; stroke-linecap: round; }
-.growth-ridge { stroke: #b1b1fb; stroke-width: 1.8; }
-.growth-future { stroke: #9b8cea; stroke-width: 1.6; opacity: .8; }
+.growth-ridge { stroke: #b8b5de; stroke-width: 1.3; }
+.growth-future { stroke: #aaa4cc; stroke-width: 1; opacity: .45; }
 .growth-now-line { stroke: var(--growth-orange); stroke-width: 2.6; opacity: 0; }
 .growth-section[data-now="true"] .growth-now-line { opacity: 1; }
 .growth-leaders path { fill: none; stroke: #d5d1ff; stroke-width: .65; opacity: .25; }

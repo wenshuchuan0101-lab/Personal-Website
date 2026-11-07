@@ -10,17 +10,65 @@
   const smooth = (value) => value * value * (3 - 2 * value);
   const escape = (value) => String(value ?? "").replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]);
   const text = (value, language) => typeof value === "string" ? value : value?.[language] ?? value?.zh ?? "";
-  const coordinates = (points) => points.map((point) => `${point.x.toFixed(2)},${point.y.toFixed(2)}`).join(" ");
+  const number = (value) => value.toFixed(2);
+
+  // 单调三次插值使节点之间的山丘连续圆润，避免折角和过冲。
+  function makeCurve(points) {
+    const slopes = points.slice(1).map((point, index) => (point.y - points[index].y) / (point.x - points[index].x));
+    const tangents = points.map((point, index) => {
+      if (index === 0) return slopes[0];
+      if (index === points.length - 1) return slopes.at(-1);
+      const before = slopes[index - 1], after = slopes[index];
+      return before * after <= 0 ? 0 : 2 * before * after / (before + after);
+    });
+    return points.slice(1).map((point, index) => {
+      const start = points[index];
+      const third = (point.x - start.x) / 3;
+      return { start, c1: { x: start.x + third, y: start.y + tangents[index] * third }, c2: { x: point.x - third, y: point.y - tangents[index + 1] * third }, end: point };
+    });
+  }
+
+  function curvePath(segments) {
+    const start = segments[0].start;
+    return `M${number(start.x)} ${number(start.y)} ` + segments.map((segment) => `C${number(segment.c1.x)} ${number(segment.c1.y)} ${number(segment.c2.x)} ${number(segment.c2.y)} ${number(segment.end.x)} ${number(segment.end.y)}`).join(" ");
+  }
+
+  function curvePoint(segment, amount) {
+    const inverse = 1 - amount;
+    const coordinate = (axis) => inverse ** 3 * segment.start[axis] + 3 * inverse ** 2 * amount * segment.c1[axis] + 3 * inverse * amount ** 2 * segment.c2[axis] + amount ** 3 * segment.end[axis];
+    return { x: coordinate("x"), y: coordinate("y") };
+  }
+
+  function hillArea(upper, lower) {
+    const end = lower.at(-1).end;
+    const returning = [...lower].reverse().map((segment) => `C${number(segment.c2.x)} ${number(segment.c2.y)} ${number(segment.c1.x)} ${number(segment.c1.y)} ${number(segment.start.x)} ${number(segment.start.y)}`).join(" ");
+    return `${curvePath(upper)} L${number(end.x)} ${number(end.y)} ${returning} Z`;
+  }
 
   function makeModel(items, settings = {}) {
     const elevations = settings.elevations || [];
     const points = items.map((item, index) => {
       const fallback = .12 + .78 * index / Math.max(1, items.length - 1) + Math.sin(index * 1.9) * .055;
-      return { x: 100 + index * 250, y: 650 - clamp(elevations[index] ?? fallback, .04, .96) * 510 };
+      return { x: 100 + index * 250, y: 690 - clamp(elevations[index] ?? fallback, .04, .96) * 100 };
     });
     const last = points.at(-1);
-    const future = [last, { x: last.x + 220, y: last.y + 62 }, { x: last.x + 445, y: last.y - 52 }, { x: last.x + 650, y: last.y - 12 }, { x: last.x + 900, y: last.y - 155 }];
-    return { points, future, width: future.at(-1).x + 120, floor: 760 };
+    const historyShare = clamp(Number(settings.historyShare) || 1 / 3, .2, .5);
+    const width = last.x / historyShare;
+    const remaining = width - last.x - 80;
+    const hills = [[.09, 18], [.21, 4], [.4, 215], [.52, 140], [.72, 370], [.86, 445], [.95, 540], [1, 540]];
+    const future = [last, ...hills.map(([position, rise]) => ({ x: last.x + remaining * position, y: Math.max(42, last.y - rise) }))];
+    future.push({ x: width + 1200, y: future.at(-1).y });
+    const ridge = [...points, ...future.slice(1)];
+    const segments = makeCurve(ridge);
+    const lowerPoints = ridge.map((point, index) => {
+      if (index === 0) return { ...point };
+      const position = (point.x - points[0].x) / (width - points[0].x);
+      const base = points[0].y + 9 * Math.sin(position * Math.PI * 2) - 20 * Math.sin(position * Math.PI) + 8 * Math.sin(position * Math.PI * 5);
+      return { x: point.x, y: Math.max(point.y + 8, base) };
+    });
+    const lower = makeCurve(lowerPoints);
+    const outline = curvePath(segments);
+    return { points, future, segments, width, outline, lowerOutline: curvePath(lower), area: hillArea(segments, lower) };
   }
 
   function words(item, language) {
@@ -30,25 +78,21 @@
   function render(items, language, heading, settings = {}) {
     const labels = ui[language];
     const model = makeModel(items, settings);
-    const ridge = [...model.points, ...model.future.slice(1)];
-    const area = `${coordinates(ridge)} ${model.width},${model.floor} 0,${model.floor}`;
-    const facets = ridge.slice(0, -1).map((point, index) => `<polygon points="${point.x},${point.y} ${ridge[index + 1].x},${ridge[index + 1].y} ${point.x + 80},${model.floor}" class="mountain-facet facet-${index % 3}"/>`).join("");
     return `<div class="growth-stage" style="--growth-distance:${Number(settings.scrollDistance) || 1800}px">
       ${heading}
       <div class="growth-chart" role="group" aria-label="${labels.chart}">
         <svg class="growth-svg" aria-hidden="true" preserveAspectRatio="none">
-          <defs><pattern id="growth-hatching" width="18" height="18" patternUnits="userSpaceOnUse"><path d="M0 0V18"/></pattern><filter id="growth-glow" x="-200%" y="-200%" width="500%" height="500%"><feGaussianBlur stdDeviation="4"/></filter></defs>
+          <defs>
+            <linearGradient id="growth-soft-slope" gradientUnits="userSpaceOnUse" x1="0" y1="40" x2="0" y2="690"><stop offset="0" stop-color="#bab3de"/><stop offset=".26" stop-color="#8c85bd"/><stop offset=".58" stop-color="#484773"/><stop offset=".82" stop-color="#1c1c39"/><stop offset=".9" stop-color="#080820"/><stop offset="1" stop-color="#080820"/></linearGradient>
+            <filter id="growth-glow" x="-200%" y="-200%" width="500%" height="500%"><feGaussianBlur stdDeviation="4"/></filter>
+          </defs>
           <g class="growth-grid"></g>
           <g class="growth-world">
-            <polygon class="mountain-distant" points="${coordinates(ridge.map((point) => ({ x: point.x + 180, y: point.y * .7 + 10 })))} ${model.width},${model.floor} 0,${model.floor}"/>
-            <polygon class="mountain-mid" points="${coordinates(ridge.map((point) => ({ x: point.x - 140, y: point.y + 74 })))} ${model.width},${model.floor} 0,${model.floor}"/>
-            <polygon class="mountain-main" points="${area}"/>
-            <g class="mountain-facets">${facets}</g>
-            <polygon class="mountain-hatching" points="${area}"/>
-            ${[32, 70, 112].map((offset) => `<polyline class="mountain-contour" points="${coordinates(ridge.map((point) => ({ x: point.x, y: point.y + offset })))}"/>`).join("")}
-            <polyline class="growth-ridge" points="${coordinates(model.points)}"/>
-            <polyline class="growth-future" points="${coordinates(model.future)}"/>
-            <polyline class="growth-now-line" points="${coordinates(model.points.slice(-2))}"/>
+            <path class="mountain-main" d="${model.area}"/>
+            <path class="mountain-base" d="${model.lowerOutline}"/>
+            <path class="growth-ridge" d="${curvePath(model.segments.slice(0, items.length - 1))}"/>
+            <path class="growth-future" d="${curvePath(model.segments.slice(items.length - 1))}"/>
+            <path class="growth-now-line" d="${curvePath(model.segments.slice(items.length - 2, items.length - 1))}"/>
           </g>
           <g class="growth-leaders"></g>
           <g class="growth-vertices">${items.map((item, index) => `<g class="growth-vertex" data-vertex="${index}" data-kind="${item.kind || "study"}"><circle class="vertex-halo" r="10" filter="url(#growth-glow)"/><circle class="vertex-ring" r="7"/><circle class="vertex-core" r="3.3"/></g>`).join("")}</g>
@@ -99,9 +143,8 @@
       const travel = clamp(progress / .72) * (items.length - 1);
       const index = Math.min(items.length - 1, Math.round(travel));
       const low = Math.floor(travel);
-      const high = Math.min(items.length - 1, low + 1);
       const fraction = travel - low;
-      const moving = { x: model.points[low].x + (model.points[high].x - model.points[low].x) * fraction, y: model.points[low].y + (model.points[high].y - model.points[low].y) * fraction };
+      const moving = low >= items.length - 1 ? model.points.at(-1) : curvePoint(model.segments[low], fraction);
       const overview = smooth(clamp((progress - .72) / .28));
       const focusScale = width < 600 ? .72 : Math.min(1.05, width / 1000);
       const overviewScale = (width - 32) / model.width;
@@ -128,13 +171,13 @@
         const active = itemIndex === index;
         const age = Math.max(0, index - itemIndex);
         const scale = active ? 1 : Math.max(.58, 1 - age * .055 - overview * .22);
-        const visible = point.x > -30 && point.x < width + 30 && (overview < .35 || active || (width >= 600 && itemIndex % 4 === 0));
+        const visible = point.x > -30 && point.x < width + 30 && (overview < .35 || active || (width >= 600 && itemIndex === 0));
         const labelWidth = Math.min(width < 600 ? 158 : 204, width - 24);
         label.style.width = `${labelWidth}px`;
         label.style.setProperty("--label-scale", scale);
         label.dataset.active = String(active);
         const labelX = clamp(point.x - labelWidth * .25, 8, width - labelWidth - 8);
-        const below = itemIndex % 2 === 1;
+        const below = itemIndex % 2 === 1 && !(active && overview > .35);
         const labelHeight = label.offsetHeight;
         const labelY = clamp(point.y + (below ? 28 : -labelHeight - 30), 5, height - labelHeight - 5);
         label.style.transform = `translate(${labelX}px, ${labelY}px) scale(${scale})`;

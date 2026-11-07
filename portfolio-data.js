@@ -18,6 +18,7 @@ const PORTFOLIO_CONTENT = {
   // 山脊高度只用于造型，不表示分数；数组可随成长记录增删调整。
   growthChart: {
     elevations: [0.12, 0.19, 0.15, 0.3, 0.25, 0.43, 0.36, 0.55, 0.49, 0.68, 0.61, 0.82, 0.74, 0.91],
+    historyShare: 1 / 3,
     scrollDistance: 1800,
   },
   timeline: [
