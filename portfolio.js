@@ -78,6 +78,7 @@
   function render() {
     const profile = data.profile;
     root.dataset.view = view;
+    root.querySelector(".quick-rail").hidden = view === "profile";
     root.setAttribute("aria-label", view === "profile" ? labels[language].about : SCENE_SETTINGS.selection.labels[language].quick);
     navigation.setAttribute("aria-label", labels[language].nav);
     navigation.innerHTML = ["about", "growth", "visual", "games"].map((id, index) => `<a class="rail-link" href="#${id}" data-scroll="${id}"${view === "profile" && id !== "about" ? " hidden" : ""}><span class="rail-number">${count(index + 1)}</span><span>${labels[language][id]}</span></a>`).join("");
