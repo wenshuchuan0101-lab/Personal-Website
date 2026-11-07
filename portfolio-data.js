@@ -19,6 +19,7 @@ const PORTFOLIO_CONTENT = {
   growthChart: {
     elevations: [0.12, 0.19, 0.15, 0.3, 0.25, 0.43, 0.36, 0.55, 0.49, 0.68, 0.61, 0.82, 0.74, 0.91],
     historyShare: 1 / 3,
+    historyRise: 260,
     scrollDistance: 1800,
   },
   timeline: [

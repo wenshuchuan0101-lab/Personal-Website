@@ -19,7 +19,7 @@
 山丘上下沿均使用圆润曲线，下沿从第一个成长节点出发并轻微起伏，下方保留深蓝留白。山体使用上浅下深的蓝紫渐变，最深处与背景色 `#080820` 完全相同，底部自然融入背景。完整视图中，过去到现在占整张图左侧约三分之一，余下部分为向上延伸的山丘轮廓。
 
 - `portfolio-data.js` 的 `timeline` 继续保存全部成长文案，`kind: "study"` 显示白色学习内容，`kind: "work"` 显示橙色作品；学习阶段的 `works` 字段仍以橙色显示。
-- `growthChart.elevations` 调整各节点造型高度，数值范围 0—1，仅用于山势构图，不是能力或成绩数据。增添成长记录后，没有填写高度的节点也会自动生成造型。`growthChart.historyShare` 调整过去到现在所占比例，默认 `1 / 3`；`growthChart.scrollDistance` 调整这段滚动叙事的长度。
+- `growthChart.elevations` 调整各节点造型高度，数值范围 0—1，仅用于山势构图，不是能力或成绩数据。增添成长记录后，没有填写高度的节点也会自动生成造型。`growthChart.historyRise` 调整经历曲线的起伏幅度，默认 260，节点间保持柔和衔接，整体逐渐上升。`growthChart.historyShare` 调整过去到现在所占比例，默认 `1 / 3`；`growthChart.scrollDistance` 调整这段滚动叙事的长度。
 - `growth-chart.css` 调整深蓝、蓝紫、白和橙的配色、辉光和布局；`growth-chart.js` 负责折线、山体、视角缩放与当前记录。所有图形均为可编辑 SVG，没有固定成图片。
 
 将封面文件放在 `assets/` 下，在相应作品中填写 `cover: "./assets/文件名.jpg"`；`coverPosition` 控制裁切位置，例如 `"center"` 或 `"50% 30%"`。封面路径为空时保留带编号的色块，不请求不存在的图片。

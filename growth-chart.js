@@ -47,16 +47,18 @@
 
   function makeModel(items, settings = {}) {
     const elevations = settings.elevations || [];
+    const historyRise = clamp(Number(settings.historyRise) || 260, 180, 340);
     const points = items.map((item, index) => {
       const fallback = .12 + .78 * index / Math.max(1, items.length - 1) + Math.sin(index * 1.9) * .055;
-      return { x: 100 + index * 250, y: 690 - clamp(elevations[index] ?? fallback, .04, .96) * 100 };
+      return { x: 100 + index * 250, y: 690 - clamp(elevations[index] ?? fallback, .04, .96) * historyRise };
     });
     const last = points.at(-1);
     const historyShare = clamp(Number(settings.historyShare) || 1 / 3, .2, .5);
     const width = last.x / historyShare;
     const remaining = width - last.x - 80;
     const hills = [[.09, 18], [.21, 4], [.4, 215], [.52, 140], [.72, 370], [.86, 445], [.95, 540], [1, 540]];
-    const future = [last, ...hills.map(([position, rise]) => ({ x: last.x + remaining * position, y: Math.max(42, last.y - rise) }))];
+    const futureRise = (last.y - 55) / 540;
+    const future = [last, ...hills.map(([position, rise]) => ({ x: last.x + remaining * position, y: last.y - rise * futureRise }))];
     future.push({ x: width + 1200, y: future.at(-1).y });
     const ridge = [...points, ...future.slice(1)];
     const segments = makeCurve(ridge);
