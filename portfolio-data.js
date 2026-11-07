@@ -234,7 +234,7 @@ const PORTFOLIO_CONTENT = {
             en: "Champion, Tripo Track, Tripo Worldbuilding Hackathon S1",
           },
           // 海报、裁切位置、介绍侧边和简介均可独立替换。
-          poster: "",
+          poster: "./assets/grotesque-garden-poster.png",
           posterPosition: "center",
           introSide: "left",
           introduction: { zh: "", en: "" },
