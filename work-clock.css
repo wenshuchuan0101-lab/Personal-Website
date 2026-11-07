@@ -14,7 +14,7 @@
 .clock-hand-detail { stroke: #ae7c4d; stroke-width: .65; }
 .clock-hub { fill: #0a1c3a; stroke: #fff0dd; stroke-width: 1.4; }
 .clock-hub-core { fill: #ffb576; }
-.work-wheel-options { left: var(--wheel-radius); right: 0; scroll-snap-type: none; }
+.work-wheel-options { left: var(--wheel-radius); right: 0; scroll-snap-type: none; overflow-anchor: none; }
 .quick-view .wheel-work { width: var(--wheel-card-width); border-color: #e7d7c159; background: #112744e8; transform: translate(calc(var(--card-x, 270px) - var(--wheel-card-width) / 2), var(--card-y, 0px)) scale(var(--card-scale, 1)); }
 .wheel-thumbnail { opacity: .6; }
 .quick-view .wheel-work[aria-current] { background-color: #234766; }

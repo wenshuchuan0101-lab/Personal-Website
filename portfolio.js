@@ -31,12 +31,15 @@
   let scrollPending = false;
   let wheelFrame = 0;
   let pendingWheelFocus = null;
+  let activeWheelButton = null;
   let dragging = null;
   let suppressClickUntil = 0;
   const text = (value) => typeof value === "string" ? value : value?.[language] ?? value?.zh ?? "";
   const escape = (value) => String(value ?? "").replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]);
   const count = (number) => String(number).padStart(2, "0");
-  const clockStep = Number(data.workClock?.angleStep) || 30;
+  const clockStep = 360 / Math.max(1, projects.length);
+  const cardStep = Number(data.workClock?.cardAngleStep) || 30;
+  const cardScaleFalloff = Number(data.workClock?.cardScaleFalloff) || .35;
   const clockLift = Number(data.workClock?.activeLift) || 22;
   const roman = (number) => {
     let result = "";
@@ -90,11 +93,13 @@
   }
 
   function renderWheel() {
-    wheelOptions.innerHTML = projects.map((project, index) => {
+    activeWheelButton = null;
+    // 三圈轨道给原生滚轮和触摸惯性留出首尾空间，越界时无缝回到中间一圈。
+    wheelOptions.innerHTML = Array.from({ length: 3 }, (_, cycle) => projects.map((project, index) => {
       const group = data.groups.find((item) => item.projects.includes(project));
       const thumbnail = project.cover || project.poster;
-      return `<button class="wheel-work" type="button" data-wheel-project="${escape(project.id)}" data-work-group="${group.id}" title="${escape(text(project.title))}" aria-label="${escape(text(project.title))}">${thumbnail ? `<img class="wheel-thumbnail" src="${escape(thumbnail)}" alt="" draggable="false">` : ""}<span class="wheel-number" aria-hidden="true">${roman(index + 1)}</span><span class="wheel-title">${escape(text(project.title))}</span></button>`;
-    }).join("");
+      return `<button class="wheel-work" type="button" tabindex="-1" data-wheel-project="${escape(project.id)}" data-work-group="${group.id}" data-wheel-cycle="${cycle}" title="${escape(text(project.title))}" aria-label="${escape(text(project.title))}">${thumbnail ? `<img class="wheel-thumbnail" src="${escape(thumbnail)}" alt="" draggable="false">` : ""}<span class="wheel-number" aria-hidden="true">${roman(index + 1)}</span><span class="wheel-title">${escape(text(project.title))}</span></button>`;
+    }).join("")).join("");
     const polar = (radius, angle) => [Math.cos(angle * Math.PI / 180) * radius, Math.sin(angle * Math.PI / 180) * radius];
     const arc = (radius, halfAngle) => {
       const start = polar(radius, -halfAngle);
@@ -102,7 +107,7 @@
       return `M${start.join(" ")}A${radius} ${radius} 0 0 1 ${end.join(" ")}`;
     };
     const ticks = Array.from({ length: 60 }, (_, index) => `<path transform="rotate(${index * 6})" d="M${index % 5 === 0 ? 88 : 92} 0H96"/>`).join("");
-    clockRotor.innerHTML = `<g class="clock-ticks">${ticks}</g><circle class="clock-inner-ring" r="78"/><circle class="clock-inner-ring" r="82"/>${projects.map((project, index) => `<g class="clock-number" data-clock-project="${escape(project.id)}" data-clock-index="${index}" transform="rotate(${index * clockStep})"><path class="clock-segment-outer" d="${arc(146, clockStep * .42)}"/><path class="clock-segment-inner" d="${arc(101, clockStep * .42)}"/><text x="124" y="1" text-anchor="middle" dominant-baseline="central" transform="rotate(90 124 1)">${roman(index + 1)}</text></g>`).join("")}`;
+    clockRotor.innerHTML = `<g class="clock-ticks">${ticks}</g><circle class="clock-inner-ring" r="78"/><circle class="clock-inner-ring" r="82"/>${projects.map((project, index) => `<g class="clock-number" data-clock-project="${escape(project.id)}" data-clock-index="${index}" transform="rotate(${index * clockStep})"><path class="clock-segment-outer" d="${arc(146, clockStep * .46)}"/><path class="clock-segment-inner" d="${arc(101, clockStep * .46)}"/><text x="124" y="1" text-anchor="middle" dominant-baseline="central" transform="rotate(90 124 1)">${roman(index + 1)}</text></g>`).join("")}`;
     clockHand.innerHTML = `<path class="clock-hand-blade" d="M-24 0-10-3 36-2 47-6 60-2 100-1 119 0 100 1 60 2 47 6 36 2-10 3Z"/><path class="clock-hand-detail" d="M10 0H102"/><circle class="clock-hub" r="7"/><circle class="clock-hub-core" r="2"/>`;
     wheel.setAttribute("aria-label", labels[language].chooseWork);
     wheelStar.setAttribute("aria-label", labels[language].chooseWork);
@@ -111,7 +116,8 @@
   }
 
   function centerWheel(id, behavior = "instant") {
-    const button = wheelOptions.querySelector(`[data-wheel-project="${id}"]`);
+    const cursor = wheelOptions.scrollTop + wheelOptions.clientHeight / 2;
+    const button = [...wheelOptions.querySelectorAll(`[data-wheel-project="${id}"]`)].sort((a, b) => Math.abs(a.offsetTop + a.offsetHeight / 2 - cursor) - Math.abs(b.offsetTop + b.offsetHeight / 2 - cursor))[0];
     if (!button || !wheelOpen) return;
     const top = button.offsetTop + button.offsetHeight / 2 - wheelOptions.clientHeight / 2;
     wheelOptions.scrollTo({ top, behavior: motion.matches ? "instant" : behavior });
@@ -136,6 +142,18 @@
     const lower = Math.max(0, centers.findLastIndex((center) => center <= cursor));
     const upper = Math.min(buttons.length - 1, lower + 1);
     const position = upper === lower ? lower : Math.max(0, lower + (cursor - centers[lower]) / (centers[upper] - centers[lower]));
+    const length = projects.length;
+    if (position < length - 1 || position > length * 2) {
+      const equivalent = position < length - 1 ? position + length : position - length;
+      const base = Math.floor(equivalent);
+      const next = Math.min(buttons.length - 1, base + 1);
+      const targetCursor = centers[base] + (equivalent - base) * (centers[next] - centers[base]);
+      const shift = targetCursor - cursor;
+      wheelOptions.scrollTop += shift;
+      if (dragging) dragging.top += shift;
+      updateWheel();
+      return;
+    }
     const styles = getComputedStyle(root);
     const faceScale = Number(styles.getPropertyValue("--clock-scale")) || 1;
     const width = buttons[0].offsetWidth;
@@ -144,16 +162,18 @@
     const orbit = clockRadius + radius * .13 + width / 2;
     buttons.forEach((button, index) => {
       const offset = button.offsetTop + button.offsetHeight / 2 - wheelOptions.scrollTop - radius;
-      const angle = (index - position) * clockStep;
+      const angle = (index - position) * cardStep;
       const radians = angle * Math.PI / 180;
       const normalized = Math.min(1, Math.abs(angle) / 78);
       button.style.setProperty("--card-x", `${hub + Math.cos(radians) * orbit}px`);
       button.style.setProperty("--card-y", `${Math.sin(radians) * radius * .82 - offset}px`);
-      button.style.setProperty("--card-scale", String(1 - normalized * .22));
+      button.style.setProperty("--card-scale", String(1 / (1 + Math.abs(index - position) * cardScaleFalloff)));
       button.style.setProperty("--card-opacity", String(1 - normalized * .5));
       button.style.visibility = Math.abs(angle) < 78 ? "visible" : "hidden";
       if (Math.abs(offset) < distance) { nearest = button; distance = Math.abs(offset); }
     });
+    activeWheelButton = nearest;
+    markWheelSelection();
     const rotation = -position * clockStep;
     clockRotor.setAttribute("transform", `translate(320 320) scale(${faceScale}) rotate(${rotation})`);
     for (const number of clockRotor.querySelectorAll(".clock-number")) {
@@ -201,10 +221,7 @@
     wheelStar.hidden = !works || wheelOpen;
     wheelStar.setAttribute("aria-expanded", String(wheelOpen));
     wheelScrim.hidden = !works || !wheelOpen;
-    wheelOptions.querySelectorAll("[data-wheel-project]").forEach((button) => {
-      if (button.dataset.wheelProject === selectedProjectId) button.setAttribute("aria-current", "true");
-      else button.removeAttribute("aria-current");
-    });
+    markWheelSelection();
     activeSection = !quick ? "about" : works ? displayedGroup : "growth";
     navigation.querySelectorAll(".section-link").forEach((button) => {
       if (button.dataset.section === activeSection) button.setAttribute("aria-current", "page");
@@ -214,6 +231,14 @@
     document.body.dataset.quickBackdrop = activeSection;
     root.setAttribute("aria-label", quick ? labels[language][activeSection] : labels[language].about);
     if (works) root.scrollTop = 0;
+  }
+
+  function markWheelSelection() {
+    wheelOptions.querySelectorAll("[data-wheel-project]").forEach((button) => {
+      button.tabIndex = button === activeWheelButton ? 0 : -1;
+      if (button === activeWheelButton) button.setAttribute("aria-current", "true");
+      else button.removeAttribute("aria-current");
+    });
   }
 
   function openWheel(group = workGroup) {
@@ -229,7 +254,7 @@
     if (target) {
       previewProject(target.dataset.wheelProject);
       centerWheel(target.dataset.wheelProject);
-      target.focus({ preventScroll: true });
+      activeWheelButton?.focus({ preventScroll: true });
     }
   }
 
@@ -413,7 +438,7 @@
   wheelOptions.addEventListener("scrollend", () => {
     if (!wheelOpen || dragging?.moved) return;
     updateWheel();
-    const button = wheelOptions.querySelector(`[data-wheel-project="${selectedProjectId}"]`);
+    const button = activeWheelButton;
     if (!button) return;
     const target = button.offsetTop + button.offsetHeight / 2 - wheelOptions.clientHeight / 2;
     if (Math.abs(target - wheelOptions.scrollTop) > 1) centerWheel(selectedProjectId, "smooth");
@@ -475,6 +500,7 @@
       panel = "works";
       selectedProjectId = id;
       confirmedProjectId = id;
+      workGroup = data.groups.find((group) => group.projects.some((project) => project.id === id)).id;
       wheelOpen = false;
       render();
       root.scrollTop = 0;

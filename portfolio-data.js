@@ -24,8 +24,8 @@ const PORTFOLIO_CONTENT = {
     historyShare: 1 / 3,
     scrollDistance: 1800,
   },
-  // 半面时钟：每件作品的角度间隔、当前数字向外凸出的距离（SVG 单位）。
-  workClock: { angleStep: 30, activeLift: 22 },
+  // 数字自动均分整圈；卡片角距、凸出距离及从中间向两侧缩小的强度可编辑。
+  workClock: { cardAngleStep: 30, activeLift: 22, cardScaleFalloff: .35 },
   timeline: [
     {
       date: "2024.09 — 2024.12",
