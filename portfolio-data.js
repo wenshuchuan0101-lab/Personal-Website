@@ -126,7 +126,7 @@ const PORTFOLIO_CONTENT = {
           duration: { zh: "4天", en: "4 days" },
           award: { zh: "Tripo智创未来三等奖", en: "Third Prize, Tripo 智创未来" },
           // 海报、裁切位置、介绍侧边和简介均可独立替换。
-          poster: "",
+          poster: "./assets/yulong-dance-poster.png",
           posterPosition: "center",
           introSide: "left",
           introduction: { zh: "", en: "" },

@@ -1,7 +1,8 @@
 /* 方块滚动轮盘；尺寸、渐变和海报介绍区均可独立调整。 */
 .quick-view { --wheel-card-size: min(106px, var(--wheel-radius) * .38); --wheel-card-gap: 14px; }
 .quick-view[data-view="quick"][data-panel="works"] { touch-action: auto; background: #10264a; }
-.work-wheel { overflow: hidden; background: #0a1c3ae6; }
+.work-wheel { overflow: hidden; border: 0; border-radius: 0; background: transparent; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+.wheel-decoration { stroke: #f4d5aa; opacity: .65; }
 .work-wheel-scrim { background: transparent; }
 .work-wheel-options { inset: 0 0 0 50%; display: flex; flex-direction: column; align-items: flex-start; gap: var(--wheel-card-gap); padding-block: calc(var(--wheel-radius) - var(--wheel-card-size) / 2); overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; scroll-snap-type: y mandatory; scrollbar-width: none; touch-action: pan-y; user-select: none; }
 .work-wheel-options::-webkit-scrollbar { display: none; }
@@ -21,8 +22,11 @@ html[lang="en"] .wheel-title { font-size: 16px; line-height: 1.05; }
 .project-poster { position: absolute; z-index: -2; inset: 0; background: #10264a; }
 .project-poster img { width: 100%; height: 100%; display: block; object-fit: cover; }
 .games-section .project-poster { background: #0a204e; }
-.project-brief { position: absolute; inset: 0 auto 0 0; display: flex; flex-direction: column; justify-content: center; width: 40%; padding: calc(var(--quick-nav-height) + 32px) clamp(24px, 3.5vw, 64px) 42px clamp(60px, 6vw, 96px); background: linear-gradient(90deg, rgb(3 10 25 / .9), rgb(3 10 25 / .4)); }
-.project-page[data-intro-side="right"] .project-brief { left: auto; right: 0; padding-left: clamp(24px, 3.5vw, 64px); padding-right: clamp(32px, 4vw, 70px); background: linear-gradient(90deg, rgb(3 10 25 / .4), rgb(3 10 25 / .9)); }
+/* 遮罩独立于文字区域：从屏幕边缘向中线淡出，在 50vw 处完全透明。 */
+.project-page::before { content: ""; position: absolute; z-index: -1; inset: 0 auto 0 0; width: 50%; background: linear-gradient(90deg, rgb(3 10 25 / .9) 0%, rgb(3 10 25 / .72) 35%, rgb(3 10 25 / .32) 70%, rgb(3 10 25 / 0) 100%); pointer-events: none; }
+.project-page[data-intro-side="right"]::before { left: auto; right: 0; background: linear-gradient(270deg, rgb(3 10 25 / .9) 0%, rgb(3 10 25 / .72) 35%, rgb(3 10 25 / .32) 70%, rgb(3 10 25 / 0) 100%); }
+.project-brief { position: absolute; inset: 0 auto 0 0; display: flex; flex-direction: column; justify-content: center; width: 40%; padding: calc(var(--quick-nav-height) + 32px) clamp(24px, 3.5vw, 64px) 42px clamp(60px, 6vw, 96px); background: transparent; }
+.project-page[data-intro-side="right"] .project-brief { left: auto; right: 0; padding-left: clamp(24px, 3.5vw, 64px); padding-right: clamp(32px, 4vw, 70px); }
 .project-kicker { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: clamp(25px, 6svh, 70px); font-size: 13px; letter-spacing: .08em; color: #eee2d0bf; }
 .project-kicker > span:last-child { font: 17px/1 "Cormorant Garamond", Georgia, serif; letter-spacing: 0; white-space: nowrap; }
 .project-introduction { min-width: 0; }
