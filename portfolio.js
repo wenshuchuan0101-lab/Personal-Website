@@ -8,6 +8,8 @@
   const wheelOptions = root.querySelector(".work-wheel-options");
   const wheelStar = root.querySelector(".work-wheel-star");
   const wheelScrim = root.querySelector(".work-wheel-scrim");
+  const clockRotor = root.querySelector(".clock-rotor");
+  const clockHand = root.querySelector(".clock-hand");
   const motion = matchMedia("(prefers-reduced-motion: reduce)");
   const data = PORTFOLIO_CONTENT;
   const projects = data.groups.flatMap((group) => group.projects);
@@ -20,6 +22,7 @@
   let panel = "growth";
   let workGroup = "visual";
   let selectedProjectId = null;
+  let confirmedProjectId = null;
   let wheelOpen = false;
   let growthScroll = 0;
   let activeSection = "about";
@@ -27,11 +30,21 @@
   let revealObserver;
   let scrollPending = false;
   let wheelFrame = 0;
+  let pendingWheelFocus = null;
   let dragging = null;
   let suppressClickUntil = 0;
   const text = (value) => typeof value === "string" ? value : value?.[language] ?? value?.zh ?? "";
   const escape = (value) => String(value ?? "").replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]);
   const count = (number) => String(number).padStart(2, "0");
+  const clockStep = Number(data.workClock?.angleStep) || 30;
+  const clockLift = Number(data.workClock?.activeLift) || 22;
+  const roman = (number) => {
+    let result = "";
+    for (const [value, symbol] of [[1000, "M"], [900, "CM"], [500, "D"], [400, "CD"], [100, "C"], [90, "XC"], [50, "L"], [40, "XL"], [10, "X"], [9, "IX"], [5, "V"], [4, "IV"], [1, "I"]]) {
+      while (number >= value) { result += symbol; number -= value; }
+    }
+    return result;
+  };
 
   function modeConsole() {
     const modeLabels = SCENE_SETTINGS.selection.labels[language];
@@ -80,8 +93,17 @@
     wheelOptions.innerHTML = projects.map((project, index) => {
       const group = data.groups.find((item) => item.projects.includes(project));
       const thumbnail = project.cover || project.poster;
-      return `<button class="wheel-work" type="button" data-wheel-project="${escape(project.id)}" data-work-group="${group.id}" title="${escape(text(project.title))}" aria-label="${escape(text(project.title))}">${thumbnail ? `<img class="wheel-thumbnail" src="${escape(thumbnail)}" alt="" draggable="false">` : ""}<span class="wheel-number" aria-hidden="true">${count(index + 1)}</span><span class="wheel-title">${escape(text(project.title))}</span></button>`;
+      return `<button class="wheel-work" type="button" data-wheel-project="${escape(project.id)}" data-work-group="${group.id}" title="${escape(text(project.title))}" aria-label="${escape(text(project.title))}">${thumbnail ? `<img class="wheel-thumbnail" src="${escape(thumbnail)}" alt="" draggable="false">` : ""}<span class="wheel-number" aria-hidden="true">${roman(index + 1)}</span><span class="wheel-title">${escape(text(project.title))}</span></button>`;
     }).join("");
+    const polar = (radius, angle) => [Math.cos(angle * Math.PI / 180) * radius, Math.sin(angle * Math.PI / 180) * radius];
+    const arc = (radius, halfAngle) => {
+      const start = polar(radius, -halfAngle);
+      const end = polar(radius, halfAngle);
+      return `M${start.join(" ")}A${radius} ${radius} 0 0 1 ${end.join(" ")}`;
+    };
+    const ticks = Array.from({ length: 60 }, (_, index) => `<path transform="rotate(${index * 6})" d="M${index % 5 === 0 ? 88 : 92} 0H96"/>`).join("");
+    clockRotor.innerHTML = `<g class="clock-ticks">${ticks}</g><circle class="clock-inner-ring" r="78"/><circle class="clock-inner-ring" r="82"/>${projects.map((project, index) => `<g class="clock-number" data-clock-project="${escape(project.id)}" data-clock-index="${index}" transform="rotate(${index * clockStep})"><path class="clock-segment-outer" d="${arc(146, clockStep * .42)}"/><path class="clock-segment-inner" d="${arc(101, clockStep * .42)}"/><text x="124" y="1" text-anchor="middle" dominant-baseline="central" transform="rotate(90 124 1)">${roman(index + 1)}</text></g>`).join("")}`;
+    clockHand.innerHTML = `<path class="clock-hand-blade" d="M-24 0-10-3 36-2 47-6 60-2 100-1 119 0 100 1 60 2 47 6 36 2-10 3Z"/><path class="clock-hand-detail" d="M10 0H102"/><circle class="clock-hub" r="7"/><circle class="clock-hub-core" r="2"/>`;
     wheel.setAttribute("aria-label", labels[language].chooseWork);
     wheelStar.setAttribute("aria-label", labels[language].chooseWork);
     wheelStar.title = labels[language].chooseWork;
@@ -108,16 +130,47 @@
     const radius = wheelOptions.clientHeight / 2;
     let nearest = null;
     let distance = Infinity;
-    for (const button of wheelOptions.querySelectorAll(".wheel-work")) {
+    const buttons = [...wheelOptions.querySelectorAll(".wheel-work")];
+    const centers = buttons.map((button) => button.offsetTop + button.offsetHeight / 2);
+    const cursor = wheelOptions.scrollTop + radius;
+    const lower = Math.max(0, centers.findLastIndex((center) => center <= cursor));
+    const upper = Math.min(buttons.length - 1, lower + 1);
+    const position = upper === lower ? lower : Math.max(0, lower + (cursor - centers[lower]) / (centers[upper] - centers[lower]));
+    const styles = getComputedStyle(root);
+    const faceScale = Number(styles.getPropertyValue("--clock-scale")) || 1;
+    const width = buttons[0].offsetWidth;
+    const hub = radius * 34 / 320;
+    const clockRadius = radius * 146 / 320 * faceScale;
+    const orbit = clockRadius + radius * .13 + width / 2;
+    buttons.forEach((button, index) => {
       const offset = button.offsetTop + button.offsetHeight / 2 - wheelOptions.scrollTop - radius;
-      const normalized = Math.min(1, Math.abs(offset) / radius);
-      const x = Math.sqrt(Math.max(0, 1 - normalized ** 2)) * radius * .66;
-      button.style.setProperty("--card-x", `${Math.max(radius * .22, x)}px`);
-      button.style.setProperty("--card-scale", String(1 - normalized * .16));
-      button.style.setProperty("--card-opacity", String(1 - normalized * .65));
+      const angle = (index - position) * clockStep;
+      const radians = angle * Math.PI / 180;
+      const normalized = Math.min(1, Math.abs(angle) / 78);
+      button.style.setProperty("--card-x", `${hub + Math.cos(radians) * orbit}px`);
+      button.style.setProperty("--card-y", `${Math.sin(radians) * radius * .82 - offset}px`);
+      button.style.setProperty("--card-scale", String(1 - normalized * .22));
+      button.style.setProperty("--card-opacity", String(1 - normalized * .5));
+      button.style.visibility = Math.abs(angle) < 78 ? "visible" : "hidden";
       if (Math.abs(offset) < distance) { nearest = button; distance = Math.abs(offset); }
+    });
+    const rotation = -position * clockStep;
+    clockRotor.setAttribute("transform", `translate(354 320) scale(${faceScale}) rotate(${rotation})`);
+    for (const number of clockRotor.querySelectorAll(".clock-number")) {
+      const active = number.dataset.clockProject === nearest?.dataset.wheelProject;
+      number.setAttribute("data-active", String(active));
+      number.setAttribute("transform", `rotate(${Number(number.dataset.clockIndex) * clockStep}) translate(${active ? clockLift : 0} 0)`);
     }
+    const confirmedIndex = Math.max(0, projects.findIndex((project) => project.id === confirmedProjectId));
+    const handAngle = (confirmedIndex - position) * clockStep;
+    clockHand.setAttribute("transform", `translate(354 320) scale(${faceScale}) rotate(${handAngle})`);
+    clockHand.dataset.project = projects[confirmedIndex]?.id || "";
+    clockHand.dataset.angle = String(handAngle);
     if (nearest) previewProject(nearest.dataset.wheelProject);
+    if (nearest?.dataset.wheelProject === pendingWheelFocus && distance < 1) {
+      pendingWheelFocus = null;
+      nearest.focus({ preventScroll: true });
+    }
   }
 
   function syncPanels() {
@@ -164,6 +217,7 @@
   }
 
   function openWheel(group = workGroup) {
+    pendingWheelFocus = null;
     if (panel === "growth") growthScroll = root.scrollTop;
     panel = "works";
     workGroup = group;
@@ -180,6 +234,7 @@
   }
 
   function closeWheel() {
+    pendingWheelFocus = null;
     wheelOpen = false;
     syncPanels();
     wheelStar.focus({ preventScroll: true });
@@ -188,7 +243,9 @@
   function chooseProject(id) {
     const project = projects.find((item) => item.id === id);
     if (!project) return;
+    pendingWheelFocus = null;
     selectedProjectId = id;
+    confirmedProjectId = id;
     workGroup = data.groups.find((group) => group.projects.includes(project)).id;
     panel = "works";
     wheelOpen = false;
@@ -346,13 +403,21 @@
     if (!(event.key in destinations)) return;
     event.preventDefault();
     const target = buttons[destinations[event.key]];
+    pendingWheelFocus = target.dataset.wheelProject;
     centerWheel(target.dataset.wheelProject, "smooth");
-    target.focus({ preventScroll: true });
   });
   wheelOptions.addEventListener("scroll", () => {
     if (wheelFrame) return;
     wheelFrame = requestAnimationFrame(() => { wheelFrame = 0; updateWheel(); });
   }, { passive: true });
+  wheelOptions.addEventListener("scrollend", () => {
+    if (!wheelOpen || dragging?.moved) return;
+    updateWheel();
+    const button = wheelOptions.querySelector(`[data-wheel-project="${selectedProjectId}"]`);
+    if (!button) return;
+    const target = button.offsetTop + button.offsetHeight / 2 - wheelOptions.clientHeight / 2;
+    if (Math.abs(target - wheelOptions.scrollTop) > 1) centerWheel(selectedProjectId, "smooth");
+  });
   wheelOptions.addEventListener("focusin", (event) => {
     const button = event.target.closest(".wheel-work");
     if (button && wheelOpen) centerWheel(button.dataset.wheelProject, "smooth");
@@ -409,6 +474,7 @@
       view = "quick";
       panel = "works";
       selectedProjectId = id;
+      confirmedProjectId = id;
       wheelOpen = false;
       render();
       root.scrollTop = 0;

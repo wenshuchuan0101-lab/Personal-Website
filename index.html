@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="./growth-chart.css">
   <link rel="stylesheet" href="./work-wheel.css">
   <link rel="stylesheet" href="./work-posters.css">
+  <link rel="stylesheet" href="./work-clock.css">
   <script src="./settings.js" defer></script>
   <script src="./portfolio-data.js" defer></script>
   <script src="./app.js" defer></script>
@@ -39,7 +40,7 @@
     <div class="portfolio-content"></div>
     <div class="work-wheel-scrim" data-wheel-close aria-hidden="true" hidden></div>
     <nav id="work-wheel" class="work-wheel" aria-label="选择作品" hidden>
-      <svg class="wheel-decoration" viewBox="0 0 640 640" aria-hidden="true"><path class="wheel-axis" d="M354 186V454M340 320h28"/></svg>
+      <svg class="wheel-clock" viewBox="0 0 640 640" aria-hidden="true"><g class="clock-rotor"></g><g class="clock-hand"></g></svg>
       <button class="work-wheel-close" type="button" data-wheel-close aria-label="收起作品轮盘">×</button>
       <div class="work-wheel-options"></div>
     </nav>
