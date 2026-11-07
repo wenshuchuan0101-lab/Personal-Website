@@ -18,3 +18,46 @@ html[lang="en"] body.work-detail-page { font: 23px/1.5 "Cormorant Garamond", Geo
 html[lang="en"] #work-detail-title { font: clamp(42px, 6vw, 88px)/1.05 "Cormorant Garamond", Georgia, serif; letter-spacing: -.02em; }
 html[lang="en"] .work-detail-back { font-size: 20px; }
 html[lang="en"] .work-detail-category { font-size: 18px; }
+
+/* 有实际素材的作品详情：图片与旁边预留文字分别编辑，完整展示原图。 */
+.work-detail-page[data-detail-layout="case-study"] .work-detail-main { max-width: 1560px; }
+.work-detail-page[data-detail-layout="case-study"] .work-detail-body { gap: clamp(84px, 10vw, 150px); }
+.case-section-heading { margin-bottom: 30px; padding-top: 18px; border-top: 1px solid #eee2d036; }
+.case-section-index { display: block; margin-bottom: 14px; color: #ffb576; font: 14px/1 "Cormorant Garamond", Georgia, serif; letter-spacing: .1em; }
+.case-section-heading h2 { margin: 0; font-size: clamp(22px, 2.3vw, 34px); font-weight: 200; letter-spacing: .12em; }
+.case-section-english { margin: 0; color: #aaa5de; font: clamp(30px, 3.4vw, 48px)/1.15 "Cormorant Garamond", Georgia, serif; }
+.case-spreads { display: grid; gap: clamp(40px, 5vw, 76px); }
+.case-spread { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 28px; align-items: stretch; }
+.case-image { min-width: 0; margin: 0; }
+.case-spread > .case-image { grid-column: span 8; }
+.case-spread[data-emphasis="true"] > .case-image { grid-column: span 10; }
+.case-copy { grid-column: span 4; min-width: 0; padding: 0 0 0 12px; }
+.case-spread[data-emphasis="true"] > .case-copy { grid-column: span 2; }
+.case-copy p { margin: 0; white-space: pre-wrap; }
+.case-image-open { display: block; width: 100%; margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; cursor: zoom-in; }
+.work-detail-body .case-image img { display: block; width: 100%; max-height: none; height: auto; margin: 0; }
+.case-image-number { margin-top: 9px; color: #e3d9c77d; font: 14px/1 "Cormorant Garamond", Georgia, serif; letter-spacing: .08em; }
+.case-concept-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); align-items: start; gap: 22px; }
+.case-concept-grid .case-image-open { background: #e0e0e0; }
+.case-concept-grid img { aspect-ratio: 16 / 9; object-fit: contain; }
+.case-whitebox-images { display: grid; gap: 30px; width: 64%; }
+.detail-image-viewer { width: fit-content; max-width: calc(100vw - 40px); max-height: calc(100svh - 40px); padding: 16px; border: 1px solid #f5efe42b; background: #080820; color: #f5efe4; overflow: auto; }
+.detail-image-viewer::backdrop { background: #020510ed; backdrop-filter: blur(8px); }
+.detail-image-original { display: block; width: auto; max-width: calc(100vw - 76px); height: auto; max-height: calc(100svh - 76px); object-fit: contain; }
+.detail-image-close { position: fixed; z-index: 1; top: 12px; right: 16px; display: grid; place-items: center; width: 34px; height: 34px; margin: 0; padding: 0; border: 1px solid #f5efe463; border-radius: 50%; background: #080820d9; color: #f5efe4; font: 28px/1 "Cormorant Garamond", Georgia, serif; cursor: pointer; }
+html[lang="en"] .case-section-heading h2 { font: clamp(34px, 4vw, 58px)/1.1 "Cormorant Garamond", Georgia, serif; letter-spacing: -.01em; }
+@media (max-width: 1000px) {
+  .case-concept-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+  .case-spread { gap: 20px; }
+}
+@media (max-width: 700px) {
+  .case-section-heading { margin-bottom: 22px; }
+  .case-spread { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+  .case-spread > .case-image { grid-column: 1; width: 86%; }
+  .case-spread[data-emphasis="true"] > .case-image { grid-column: 1; width: 100%; }
+  .case-copy, .case-spread[data-emphasis="true"] > .case-copy { grid-column: 1; min-height: 72px; padding: 0; }
+  .case-concept-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .case-whitebox-images { width: 100%; }
+  .detail-image-viewer { max-width: calc(100vw - 20px); max-height: calc(100svh - 30px); padding: 8px; }
+  .detail-image-original { max-width: calc(100vw - 40px); max-height: calc(100svh - 50px); }
+}

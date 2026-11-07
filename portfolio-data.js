@@ -1,5 +1,5 @@
 // 快速浏览的全部内容集中在这里；素材路径留空时显示空白作品位。
-// detail 预留单个作品的介绍、概念图、视频、海报及游玩链接，本轮不填充。
+// detail 保存单个作品的介绍、展示图、概念图、白盒、视频、海报及游玩链接。
 // slots 记录原文档中的素材需求；null 表示原文使用 n，数量尚未确定。
 const PORTFOLIO_CONTENT = {
   profile: {
@@ -137,11 +137,25 @@ const PORTFOLIO_CONTENT = {
           detail: {
             description: { zh: "", en: "" },
             images: [],
+            // 原文件名倒序；最后一张为较大的展示图，text 是旁边预留的文字。
+            showcase: [
+              { src: "./assets/yulong-dance-poster.png", sourceName: "鱼龙舞.png", text: { zh: "", en: "" } },
+              { src: "./assets/yulong-showcase-02.jpg", sourceName: "鱼龙舞.jpg", text: { zh: "", en: "" } },
+              { src: "./assets/yulong-showcase-03.png", sourceName: "鱼龙舞 (2).png", emphasis: true, text: { zh: "", en: "" } },
+            ],
+            conceptImages: [
+              "./assets/yulong-concept-01.jpg",
+              "./assets/yulong-concept-02.jpg",
+              "./assets/yulong-concept-03.jpg",
+              "./assets/yulong-concept-04.jpg",
+              "./assets/yulong-concept-05.jpg",
+            ],
+            whiteboxImages: ["./assets/yulong-whitebox-22.jpg"],
             video: "",
             posterImages: [],
             playUrl: "",
           },
-          slots: { conceptImages: 1, videos: 1, posters: 0, descriptionCharacters: 300 },
+          slots: { conceptImages: 5, videos: 1, posters: 0, descriptionCharacters: 300 },
         },
         {
           id: "cangfeng",
