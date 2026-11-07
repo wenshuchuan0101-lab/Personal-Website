@@ -16,7 +16,7 @@
 .wheel-title { display: -webkit-box; white-space: normal; -webkit-line-clamp: 3; font-size: 13px; line-height: 1.4; letter-spacing: .03em; text-overflow: clip; overflow-wrap: anywhere; }
 html[lang="en"] .wheel-title { font-size: 16px; line-height: 1.05; }
 .quick-view .work-wheel-star { color: #ffb576; filter: drop-shadow(0 1px 5px #0008); }
-.quick-view .projects-section { background: #10264a; }
+.quick-view .projects-section { padding: 0; background: #10264a; }
 .quick-view .games-section { background: #0a204e; }
 .quick-view .project-page { position: relative; display: block; width: 100%; height: 100svh; min-height: 100svh; margin: 0; padding: 0; overflow: hidden; color: #f5efe4; isolation: isolate; animation: work-preview-in .3s ease-out; }
 .project-poster { position: absolute; z-index: -2; inset: 0; background: #10264a; }

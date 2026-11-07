@@ -32,6 +32,7 @@
   let wheelFrame = 0;
   let pendingWheelFocus = null;
   let activeWheelButton = null;
+  const posterPanelIndices = new Map();
   let dragging = null;
   let suppressClickUntil = 0;
   const text = (value) => typeof value === "string" ? value : value?.[language] ?? value?.zh ?? "";
@@ -78,8 +79,11 @@
     const globalIndex = projects.indexOf(project);
     const poster = project.poster || project.cover;
     const image = poster ? `<img src="${escape(poster)}" alt="" style="object-position:${escape(project.posterPosition || project.coverPosition || "center")}">` : "";
-    return `<article id="project-${escape(project.id)}" class="project-card project-page" data-project-card="${escape(project.id)}" data-intro-side="${project.introSide === "right" ? "right" : "left"}" aria-labelledby="title-${escape(project.id)}">
-      <div class="project-poster" aria-hidden="true">${image}</div>
+    const panels = project.posterPanels?.filter((panel) => panel.src) || [];
+    const activePanel = Math.min(posterPanelIndices.get(project.id) || 0, Math.max(0, panels.length - 1));
+    const background = panels.length ? `<div class="project-poster poster-panels" role="group" aria-label="${escape(text(project.title))}" data-poster-project="${escape(project.id)}">${panels.map((panel, index) => `<button class="poster-panel" type="button" data-poster-index="${index}" aria-label="${escape(text(project.title))} · ${count(index + 1)} / ${count(panels.length)}" aria-pressed="${index === activePanel}" style="--poster-weight:${index === activePanel ? 3 : 1}"><img src="${escape(panel.src)}" alt="" loading="lazy" decoding="async" draggable="false" style="object-position:${escape(panel.position || "center")}"></button>`).join("")}</div>` : `<div class="project-poster" aria-hidden="true">${image}</div>`;
+    return `<article id="project-${escape(project.id)}" class="project-card project-page" data-project-card="${escape(project.id)}" data-poster-layout="${panels.length ? "panels" : "single"}" data-intro-side="${project.introSide === "right" ? "right" : "left"}" aria-labelledby="title-${escape(project.id)}">
+      ${background}
       <div class="project-brief">
         <div class="project-kicker"><span>${escape(text(group.title))}</span><span>${count(globalIndex + 1)} / ${count(projects.length)}</span></div>
         <div class="project-introduction"><h2 id="title-${escape(project.id)}">${escape(text(project.title))}</h2>
@@ -90,6 +94,17 @@
         <a class="project-enter" href="./project.html?work=${encodeURIComponent(project.id)}&amp;lang=${language}" aria-label="${escape(labels[language].enter + " · " + text(project.title))}"><span>${labels[language].enter}</span><span aria-hidden="true">↗</span></a>
       </div>
     </article>`;
+  }
+
+  function selectPosterPanel(button) {
+    const gallery = button.closest(".poster-panels");
+    if (!gallery || button.getAttribute("aria-pressed") === "true") return;
+    posterPanelIndices.set(gallery.dataset.posterProject, Number(button.dataset.posterIndex));
+    gallery.querySelectorAll(".poster-panel").forEach((panel) => {
+      const active = panel === button;
+      panel.setAttribute("aria-pressed", String(active));
+      panel.style.setProperty("--poster-weight", active ? 3 : 1);
+    });
   }
 
   function renderWheel() {
@@ -386,6 +401,11 @@
   }
 
   root.addEventListener("click", (event) => {
+    const posterPanel = event.target.closest(".poster-panel");
+    if (posterPanel) {
+      selectPosterPanel(posterPanel);
+      return;
+    }
     const workButton = event.target.closest("[data-wheel-project]");
     if (workButton) {
       if (event.detail > 0 && performance.now() < suppressClickUntil) return;
@@ -414,7 +434,27 @@
       history.replaceState(null, "", address);
     }
   });
+  root.addEventListener("pointerover", (event) => {
+    if (event.pointerType === "touch") return;
+    const button = event.target.closest(".poster-panel");
+    if (button) selectPosterPanel(button);
+  });
+  root.addEventListener("focusin", (event) => {
+    const button = event.target.closest(".poster-panel");
+    if (button) selectPosterPanel(button);
+  });
   root.addEventListener("keydown", (event) => {
+    const posterPanel = event.target.closest(".poster-panel");
+    if (posterPanel) {
+      const buttons = [...posterPanel.parentElement.querySelectorAll(".poster-panel")];
+      const index = buttons.indexOf(posterPanel);
+      const destinations = { ArrowLeft: (index + buttons.length - 1) % buttons.length, ArrowRight: (index + 1) % buttons.length, Home: 0, End: buttons.length - 1 };
+      if (event.key in destinations) {
+        event.preventDefault();
+        buttons[destinations[event.key]].focus({ preventScroll: true });
+      }
+      return;
+    }
     if (!wheelOpen || panel !== "works" || view !== "quick") return;
     if (event.key === "Escape") {
       event.preventDefault();

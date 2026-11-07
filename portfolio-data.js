@@ -258,8 +258,16 @@ const PORTFOLIO_CONTENT = {
           duration: { zh: "一个月", en: "1 month" },
           award: null,
           // 海报、裁切位置、介绍侧边和简介均可独立替换。
-          poster: "",
+          poster: "./assets/zephyrus-poster-01.png",
           posterPosition: "center",
+          // 按左到右的展示顺序；position 对应参考图标出的保留区域。
+          posterPanels: [
+            { src: "./assets/zephyrus-poster-01.png", position: "75% 50%" },
+            { src: "./assets/zephyrus-poster-02.png", position: "48% 50%" },
+            { src: "./assets/zephyrus-poster-03.jpg", position: "49% 50%" },
+            { src: "./assets/zephyrus-poster-04.jpg", position: "54% 50%" },
+            { src: "./assets/zephyrus-poster-05.png", position: "48% 50%" },
+          ],
           introSide: "left",
           introduction: { zh: "", en: "" },
           cover: "",
