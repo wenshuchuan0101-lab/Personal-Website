@@ -46,26 +46,32 @@
   }
 
   function makeModel(items, settings = {}) {
-    const elevations = settings.elevations || [];
-    const historyRise = clamp(Number(settings.historyRise) || 300, 180, 340);
     const months = items.map((item) => {
       const match = item.date.match(/^(\d{4})\.(\d{1,2})/);
       return match ? Number(match[1]) * 12 + Number(match[2]) : NaN;
     });
     const chronological = months.every((month, index) => Number.isFinite(month) && (index === 0 || month > months[index - 1]));
     const historySpan = Math.max(1, items.length - 1) * 250;
+    const historyShare = clamp(Number(settings.historyShare) || 1 / 3, .2, .5);
+    const width = (100 + historySpan) / historyShare;
+    const acceleration = clamp(Number(settings.acceleration) || 2.6, 2.2, 3.2);
+    const trendRise = clamp(Number(settings.trendRise) || 650, 580, 700);
+    const trend = (position) => 690 - trendRise * Math.pow(Math.max(0, position), acceleration);
+    const historyWaves = settings.historyWaves || [];
     const points = items.map((item, index) => {
-      const fallback = .12 + .78 * index / Math.max(1, items.length - 1) + Math.sin(index * 1.9) * .055;
       const position = chronological ? (months[index] - months[0]) / Math.max(1, months.at(-1) - months[0]) : index / Math.max(1, items.length - 1);
-      return { x: 100 + position * historySpan, y: 690 - clamp(elevations[index] ?? fallback, .04, .96) * historyRise };
+      const x = 100 + position * historySpan;
+      const fallback = index === 0 ? 0 : (item.kind === "work" ? 12 : 6) * (1 + Math.sin(index * 1.7));
+      const wave = index === 0 ? 0 : clamp(Number(historyWaves[index] ?? fallback), -30, 55);
+      return { x, y: trend((x - 100) / (width - 100)) - wave };
     });
     const last = points.at(-1);
-    const historyShare = clamp(Number(settings.historyShare) || 1 / 3, .2, .5);
-    const width = last.x / historyShare;
-    const remaining = width - last.x - 80;
-    const hills = [[.075, 90], [.19, 32], [.4, 215], [.52, 140], [.7, 300], [.84, 410], [1.02, 640], [1.2, 1080]];
-    const futureRise = (last.y - 55) / 540;
-    const future = [last, ...hills.map(([position, rise]) => ({ x: last.x + remaining * position, y: last.y - rise * futureRise }))];
+    const present = (last.x - 100) / (width - 100);
+    const swells = [[.05, 50], [.12, 20], [.22, 14], [.35, 7], [.5, 5], [.67, 2], [.85, 0], [1.06, 0], [1.25, 0]];
+    const future = [last, ...swells.map(([distance, wave]) => {
+      const position = present + (1 - present) * distance;
+      return { x: 100 + position * (width - 100), y: trend(position) - wave };
+    })];
     const ridge = [...points, ...future.slice(1)];
     const segments = makeCurve(ridge);
     const lowerPoints = ridge.map((point, index) => {
