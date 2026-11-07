@@ -139,7 +139,7 @@
     const styles = getComputedStyle(root);
     const faceScale = Number(styles.getPropertyValue("--clock-scale")) || 1;
     const width = buttons[0].offsetWidth;
-    const hub = radius * 34 / 320;
+    const hub = 0;
     const clockRadius = radius * 146 / 320 * faceScale;
     const orbit = clockRadius + radius * .13 + width / 2;
     buttons.forEach((button, index) => {
@@ -155,7 +155,7 @@
       if (Math.abs(offset) < distance) { nearest = button; distance = Math.abs(offset); }
     });
     const rotation = -position * clockStep;
-    clockRotor.setAttribute("transform", `translate(354 320) scale(${faceScale}) rotate(${rotation})`);
+    clockRotor.setAttribute("transform", `translate(320 320) scale(${faceScale}) rotate(${rotation})`);
     for (const number of clockRotor.querySelectorAll(".clock-number")) {
       const active = number.dataset.clockProject === nearest?.dataset.wheelProject;
       number.setAttribute("data-active", String(active));
@@ -163,7 +163,7 @@
     }
     const confirmedIndex = Math.max(0, projects.findIndex((project) => project.id === confirmedProjectId));
     const handAngle = (confirmedIndex - position) * clockStep;
-    clockHand.setAttribute("transform", `translate(354 320) scale(${faceScale}) rotate(${handAngle})`);
+    clockHand.setAttribute("transform", `translate(320 320) scale(${faceScale}) rotate(${handAngle})`);
     clockHand.dataset.project = projects[confirmedIndex]?.id || "";
     clockHand.dataset.angle = String(handAngle);
     if (nearest) previewProject(nearest.dataset.wheelProject);

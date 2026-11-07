@@ -1,5 +1,5 @@
 /* 半面时钟和外围横向卡片；角度与凸出距离在 portfolio-data.js 的 workClock。 */
-.quick-view { --clock-scale: 1; --wheel-card-size: min(106px, var(--wheel-radius) * .32); --wheel-card-width: min(230px, var(--wheel-radius) * .74); --wheel-reach: min(190px, var(--wheel-radius) * .62); }
+.quick-view { --clock-scale: 1.4; --wheel-card-size: min(106px, var(--wheel-radius) * .32); --wheel-card-width: min(230px, var(--wheel-radius) * .74); --wheel-reach: min(190px, var(--wheel-radius) * .62); }
 .work-wheel { width: calc(2 * var(--wheel-radius) + var(--wheel-reach)); }
 .wheel-clock { position: absolute; inset: 0 auto auto 0; width: calc(2 * var(--wheel-radius)); height: calc(2 * var(--wheel-radius)); overflow: visible; pointer-events: none; color: #f5e8d4; filter: drop-shadow(0 1px 5px #020912b3); }
 .clock-ticks { fill: none; stroke: currentColor; stroke-width: .65; opacity: .4; }
@@ -20,15 +20,15 @@
 .quick-view .wheel-work[aria-current] { background-color: #234766; }
 .wheel-title { font-size: 15px; letter-spacing: .06em; }
 html[lang="en"] .wheel-title { font-size: 22px; }
-.quick-view .work-wheel-close { left: calc(var(--wheel-radius) + 18px); top: calc(50% + var(--wheel-radius) * .62); width: 26px; height: 26px; font-size: 21px; background: #08182bb3; }
+.quick-view .work-wheel-close { left: calc(var(--wheel-radius) + 18px); top: calc(50% + var(--wheel-radius) * .8); width: 26px; height: 26px; font-size: 21px; background: #08182bb3; }
 @media (max-width: 700px) {
-  .quick-view { --clock-scale: .65; --wheel-card-size: min(94px, var(--wheel-radius) * .32); --wheel-card-width: min(146px, var(--wheel-radius) * .5); --wheel-reach: min(80px, 16vw); }
+  .quick-view { --clock-scale: .95; --wheel-card-size: min(94px, var(--wheel-radius) * .32); --wheel-card-width: min(146px, var(--wheel-radius) * .5); --wheel-reach: min(80px, 16vw); }
   .wheel-title { font-size: 13px; }
   html[lang="en"] .wheel-title { font-size: 18px; }
-  .quick-view .work-wheel-close { left: calc(var(--wheel-radius) + 12px); top: calc(50% + var(--wheel-radius) * .4); width: 24px; height: 24px; }
+  .quick-view .work-wheel-close { left: calc(var(--wheel-radius) + 12px); top: calc(50% + var(--wheel-radius) * .58); width: 24px; height: 24px; }
 }
 @media (max-height: 520px) and (orientation: landscape) {
-  .quick-view { --clock-scale: 1; --wheel-card-size: min(64px, var(--wheel-radius) * .32); --wheel-card-width: min(150px, var(--wheel-radius) * .9); --wheel-reach: 110px; }
+  .quick-view { --clock-scale: 1.35; --wheel-card-size: min(64px, var(--wheel-radius) * .32); --wheel-card-width: min(150px, var(--wheel-radius) * .9); --wheel-reach: 110px; }
   .wheel-title { font-size: 12px; }
   html[lang="en"] .wheel-title { font-size: 16px; }
 }
