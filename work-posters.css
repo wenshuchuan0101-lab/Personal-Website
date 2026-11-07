@@ -25,7 +25,8 @@ html[lang="en"] .wheel-title { font-size: 16px; line-height: 1.05; }
 /* 遮罩独立于文字区域：从屏幕边缘向中线淡出，在 50vw 处完全透明。 */
 .project-page::before { content: ""; position: absolute; z-index: -1; inset: 0 auto 0 0; width: 50%; background: linear-gradient(90deg, rgb(3 10 25 / .9) 0%, rgb(3 10 25 / .72) 35%, rgb(3 10 25 / .32) 70%, rgb(3 10 25 / 0) 100%); pointer-events: none; }
 .project-page[data-intro-side="right"]::before { left: auto; right: 0; background: linear-gradient(270deg, rgb(3 10 25 / .9) 0%, rgb(3 10 25 / .72) 35%, rgb(3 10 25 / .32) 70%, rgb(3 10 25 / 0) 100%); }
-.project-brief { position: absolute; inset: 0 auto 0 0; display: flex; flex-direction: column; justify-content: center; width: 40%; padding: calc(var(--quick-nav-height) + 32px) clamp(24px, 3.5vw, 64px) 42px clamp(60px, 6vw, 96px); background: transparent; }
+.project-brief { position: absolute; inset: 0 auto 0 0; display: flex; flex-direction: column; justify-content: center; width: 40%; padding: calc(var(--quick-nav-height) + 32px) clamp(24px, 3.5vw, 64px) 42px clamp(60px, 6vw, 96px); background: transparent; opacity: 1; visibility: visible; transition: opacity .25s ease .5s, visibility 0s linear .5s; }
+.quick-view[data-wheel-open="true"] .project-brief { opacity: 0; visibility: hidden; pointer-events: none; transition: none; }
 .project-page[data-intro-side="right"] .project-brief { left: auto; right: 0; padding-left: clamp(24px, 3.5vw, 64px); padding-right: clamp(32px, 4vw, 70px); }
 .project-kicker { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: clamp(25px, 6svh, 70px); font-size: 13px; letter-spacing: .08em; color: #eee2d0bf; }
 .project-kicker > span:last-child { font: 17px/1 "Cormorant Garamond", Georgia, serif; letter-spacing: 0; white-space: nowrap; }
@@ -84,4 +85,4 @@ html[lang="en"] .quick-view .project-enter { font: 25px/1 "Cormorant Garamond", 
   html[lang="en"] .quick-view .project-page .project-award { font-size: 15px; }
   html[lang="en"] .quick-view .project-enter { font-size: 21px; }
 }
-@media (prefers-reduced-motion: reduce) { .quick-view .project-page { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .quick-view .project-page { animation: none; } .project-brief { transition: none; } }
