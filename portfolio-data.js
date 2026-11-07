@@ -176,8 +176,8 @@ const PORTFOLIO_CONTENT = {
           duration: { zh: "一周", en: "1 week" },
           award: { zh: "Tripo世界构建黑客松S1 S100", en: "Tripo Worldbuilding Hackathon S1 S100" },
           // 海报、裁切位置、介绍侧边和简介均可独立替换。
-          poster: "",
-          posterPosition: "center",
+          poster: "./assets/flower-room-poster.png",
+          posterPosition: "35% 50%",
           introSide: "left",
           introduction: { zh: "", en: "" },
           cover: "",
