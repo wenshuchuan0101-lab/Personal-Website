@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080820">
+  <title>作品详情</title>
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./project-detail.css">
+  <script src="./portfolio-data.js" defer></script>
+  <script src="./project-detail.js" defer></script>
+</head>
+<body class="work-detail-page">
+  <header class="work-detail-header">
+    <a class="work-detail-back" href="./index.html"><span aria-hidden="true">←</span> <span>返回</span></a>
+    <span class="work-detail-category"></span>
+    <button class="detail-language" type="button" aria-label="Switch to English">
+      <svg viewBox="0 0 100 140" aria-hidden="true"><path d="M50 2 55 53Q56 63 65 65L98 70 65 75Q56 77 55 87L50 138 45 87Q44 77 35 75L2 70 35 65Q44 63 45 53Z" fill="currentColor"/></svg>
+    </button>
+  </header>
+  <main class="work-detail-main" aria-labelledby="work-detail-title">
+    <h1 id="work-detail-title"></h1>
+    <div class="work-detail-body"></div>
+  </main>
+</body>
+</html>

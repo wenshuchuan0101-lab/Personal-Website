@@ -8,13 +8,12 @@
   const wheelOptions = root.querySelector(".work-wheel-options");
   const wheelStar = root.querySelector(".work-wheel-star");
   const wheelScrim = root.querySelector(".work-wheel-scrim");
-  const dialog = document.querySelector(".project-detail");
   const motion = matchMedia("(prefers-reduced-motion: reduce)");
   const data = PORTFOLIO_CONTENT;
   const projects = data.groups.flatMap((group) => group.projects);
   const labels = {
-    zh: { about: "个人介绍", growth: "成长过程", visual: "图片影像", games: "交互 / 游戏", nav: "内容分区", close: "关闭作品详情", detail: "作品详情", play: "游玩", empty: "作品展示预留区域", chooseWork: "选择作品", closeWheel: "收起作品轮盘" },
-    en: { about: "About", growth: "Growth", visual: "Images & Film", games: "Interaction & Games", nav: "Sections", close: "Close project details", detail: "Project details", play: "Play", empty: "Reserved project presentation area", chooseWork: "Choose a work", closeWheel: "Close work selector" },
+    zh: { about: "个人介绍", growth: "成长过程", visual: "图片影像", games: "交互 / 游戏", nav: "内容分区", enter: "进入", detail: "作品详情", chooseWork: "选择作品", closeWheel: "收起作品轮盘" },
+    en: { about: "About", growth: "Growth", visual: "Images & Film", games: "Interaction & Games", nav: "Sections", enter: "Enter", detail: "Project details", chooseWork: "Choose a work", closeWheel: "Close work selector" },
   };
   let language = "zh";
   let view = "profile";
@@ -24,10 +23,12 @@
   let wheelOpen = false;
   let growthScroll = 0;
   let activeSection = "about";
-  let openedProject = null;
   let nameFlipped = false;
   let revealObserver;
   let scrollPending = false;
+  let wheelFrame = 0;
+  let dragging = null;
+  let suppressClickUntil = 0;
   const text = (value) => typeof value === "string" ? value : value?.[language] ?? value?.zh ?? "";
   const escape = (value) => String(value ?? "").replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]);
   const count = (number) => String(number).padStart(2, "0");
@@ -59,32 +60,64 @@
 
   function projectCard(project, group) {
     const globalIndex = projects.indexOf(project);
-    const cover = project.cover
-      ? `<img src="${escape(project.cover)}" alt="${escape(text(project.title))}" loading="lazy" style="object-position:${escape(project.coverPosition)}">`
-      : `<span class="cover-number" aria-hidden="true">${count(globalIndex + 1)}</span><span class="cover-caption">${escape(text(project.kind))}</span>`;
-    return `<article id="project-${escape(project.id)}" class="project-card project-page" data-project-card="${escape(project.id)}" aria-labelledby="title-${escape(project.id)}">
-      <header class="project-page-header"><h2>${escape(text(group.title))}</h2><span class="project-page-count">${count(globalIndex + 1)} / ${count(projects.length)}</span></header>
-      <a class="project-open project-page-main reveal" href="#project-${escape(project.id)}" data-project="${escape(project.id)}" aria-label="${escape(text(project.title))} · ${labels[language].detail}">
-        <div class="project-cover${project.cover ? " has-image" : ""}">${cover}<span class="cover-corners" aria-hidden="true"></span><span class="project-arrow" aria-hidden="true">↗</span></div>
-        <div class="project-info"><div class="project-heading"><h3 id="title-${escape(project.id)}">${escape(text(project.title))}</h3></div>
+    const poster = project.poster || project.cover;
+    const image = poster ? `<img src="${escape(poster)}" alt="" style="object-position:${escape(project.posterPosition || project.coverPosition || "center")}">` : "";
+    return `<article id="project-${escape(project.id)}" class="project-card project-page" data-project-card="${escape(project.id)}" data-intro-side="${project.introSide === "right" ? "right" : "left"}" aria-labelledby="title-${escape(project.id)}">
+      <div class="project-poster" aria-hidden="true">${image}</div>
+      <div class="project-brief">
+        <div class="project-kicker"><span>${escape(text(group.title))}</span><span>${count(globalIndex + 1)} / ${count(projects.length)}</span></div>
+        <div class="project-introduction"><h2 id="title-${escape(project.id)}">${escape(text(project.title))}</h2>
+          ${text(project.introduction) ? `<p class="project-summary">${escape(text(project.introduction))}</p>` : ""}
           <div class="project-meta"><p>${project.role ? `${escape(text(project.role))}<span> / </span>` : ""}${escape(text(project.kind))}</p><p>${escape(project.tools)}<span> · </span>${escape(text(project.duration))}</p></div>
           ${project.award ? `<p class="project-award"><span aria-hidden="true">✦</span>${escape(text(project.award))}</p>` : ""}
         </div>
-      </a>
+        <a class="project-enter" href="./project.html?work=${encodeURIComponent(project.id)}&amp;lang=${language}" aria-label="${escape(labels[language].enter + " · " + text(project.title))}"><span>${labels[language].enter}</span><span aria-hidden="true">↗</span></a>
+      </div>
     </article>`;
   }
 
   function renderWheel() {
     wheelOptions.innerHTML = projects.map((project, index) => {
-      const angle = -60 + index * 120 / Math.max(1, projects.length - 1);
-      const radians = angle * Math.PI / 180;
       const group = data.groups.find((item) => item.projects.includes(project));
-      return `<button class="wheel-work" type="button" data-wheel-project="${escape(project.id)}" data-work-group="${group.id}" style="--wheel-x:${(Math.cos(radians) * .72).toFixed(5)};--wheel-y:${(Math.sin(radians) * .72).toFixed(5)}" title="${escape(text(project.title))}" aria-label="${escape(text(project.title))}"><span class="wheel-number" aria-hidden="true">${count(index + 1)}</span><span class="wheel-title">${escape(text(project.title))}</span></button>`;
+      const thumbnail = project.cover || project.poster;
+      return `<button class="wheel-work" type="button" data-wheel-project="${escape(project.id)}" data-work-group="${group.id}" title="${escape(text(project.title))}" aria-label="${escape(text(project.title))}">${thumbnail ? `<img class="wheel-thumbnail" src="${escape(thumbnail)}" alt="" draggable="false">` : ""}<span class="wheel-number" aria-hidden="true">${count(index + 1)}</span><span class="wheel-title">${escape(text(project.title))}</span></button>`;
     }).join("");
     wheel.setAttribute("aria-label", labels[language].chooseWork);
     wheelStar.setAttribute("aria-label", labels[language].chooseWork);
     wheelStar.title = labels[language].chooseWork;
     wheel.querySelector(".work-wheel-close").setAttribute("aria-label", labels[language].closeWheel);
+  }
+
+  function centerWheel(id, behavior = "instant") {
+    const button = wheelOptions.querySelector(`[data-wheel-project="${id}"]`);
+    if (!button || !wheelOpen) return;
+    const top = button.offsetTop + button.offsetHeight / 2 - wheelOptions.clientHeight / 2;
+    wheelOptions.scrollTo({ top, behavior: motion.matches ? "instant" : behavior });
+    if (behavior === "instant" || motion.matches) updateWheel();
+  }
+
+  function previewProject(id) {
+    if (!projects.some((project) => project.id === id) || id === selectedProjectId) return;
+    selectedProjectId = id;
+    workGroup = data.groups.find((group) => group.projects.some((project) => project.id === id)).id;
+    syncPanels();
+  }
+
+  function updateWheel() {
+    if (!wheelOpen || panel !== "works" || view !== "quick") return;
+    const radius = wheelOptions.clientHeight / 2;
+    let nearest = null;
+    let distance = Infinity;
+    for (const button of wheelOptions.querySelectorAll(".wheel-work")) {
+      const offset = button.offsetTop + button.offsetHeight / 2 - wheelOptions.scrollTop - radius;
+      const normalized = Math.min(1, Math.abs(offset) / radius);
+      const x = Math.sqrt(Math.max(0, 1 - normalized ** 2)) * radius * .66;
+      button.style.setProperty("--card-x", `${Math.max(radius * .22, x)}px`);
+      button.style.setProperty("--card-scale", String(1 - normalized * .16));
+      button.style.setProperty("--card-opacity", String(1 - normalized * .65));
+      if (Math.abs(offset) < distance) { nearest = button; distance = Math.abs(offset); }
+    }
+    if (nearest) previewProject(nearest.dataset.wheelProject);
   }
 
   function syncPanels() {
@@ -138,7 +171,12 @@
     syncPanels();
     const current = wheelOptions.querySelector(`[data-wheel-project="${selectedProjectId}"]`);
     const firstInGroup = wheelOptions.querySelector(`[data-work-group="${group}"]`);
-    (current?.dataset.workGroup === group ? current : firstInGroup)?.focus({ preventScroll: true });
+    const target = current?.dataset.workGroup === group ? current : firstInGroup;
+    if (target) {
+      previewProject(target.dataset.wheelProject);
+      centerWheel(target.dataset.wheelProject);
+      target.focus({ preventScroll: true });
+    }
   }
 
   function closeWheel() {
@@ -191,15 +229,15 @@
       <section id="growth" class="portfolio-section growth-section" aria-labelledby="growth-heading">
         ${window.GrowthMountain.render(data.timeline, language, sectionHeading({ zh: labels.zh.growth, en: labels.en.growth }, "Growth", 2), data.growthChart)}
       </section>
-      ${data.groups.map((group) => `<section id="${escape(group.id)}" class="portfolio-section projects-section ${escape(group.id)}-section" aria-labelledby="${escape(group.id)}-heading"><div class="project-grid">${group.projects.map((project) => projectCard(project, group)).join("")}</div></section>`).join("")}
+      ${data.groups.map((group) => `<section id="${escape(group.id)}" class="portfolio-section projects-section ${escape(group.id)}-section" aria-label="${escape(text(group.title))}"><div class="project-grid">${group.projects.map((project) => projectCard(project, group)).join("")}</div></section>`).join("")}
       <section class="work-empty" aria-labelledby="work-empty-title" hidden><p class="work-empty-category"></p><h2 id="work-empty-title">${labels[language].chooseWork}</h2></section>`;
     // 标题 ID 与分区的可访问名称保持对应。
     for (const section of content.querySelectorAll(".portfolio-section:not(.profile-section)")) {
-      section.querySelector("h2").id = `${section.id}-heading`;
+      if (section.id === "growth") section.querySelector("h2").id = "growth-heading";
     }
     renderWheel();
     syncPanels();
-    content.querySelectorAll(".project-cover img").forEach((image) => {
+    content.querySelectorAll(".project-poster img").forEach((image) => {
       image.addEventListener("error", () => {
         const cover = image.parentElement;
         cover.classList.remove("has-image");
@@ -217,7 +255,7 @@
     window.GrowthMountain.mount(root, data.timeline, language, data.growthChart);
     observeReveals();
     updateScrollState();
-    if (openedProject) renderDetail(openedProject);
+    if (wheelOpen) centerWheel(selectedProjectId);
   }
 
   function observeReveals() {
@@ -265,57 +303,10 @@
     }
   }
 
-  function renderDetail(project) {
-    const group = data.groups.find((item) => item.projects.includes(project));
-    dialog.querySelector(".detail-category").textContent = text(group.title);
-    dialog.querySelector(".detail-close").setAttribute("aria-label", labels[language].close);
-    dialog.querySelector("#detail-title").textContent = text(project.title);
-    const detail = project.detail;
-    const hasContent = Boolean(text(detail.description) || detail.images.length || detail.video || detail.posterImages.length || detail.playUrl);
-    const body = dialog.querySelector(".detail-body");
-    body.replaceChildren();
-    // 本轮素材全为空；以下是以后替换素材时的渲染入口。
-    if (!hasContent) {
-      const empty = document.createElement("div");
-      empty.className = "detail-reserved";
-      empty.setAttribute("role", "img");
-      empty.setAttribute("aria-label", labels[language].empty);
-      body.append(empty);
-      return;
-    }
-    if (text(detail.description)) {
-      const description = document.createElement("p");
-      description.className = "detail-description";
-      description.textContent = text(detail.description);
-      body.append(description);
-    }
-    [...detail.images, ...detail.posterImages].forEach((path) => {
-      const image = document.createElement("img");
-      image.src = path;
-      image.alt = text(project.title);
-      image.loading = "lazy";
-      body.append(image);
-    });
-    if (detail.video) {
-      const video = document.createElement("video");
-      video.src = detail.video;
-      video.controls = true;
-      video.preload = "metadata";
-      body.append(video);
-    }
-    if (detail.playUrl) {
-      const link = document.createElement("a");
-      link.href = detail.playUrl;
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
-      link.textContent = labels[language].play + " ↗";
-      body.append(link);
-    }
-  }
-
   root.addEventListener("click", (event) => {
     const workButton = event.target.closest("[data-wheel-project]");
     if (workButton) {
+      if (event.detail > 0 && performance.now() < suppressClickUntil) return;
       chooseProject(workButton.dataset.wheelProject);
       return;
     }
@@ -332,12 +323,14 @@
       navigate(sectionButton.dataset.section);
       return;
     }
-    const projectLink = event.target.closest("[data-project]");
-    if (!projectLink) return;
-    event.preventDefault();
-    openedProject = projects.find((item) => item.id === projectLink.dataset.project);
-    renderDetail(openedProject);
-    dialog.showModal();
+    // 浏览器后退即使未保留页面内存，也能恢复进入详情前的作品。
+    if (event.target.closest(".project-enter")) {
+      const address = new URL(location.href);
+      address.searchParams.set("view", "work");
+      address.searchParams.set("work", selectedProjectId);
+      address.searchParams.set("lang", language);
+      history.replaceState(null, "", address);
+    }
   });
   root.addEventListener("keydown", (event) => {
     if (!wheelOpen || panel !== "works" || view !== "quick") return;
@@ -352,29 +345,75 @@
     const destinations = { ArrowDown: (index + 1) % buttons.length, ArrowUp: (index + buttons.length - 1) % buttons.length, Home: 0, End: buttons.length - 1 };
     if (!(event.key in destinations)) return;
     event.preventDefault();
-    buttons[destinations[event.key]].focus({ preventScroll: true });
+    const target = buttons[destinations[event.key]];
+    centerWheel(target.dataset.wheelProject, "smooth");
+    target.focus({ preventScroll: true });
   });
+  wheelOptions.addEventListener("scroll", () => {
+    if (wheelFrame) return;
+    wheelFrame = requestAnimationFrame(() => { wheelFrame = 0; updateWheel(); });
+  }, { passive: true });
+  wheelOptions.addEventListener("focusin", (event) => {
+    const button = event.target.closest(".wheel-work");
+    if (button && wheelOpen) centerWheel(button.dataset.wheelProject, "smooth");
+  });
+  wheel.addEventListener("wheel", (event) => {
+    if (event.target.closest(".work-wheel-options")) return;
+    event.preventDefault();
+    wheelOptions.scrollBy({ top: event.deltaY * (event.deltaMode === 1 ? 16 : 1), behavior: "instant" });
+  }, { passive: false });
+  wheelOptions.addEventListener("pointerdown", (event) => {
+    if (event.pointerType !== "mouse" || event.button !== 0) return;
+    dragging = { id: event.pointerId, y: event.clientY, top: wheelOptions.scrollTop, moved: false };
+  });
+  wheelOptions.addEventListener("pointermove", (event) => {
+    if (!dragging || event.pointerId !== dragging.id) return;
+    if (!(event.buttons & 1)) { endDrag(); return; }
+    const distance = event.clientY - dragging.y;
+    if (!dragging.moved && Math.abs(distance) < 6) return;
+    if (!dragging.moved) {
+      dragging.moved = true;
+      wheelOptions.setPointerCapture(event.pointerId);
+      wheelOptions.style.scrollSnapType = "none";
+    }
+    event.preventDefault();
+    wheelOptions.scrollTop = dragging.top - distance;
+  });
+  function endDrag() {
+    if (!dragging) return;
+    const moved = dragging.moved;
+    dragging = null;
+    if (moved) {
+      suppressClickUntil = performance.now() + 250;
+      wheelOptions.style.scrollSnapType = "";
+      updateWheel();
+      centerWheel(selectedProjectId, "smooth");
+    }
+  }
+  addEventListener("pointerup", endDrag);
+  addEventListener("pointercancel", endDrag);
   root.addEventListener("scroll", () => {
     if (scrollPending) return;
     scrollPending = true;
     requestAnimationFrame(() => { updateScrollState(); scrollPending = false; });
   }, { passive: true });
-  addEventListener("resize", updateScrollState);
-  dialog.querySelector(".detail-close").addEventListener("click", () => dialog.close());
-  dialog.addEventListener("close", () => {
-    dialog.querySelectorAll("video").forEach((video) => video.pause());
-    openedProject = null;
-  });
-  dialog.addEventListener("click", (event) => {
-    const bounds = dialog.getBoundingClientRect();
-    if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) dialog.close();
-  });
+  addEventListener("resize", () => { updateScrollState(); if (wheelOpen) centerWheel(selectedProjectId); });
   motion.addEventListener("change", observeReveals);
   function getPosition() {
     return { id: activeSection, offset: view === "quick" && panel === "growth" ? root.scrollTop : 0 };
   }
   window.PortfolioQuick = {
     getPosition,
+    showProject(id) {
+      if (!projects.some((project) => project.id === id)) return false;
+      view = "quick";
+      panel = "works";
+      selectedProjectId = id;
+      wheelOpen = false;
+      render();
+      root.scrollTop = 0;
+      return true;
+    },
     setLanguage(next, position = getPosition()) {
       language = next;
       render();

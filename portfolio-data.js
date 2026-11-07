@@ -125,6 +125,11 @@ const PORTFOLIO_CONTENT = {
           tools: "UE5 + Tripo",
           duration: { zh: "4天", en: "4 days" },
           award: { zh: "Tripo智创未来三等奖", en: "Third Prize, Tripo 智创未来" },
+          // 海报、裁切位置、介绍侧边和简介均可独立替换。
+          poster: "",
+          posterPosition: "center",
+          introSide: "left",
+          introduction: { zh: "", en: "" },
           cover: "",
           coverPosition: "center",
           detail: {
@@ -144,6 +149,11 @@ const PORTFOLIO_CONTENT = {
           tools: "UE5 + Tripo",
           duration: { zh: "三个周", en: "3 weeks" },
           award: null,
+          // 海报、裁切位置、介绍侧边和简介均可独立替换。
+          poster: "",
+          posterPosition: "center",
+          introSide: "left",
+          introduction: { zh: "", en: "" },
           cover: "",
           coverPosition: "center",
           detail: {
@@ -163,6 +173,11 @@ const PORTFOLIO_CONTENT = {
           tools: "Tapnow / LibTV",
           duration: { zh: "一周", en: "1 week" },
           award: { zh: "Tripo世界构建黑客松S1 S100", en: "Tripo Worldbuilding Hackathon S1 S100" },
+          // 海报、裁切位置、介绍侧边和简介均可独立替换。
+          poster: "",
+          posterPosition: "center",
+          introSide: "left",
+          introduction: { zh: "", en: "" },
           cover: "",
           coverPosition: "center",
           detail: {
@@ -182,6 +197,11 @@ const PORTFOLIO_CONTENT = {
           tools: "Maya",
           duration: { zh: "两个月", en: "2 months" },
           award: null,
+          // 海报、裁切位置、介绍侧边和简介均可独立替换。
+          poster: "",
+          posterPosition: "center",
+          introSide: "left",
+          introduction: { zh: "", en: "" },
           cover: "",
           coverPosition: "center",
           detail: {
@@ -211,6 +231,11 @@ const PORTFOLIO_CONTENT = {
             zh: "Tripo世界构建黑客松S1 Tripo方向赛道冠军",
             en: "Champion, Tripo Track, Tripo Worldbuilding Hackathon S1",
           },
+          // 海报、裁切位置、介绍侧边和简介均可独立替换。
+          poster: "",
+          posterPosition: "center",
+          introSide: "left",
+          introduction: { zh: "", en: "" },
           cover: "",
           coverPosition: "center",
           detail: {
@@ -230,6 +255,11 @@ const PORTFOLIO_CONTENT = {
           tools: "Godot + Codex",
           duration: { zh: "一个月", en: "1 month" },
           award: null,
+          // 海报、裁切位置、介绍侧边和简介均可独立替换。
+          poster: "",
+          posterPosition: "center",
+          introSide: "left",
+          introduction: { zh: "", en: "" },
           cover: "",
           coverPosition: "center",
           detail: {
@@ -250,6 +280,11 @@ const PORTFOLIO_CONTENT = {
           tools: "Codex + Chatgpt + Thres JS + Claude",
           duration: { zh: "2个月", en: "2 months" },
           award: null,
+          // 海报、裁切位置、介绍侧边和简介均可独立替换。
+          poster: "",
+          posterPosition: "center",
+          introSide: "left",
+          introduction: { zh: "", en: "" },
           cover: "",
           coverPosition: "center",
           detail: {

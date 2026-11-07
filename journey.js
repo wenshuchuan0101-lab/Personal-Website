@@ -111,3 +111,15 @@ document.addEventListener("keydown", (event) => {
 });
 
 applyLanguage();
+
+// 独立作品详情页返回时直接恢复对应作品，不重播入口流程。
+const returnParameters = new URLSearchParams(location.search);
+if (returnParameters.get("view") === "work") {
+  language = returnParameters.get("lang") === "en" ? "en" : "zh";
+  applyLanguage();
+  if (window.PortfolioQuick.showProject(returnParameters.get("work"))) {
+    intro.hidden = true;
+    quickView.hidden = false;
+    setPhase("quick");
+  }
+}

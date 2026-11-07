@@ -1,0 +1,20 @@
+html { height: auto; min-height: 100%; overflow: auto; background: #080820; }
+body.work-detail-page { height: auto; min-height: 100svh; overflow: visible; margin: 0; background: #080820; color: #f5efe4; font: 200 16px/1.9 "Noto Sans SC Title", "Microsoft YaHei Light", sans-serif; }
+.work-detail-header { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 20px; height: 48px; padding: 0 clamp(20px, 5vw, 80px); border-bottom: 1px solid #eee2d029; background: #0a204eab; backdrop-filter: blur(18px); }
+.work-detail-back { color: #f5efe4; text-decoration: none; font-size: 13px; }
+.work-detail-back > span:first-child { margin-right: 10px; color: #ffb576; }
+.work-detail-category { font-size: 12px; opacity: .6; }
+.detail-language { display: grid; place-items: center; width: 28px; height: 38px; padding: 4px 7px; background: none; border: 0; color: #ffb576; cursor: pointer; }
+.detail-language svg { width: 100%; height: 100%; }
+.work-detail-main { max-width: 1320px; margin: 0 auto; padding: clamp(42px, 8vw, 110px) clamp(24px, 7vw, 100px) 100px; }
+#work-detail-title { margin: 0 0 64px; font-size: clamp(32px, 5vw, 72px); font-weight: 200; line-height: 1.4; letter-spacing: .08em; overflow-wrap: anywhere; }
+.work-detail-body { display: grid; gap: 44px; }
+.work-detail-body img, .work-detail-body video { display: block; max-width: 100%; max-height: 100svh; height: auto; margin: 0 auto; }
+.work-detail-description { max-width: 760px; margin: 0; white-space: pre-wrap; }
+.detail-reserved { min-height: 55svh; }
+.work-detail-play { justify-self: start; padding-bottom: 6px; border-bottom: 1px solid #ffb576; color: #ffb576; text-decoration: none; }
+.work-detail-page a:focus-visible, .work-detail-page button:focus-visible { outline: 1px solid #ffb576; outline-offset: 5px; }
+html[lang="en"] body.work-detail-page { font: 23px/1.5 "Cormorant Garamond", Georgia, serif; }
+html[lang="en"] #work-detail-title { font: clamp(42px, 6vw, 88px)/1.05 "Cormorant Garamond", Georgia, serif; letter-spacing: -.02em; }
+html[lang="en"] .work-detail-back { font-size: 20px; }
+html[lang="en"] .work-detail-category { font-size: 18px; }

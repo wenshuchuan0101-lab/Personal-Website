@@ -1,0 +1,83 @@
+/* 方块滚动轮盘；尺寸、渐变和海报介绍区均可独立调整。 */
+.quick-view { --wheel-card-size: min(106px, var(--wheel-radius) * .38); --wheel-card-gap: 14px; }
+.quick-view[data-view="quick"][data-panel="works"] { touch-action: auto; background: #10264a; }
+.work-wheel { overflow: hidden; background: #0a1c3ae6; }
+.work-wheel-scrim { background: transparent; }
+.work-wheel-options { inset: 0 0 0 50%; display: flex; flex-direction: column; align-items: flex-start; gap: var(--wheel-card-gap); padding-block: calc(var(--wheel-radius) - var(--wheel-card-size) / 2); overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; scroll-snap-type: y mandatory; scrollbar-width: none; touch-action: pan-y; user-select: none; }
+.work-wheel-options::-webkit-scrollbar { display: none; }
+.quick-view .wheel-work { position: relative; left: auto; top: auto; flex: 0 0 var(--wheel-card-size); display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; gap: 8px; width: var(--wheel-card-size); height: var(--wheel-card-size); min-height: 0; margin: 0; padding: 10px; border: 1px solid #e7d7c14d; border-radius: 2px; background: #163459d9; color: #f5e7d6; overflow: hidden; transform: translateX(calc(var(--card-x, 180px) - var(--wheel-card-size) / 2)) scale(var(--card-scale, 1)); opacity: var(--card-opacity, 1); scroll-snap-align: center; cursor: grab; transition: border-color .2s, background-color .2s; }
+.quick-view .wheel-work:active { cursor: grabbing; }
+.quick-view .wheel-work[aria-current], .quick-view .wheel-work:hover { border-color: #ffb576; background-color: #23496b; color: #ffe5c8; }
+.wheel-work[aria-current] { box-shadow: inset 0 0 18px #ff9b4512; }
+.wheel-thumbnail { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .45; pointer-events: none; }
+.wheel-number, .wheel-title { position: relative; z-index: 1; }
+.wheel-number { font-size: 13px; opacity: .85; }
+.wheel-title { display: -webkit-box; white-space: normal; -webkit-line-clamp: 3; font-size: 13px; line-height: 1.4; letter-spacing: .03em; text-overflow: clip; overflow-wrap: anywhere; }
+html[lang="en"] .wheel-title { font-size: 16px; line-height: 1.05; }
+.quick-view .work-wheel-star { color: #ffb576; filter: drop-shadow(0 1px 5px #0008); }
+.quick-view .projects-section { background: #10264a; }
+.quick-view .games-section { background: #0a204e; }
+.quick-view .project-page { position: relative; display: block; width: 100%; height: 100svh; min-height: 100svh; margin: 0; padding: 0; overflow: hidden; color: #f5efe4; isolation: isolate; animation: work-preview-in .3s ease-out; }
+.project-poster { position: absolute; z-index: -2; inset: 0; background: #10264a; }
+.project-poster img { width: 100%; height: 100%; display: block; object-fit: cover; }
+.games-section .project-poster { background: #0a204e; }
+.project-brief { position: absolute; inset: 0 auto 0 0; display: flex; flex-direction: column; justify-content: center; width: 40%; padding: calc(var(--quick-nav-height) + 32px) clamp(24px, 3.5vw, 64px) 42px clamp(60px, 6vw, 96px); background: linear-gradient(90deg, rgb(3 10 25 / .9), rgb(3 10 25 / .4)); }
+.project-page[data-intro-side="right"] .project-brief { left: auto; right: 0; padding-left: clamp(24px, 3.5vw, 64px); padding-right: clamp(32px, 4vw, 70px); background: linear-gradient(90deg, rgb(3 10 25 / .4), rgb(3 10 25 / .9)); }
+.project-kicker { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: clamp(25px, 6svh, 70px); font-size: 13px; letter-spacing: .08em; color: #eee2d0bf; }
+.project-kicker > span:last-child { font: 17px/1 "Cormorant Garamond", Georgia, serif; letter-spacing: 0; white-space: nowrap; }
+.project-introduction { min-width: 0; }
+.project-introduction h2 { margin: 0; font-size: clamp(28px, 3.3vw, 54px); line-height: 1.45; font-weight: 200; letter-spacing: .07em; overflow-wrap: anywhere; }
+.project-introduction h2:focus { outline: none; }
+.project-summary { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 6; overflow: hidden; margin: 24px 0 0; font-size: 15px; line-height: 1.9; color: #f4ebdfdf; }
+.quick-view .project-page .project-meta { margin-top: 22px; font-size: 14px; line-height: 1.9; color: #f4ebdfbf; overflow-wrap: anywhere; }
+.quick-view .project-page .project-award { margin: 20px 0 0; padding-top: 16px; border-top: 1px solid #ffb57645; font-size: 13px; line-height: 1.7; color: #ffb576; }
+.quick-view .project-enter { display: flex; justify-content: space-between; align-items: center; gap: 12px; width: 100%; margin-top: clamp(28px, 7svh, 76px); padding: 12px 0; border-top: 1px solid #f4ebdf75; color: #ffb576; font-size: 16px; letter-spacing: .22em; transition: color .2s; }
+.project-enter > span:last-child { font: 24px/1 Georgia, serif; transition: transform .25s; }
+.project-enter:hover > span:last-child { transform: translate(3px, -3px); }
+html[lang="en"] .project-introduction h2 { font: clamp(34px, 4vw, 62px)/1.05 "Cormorant Garamond", Georgia, serif; letter-spacing: -.02em; }
+html[lang="en"] .project-kicker { font-size: 19px; letter-spacing: 0; }
+html[lang="en"] .project-summary { font-size: 21px; line-height: 1.4; }
+html[lang="en"] .quick-view .project-page .project-meta { font-size: 21px; line-height: 1.35; }
+html[lang="en"] .quick-view .project-page .project-award { font-size: 18px; line-height: 1.3; }
+html[lang="en"] .quick-view .project-enter { font: 25px/1 "Cormorant Garamond", Georgia, serif; letter-spacing: .04em; }
+@keyframes work-preview-in { from { opacity: .4; } to { opacity: 1; } }
+@media (max-width: 700px) {
+  .quick-view { --wheel-card-size: min(94px, var(--wheel-radius) * .42); --wheel-card-gap: 12px; }
+  .quick-view .wheel-work { padding: 8px; }
+  .wheel-number { font-size: 12px; }
+  .wheel-title { font-size: 12px; }
+  html[lang="en"] .wheel-title { font-size: 15px; }
+  .project-brief { padding: calc(var(--quick-nav-height) + 24px) 14px 28px 20px; }
+  .project-page[data-intro-side="right"] .project-brief { padding-left: 14px; padding-right: 20px; }
+  .project-kicker { font-size: 10px; gap: 7px; margin-bottom: 26px; letter-spacing: 0; }
+  .project-kicker > span:last-child { font-size: 14px; }
+  .project-introduction h2 { font-size: 23px; line-height: 1.45; letter-spacing: .02em; }
+  .project-summary { margin-top: 14px; font-size: 11px; line-height: 1.7; -webkit-line-clamp: 4; }
+  .quick-view .project-page .project-meta { margin-top: 15px; font-size: 11px; line-height: 1.6; }
+  .quick-view .project-page .project-award { margin-top: 15px; padding-top: 12px; font-size: 10px; line-height: 1.6; }
+  .quick-view .project-enter { font-size: 13px; margin-top: 28px; padding: 10px 0; }
+  html[lang="en"] .project-introduction h2 { font-size: clamp(20px, 6vw, 28px); }
+  html[lang="en"] .project-kicker { font-size: 14px; }
+  html[lang="en"] .project-summary { font-size: 15px; line-height: 1.3; }
+  html[lang="en"] .quick-view .project-page .project-meta { font-size: 15px; line-height: 1.25; }
+  html[lang="en"] .quick-view .project-page .project-award { font-size: 14px; line-height: 1.2; }
+  html[lang="en"] .quick-view .project-enter { font-size: 21px; }
+}
+@media (max-height: 520px) and (orientation: landscape) {
+  .quick-view { --wheel-card-size: 64px; --wheel-card-gap: 10px; }
+  .quick-view .wheel-work { padding: 6px; gap: 4px; }
+  .wheel-title { font-size: 11px; }
+  html[lang="en"] .wheel-title { font-size: 13px; }
+  .project-brief, .project-page[data-intro-side="right"] .project-brief { padding-top: calc(var(--quick-nav-height) + 14px); padding-bottom: 16px; padding-left: 40px; padding-right: 22px; }
+  .project-kicker { margin-bottom: 14px; font-size: 11px; }
+  .project-introduction h2 { font-size: 25px; }
+  html[lang="en"] .project-introduction h2 { font-size: 30px; }
+  .project-summary { margin-top: 10px; -webkit-line-clamp: 2; }
+  .quick-view .project-page .project-meta { margin-top: 10px; font-size: 12px; line-height: 1.5; }
+  .quick-view .project-page .project-award { margin-top: 10px; padding-top: 8px; font-size: 11px; line-height: 1.3; }
+  .quick-view .project-enter { margin-top: 16px; padding: 8px 0; font-size: 13px; }
+  html[lang="en"] .quick-view .project-page .project-meta { font-size: 17px; }
+  html[lang="en"] .quick-view .project-page .project-award { font-size: 15px; }
+  html[lang="en"] .quick-view .project-enter { font-size: 21px; }
+}
+@media (prefers-reduced-motion: reduce) { .quick-view .project-page { animation: none; } }
