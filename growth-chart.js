@@ -47,10 +47,17 @@
 
   function makeModel(items, settings = {}) {
     const elevations = settings.elevations || [];
-    const historyRise = clamp(Number(settings.historyRise) || 260, 180, 340);
+    const historyRise = clamp(Number(settings.historyRise) || 300, 180, 340);
+    const months = items.map((item) => {
+      const match = item.date.match(/^(\d{4})\.(\d{1,2})/);
+      return match ? Number(match[1]) * 12 + Number(match[2]) : NaN;
+    });
+    const chronological = months.every((month, index) => Number.isFinite(month) && (index === 0 || month > months[index - 1]));
+    const historySpan = Math.max(1, items.length - 1) * 250;
     const points = items.map((item, index) => {
       const fallback = .12 + .78 * index / Math.max(1, items.length - 1) + Math.sin(index * 1.9) * .055;
-      return { x: 100 + index * 250, y: 690 - clamp(elevations[index] ?? fallback, .04, .96) * historyRise };
+      const position = chronological ? (months[index] - months[0]) / Math.max(1, months.at(-1) - months[0]) : index / Math.max(1, items.length - 1);
+      return { x: 100 + position * historySpan, y: 690 - clamp(elevations[index] ?? fallback, .04, .96) * historyRise };
     });
     const last = points.at(-1);
     const historyShare = clamp(Number(settings.historyShare) || 1 / 3, .2, .5);
@@ -96,11 +103,14 @@
             <path class="growth-future" d="${curvePath(model.segments.slice(items.length - 1))}"/>
             <path class="growth-now-line" d="${curvePath(model.segments.slice(items.length - 2, items.length - 1))}"/>
           </g>
-          <g class="growth-leaders"></g>
+          <path class="growth-time-axis"/>
+          <g class="growth-date-guides"></g>
+          <g class="growth-date-ticks"></g>
           <g class="growth-vertices">${items.map((item, index) => `<g class="growth-vertex" data-vertex="${index}" data-kind="${item.kind || "study"}"><circle class="vertex-halo" r="10" filter="url(#growth-glow)"/><circle class="vertex-ring" r="7"/><circle class="vertex-core" r="3.3"/></g>`).join("")}</g>
           <g class="growth-head" aria-hidden="true"><circle class="head-halo" r="15" filter="url(#growth-glow)"/><circle class="head-ring" r="8"/><circle class="head-core" r="4.5"/></g>
         </svg>
-        <ol class="growth-list" aria-hidden="true">${items.map((item, index) => `<li class="growth-item" data-milestone="${index}"><span class="growth-date">${escape(item.date)}</span><span class="growth-label">${words(item, language)}</span></li>`).join("")}</ol>
+        <ol class="growth-list" aria-hidden="true">${items.map((item, index) => `<li class="growth-item" data-milestone="${index}"><span class="growth-label">${words(item, language)}</span></li>`).join("")}</ol>
+        <ol class="growth-dates" aria-hidden="true">${items.map((item, index) => `<li class="growth-axis-date" data-date-index="${index}">${item.date.split(/\s+—\s+/).map((part, partIndex) => `<span>${partIndex ? "— " : ""}${escape(part)}</span>`).join("")}</li>`).join("")}</ol>
         <span class="growth-now-label">${labels.now}</span>
       </div>
       <footer class="growth-footer">
@@ -120,7 +130,10 @@
     const svg = stage.querySelector(".growth-svg");
     const world = svg.querySelector(".growth-world");
     const head = svg.querySelector(".growth-head");
-    const leaders = svg.querySelector(".growth-leaders");
+    const axis = svg.querySelector(".growth-time-axis");
+    const guides = svg.querySelector(".growth-date-guides");
+    const ticks = svg.querySelector(".growth-date-ticks");
+    const dates = [...stage.querySelectorAll(".growth-axis-date")];
     const labels = [...stage.querySelectorAll(".growth-item")];
     const vertices = [...svg.querySelectorAll(".growth-vertex")];
     const now = stage.querySelector(".growth-now-label");
@@ -151,10 +164,11 @@
       const focusScale = width < 600 ? .72 : Math.min(1.05, width / 1000);
       const overviewScale = (width - 32) / model.width;
       const sx = focusScale + (overviewScale - focusScale) * overview;
-      const sy = height / 820;
+      const axisY = Math.max(32, height - (height < 220 ? 36 : 52));
+      const ty = height * .04;
+      const sy = Math.max(.03, Math.min(height / 820, (axisY - 24 - ty) / Math.max(...model.points.map((point) => point.y))));
       const focusX = Math.min(32 - model.points[0].x * focusScale, width * .5 - moving.x * focusScale);
       const tx = focusX * (1 - overview) + 16 * overview;
-      const ty = height * .04;
       const project = (point) => ({ x: point.x * sx + tx, y: point.y * sy + ty });
       if (lastSize !== `${width}:${height}`) {
         svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
@@ -167,9 +181,25 @@
       const currentPoint = project(moving);
       head.setAttribute("transform", `translate(${currentPoint.x} ${currentPoint.y})`);
       head.dataset.kind = progress >= .72 || items[index].kind === "work" ? "work" : "study";
-      const lineSegments = [];
+      const dateGuides = [];
+      const dateTicks = [];
+      const projected = model.points.map(project);
+      const dateWidth = width < 600 ? 74 : 82;
+      const shownDates = [];
+      const dateCandidates = [index, 0, ...items.map((item, itemIndex) => itemIndex).reverse()].filter((itemIndex, position, list) => list.indexOf(itemIndex) === position);
+      dateCandidates.forEach((itemIndex) => {
+        const point = projected[itemIndex];
+        const labelX = clamp(point.x - dateWidth / 2, 2, width - dateWidth - 2);
+        const visible = point.x >= 4 && point.x <= width - 4 && shownDates.every((shown) => labelX + dateWidth + 10 <= shown.left || labelX >= shown.right + 10);
+        dates[itemIndex].style.width = `${dateWidth}px`;
+        dates[itemIndex].style.transform = `translate(${labelX}px, ${axisY + 9}px)`;
+        dates[itemIndex].style.opacity = visible ? "1" : "0";
+        dates[itemIndex].dataset.active = String(itemIndex === index);
+        if (visible) shownDates.push({ left: labelX, right: labelX + dateWidth });
+      });
+      axis.setAttribute("d", `M${clamp(projected[0].x, 8, width - 8)} ${axisY}H${width - 8}`);
       labels.forEach((label, itemIndex) => {
-        const point = project(model.points[itemIndex]);
+        const point = projected[itemIndex];
         const active = itemIndex === index;
         const age = Math.max(0, index - itemIndex);
         const scale = active ? 1 : Math.max(.58, 1 - age * .055 - overview * .22);
@@ -179,21 +209,20 @@
         label.style.setProperty("--label-scale", scale);
         label.dataset.active = String(active);
         const labelX = clamp(point.x - labelWidth * .25, 8, width - labelWidth - 8);
-        const below = itemIndex % 2 === 1 && !(active && overview > .35);
         const labelHeight = label.offsetHeight;
-        const labelY = clamp(point.y + (below ? 28 : -labelHeight - 30), 5, height - labelHeight - 5);
+        const labelY = clamp(point.y - labelHeight - (active ? 30 : itemIndex % 2 ? 48 : 26), 5, axisY - labelHeight - 12);
         label.style.transform = `translate(${labelX}px, ${labelY}px) scale(${scale})`;
         label.style.opacity = visible ? String(active ? 1 : Math.max(.25, .78 - age * .06)) : "0";
         const vertexScale = active ? 1 : Math.max(.38, 1 - age * .045 - overview * .3);
         vertices[itemIndex].setAttribute("transform", `translate(${point.x} ${point.y}) scale(${vertexScale})`);
         vertices[itemIndex].dataset.active = String(active);
-        if (visible) {
-          const endX = clamp(point.x, labelX + 10, labelX + labelWidth * scale - 10);
-          const endY = below ? labelY - 6 : labelY + labelHeight * scale + 6;
-          lineSegments.push(`<path d="M${point.x} ${point.y}L${endX} ${endY}" class="${active ? "leader-active" : ""}"/>`);
+        if (point.x >= 0 && point.x <= width) {
+          dateGuides.push(`<line x1="${point.x}" y1="${point.y + 6 * vertexScale}" x2="${point.x}" y2="${axisY}" data-kind="${items[itemIndex].kind || "study"}" data-active="${active}"/>`);
+          dateTicks.push(`<line x1="${point.x}" y1="${axisY}" x2="${point.x}" y2="${axisY + 4}" data-active="${active}"/>`);
         }
       });
-      leaders.innerHTML = lineSegments.join("");
+      guides.innerHTML = dateGuides.join("");
+      ticks.innerHTML = dateTicks.join("");
       const present = project(model.points.at(-1));
       now.style.transform = `translate(${clamp(present.x + 13, 8, width - 46)}px, ${clamp(present.y - 10, 5, height - 25)}px)`;
       now.style.opacity = progress >= .72 ? "1" : "0";

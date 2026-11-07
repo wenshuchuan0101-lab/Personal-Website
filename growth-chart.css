@@ -26,7 +26,7 @@
 .growth-stage .heading-english { color: #a8a3f0; font-size: clamp(56px, 6vw, 88px); margin: 0; line-height: .9; }
 html[lang="en"] .growth-stage .portfolio-heading h2 { font-size: clamp(56px, 6vw, 88px); }
 .growth-chart { position: relative; min-width: 0; min-height: 0; overflow: hidden; }
-.growth-svg, .growth-list { position: absolute; inset: 0; width: 100%; height: 100%; }
+.growth-svg, .growth-list, .growth-dates { position: absolute; inset: 0; width: 100%; height: 100%; }
 .growth-svg { overflow: visible; }
 .growth-grid path { fill: none; stroke: #c6c4f2; stroke-width: .6; opacity: .1; stroke-dasharray: 2 8; }
 .mountain-main { fill: url(#growth-soft-slope); opacity: .92; }
@@ -36,8 +36,12 @@ html[lang="en"] .growth-stage .portfolio-heading h2 { font-size: clamp(56px, 6vw
 .growth-future { stroke: #aaa4cc; stroke-width: 1; opacity: .45; }
 .growth-now-line { stroke: var(--growth-orange); stroke-width: 2.6; opacity: 0; }
 .growth-section[data-now="true"] .growth-now-line { opacity: 1; }
-.growth-leaders path { fill: none; stroke: #d5d1ff; stroke-width: .65; opacity: .25; }
-.growth-leaders .leader-active { opacity: .7; }
+.growth-time-axis { fill: none; stroke: #bcb7da; stroke-width: .7; opacity: .45; }
+.growth-date-guides line { stroke: #c5bfdf; stroke-width: .6; opacity: .17; }
+.growth-date-guides line[data-kind="work"] { stroke: var(--growth-orange); opacity: .25; }
+.growth-date-guides line[data-active="true"] { stroke: var(--growth-orange); opacity: .65; }
+.growth-date-ticks line { stroke: #c5bfdf; stroke-width: .7; opacity: .45; }
+.growth-date-ticks line[data-active="true"] { stroke: var(--growth-orange); opacity: 1; }
 .growth-vertex { color: #f4f1ff; }
 .growth-vertex[data-kind="work"] { color: var(--growth-orange); }
 .vertex-halo { fill: currentColor; opacity: .25; }
@@ -49,14 +53,15 @@ html[lang="en"] .growth-stage .portfolio-heading h2 { font-size: clamp(56px, 6vw
 .head-halo { fill: currentColor; opacity: .45; }
 .head-ring { fill: var(--growth-night); stroke: currentColor; stroke-width: 1.3; }
 .head-core { fill: currentColor; }
-.growth-list { list-style: none; margin: 0; padding: 0; pointer-events: none; }
+.growth-list, .growth-dates { list-style: none; margin: 0; padding: 0; pointer-events: none; }
 .growth-item { position: absolute; top: 0; left: 0; margin: 0; padding: 0; border: 0; transform-origin: top left; will-change: transform; }
-.growth-date { display: block; color: #b3aed7; font: 17px/1.35 "Cormorant Garamond", Georgia, serif; letter-spacing: .04em; white-space: nowrap; }
-.growth-label { display: grid; gap: 5px; margin-top: 6px; font-size: 17px; line-height: 1.6; letter-spacing: .04em; }
+.growth-axis-date { position: absolute; top: 0; left: 0; display: grid; gap: 1px; color: #b3aed7; font: 15px/1.1 "Cormorant Garamond", Georgia, serif; white-space: nowrap; text-align: center; }
+.growth-axis-date[data-active="true"] { color: var(--growth-orange); }
+.growth-label { display: grid; gap: 5px; font-size: 17px; line-height: 1.6; letter-spacing: .04em; }
 .growth-study { color: var(--growth-white); }
 .growth-work { color: var(--growth-orange); }
 .growth-now-label { position: absolute; top: 0; left: 0; color: var(--growth-orange); font-size: 13px; line-height: 1.4; letter-spacing: .15em; }
-.growth-footer { display: grid; grid-template-columns: minmax(160px, 30%) minmax(0, 1fr); gap: 32px; align-items: center; padding-top: 20px; border-top: 1px solid #c9c4f12c; }
+.growth-footer { display: grid; grid-template-columns: minmax(160px, 30%) minmax(0, 1fr); gap: 32px; align-items: center; padding-top: 14px; }
 .growth-meta { display: grid; gap: 15px; }
 .growth-legend { display: flex; gap: 22px; font-size: 12px; letter-spacing: .1em; }
 .growth-legend > span::before { content: ""; display: inline-block; width: 5px; height: 5px; border-radius: 50%; margin-right: 9px; background: currentColor; }
@@ -90,7 +95,7 @@ body[data-scene="quick"][data-quick-backdrop="growth"] .language-star { color: #
   .growth-stage .heading-english { font-size: 53px; line-height: 1; }
   html[lang="en"] .growth-stage .portfolio-heading h2 { font-size: 53px; }
   .growth-label { font-size: 16px; line-height: 1.5; letter-spacing: .01em; }
-  .growth-date { font-size: 16px; letter-spacing: 0; }
+  .growth-axis-date { font-size: 14px; }
   html[lang="en"] .growth-label { font-size: 21px; }
   .growth-footer { grid-template-columns: minmax(0, 1fr); gap: 13px; padding-top: 15px; }
   .growth-meta { display: flex; justify-content: space-between; gap: 8px; }
