@@ -33,6 +33,7 @@
   let pendingWheelFocus = null;
   let activeWheelButton = null;
   const posterPanelIndices = new Map();
+  const expandedPosterWeight = 4;
   let dragging = null;
   let suppressClickUntil = 0;
   const text = (value) => typeof value === "string" ? value : value?.[language] ?? value?.zh ?? "";
@@ -81,7 +82,7 @@
     const image = poster ? `<img src="${escape(poster)}" alt="" style="object-position:${escape(project.posterPosition || project.coverPosition || "center")}">` : "";
     const panels = project.posterPanels?.filter((panel) => panel.src) || [];
     const activePanel = Math.min(posterPanelIndices.get(project.id) || 0, Math.max(0, panels.length - 1));
-    const background = panels.length ? `<div class="project-poster poster-panels" role="group" aria-label="${escape(text(project.title))}" data-poster-project="${escape(project.id)}">${panels.map((panel, index) => `<button class="poster-panel" type="button" data-poster-index="${index}" aria-label="${escape(text(project.title))} · ${count(index + 1)} / ${count(panels.length)}" aria-pressed="${index === activePanel}" style="--poster-weight:${index === activePanel ? 3 : 1}"><img src="${escape(panel.src)}" alt="" loading="lazy" decoding="async" draggable="false" style="object-position:${escape(panel.position || "center")}"></button>`).join("")}</div>` : `<div class="project-poster" aria-hidden="true">${image}</div>`;
+    const background = panels.length ? `<div class="project-poster poster-panels" role="group" aria-label="${escape(text(project.title))}" data-poster-project="${escape(project.id)}">${panels.map((panel, index) => `<button class="poster-panel" type="button" data-poster-index="${index}" aria-label="${escape(text(project.title))} · ${count(index + 1)} / ${count(panels.length)}" aria-pressed="${index === activePanel}" style="--poster-weight:${index === activePanel ? expandedPosterWeight : 1}"><img src="${escape(panel.src)}" alt="" loading="lazy" decoding="async" draggable="false" style="object-position:${escape(panel.position || "center")}"></button>`).join("")}</div>` : `<div class="project-poster" aria-hidden="true">${image}</div>`;
     return `<article id="project-${escape(project.id)}" class="project-card project-page" data-project-card="${escape(project.id)}" data-poster-layout="${panels.length ? "panels" : "single"}" data-intro-side="${project.introSide === "right" ? "right" : "left"}" aria-labelledby="title-${escape(project.id)}">
       ${background}
       <div class="project-brief">
@@ -103,7 +104,7 @@
     gallery.querySelectorAll(".poster-panel").forEach((panel) => {
       const active = panel === button;
       panel.setAttribute("aria-pressed", String(active));
-      panel.style.setProperty("--poster-weight", active ? 3 : 1);
+      panel.style.setProperty("--poster-weight", active ? expandedPosterWeight : 1);
     });
   }
 
