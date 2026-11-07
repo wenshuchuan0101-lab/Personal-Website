@@ -109,9 +109,27 @@ html[lang="en"] .quick-view .choice-label { font-size: clamp(19px, 1.75vw, 27px)
 .portfolio-heading h2 { margin: 0; font-size: clamp(30px, 3.2vw, 48px); font-weight: 200; line-height: 1.5; letter-spacing: .12em; }
 .heading-english { margin: 4px 0 -12px; font: clamp(50px, 7.5vw, 116px)/.95 "Cormorant Garamond", Georgia, serif; letter-spacing: -.035em; transform: scaleY(.8); transform-origin: left center; }
 .visual-section { background: var(--portfolio-orange); color: var(--portfolio-navy); }
-.project-grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: clamp(26px, 4.5vw, 80px); row-gap: 52px; align-items: start; }
-.visual-section .project-card:nth-child(even) { margin-top: 84px; }
-.project-open { display: block; }
+.projects-section { padding: 0; }
+.project-grid { display: block; }
+.project-page { position: relative; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; height: 100svh; min-height: 100svh; padding: 32px var(--portfolio-gutter) 24px var(--portfolio-side); gap: 22px; scroll-snap-align: start; }
+.quick-view[data-view="quick"] { scroll-snap-type: y proximity; }
+.project-page-header { display: flex; align-items: baseline; justify-content: space-between; gap: 24px; padding: 0 58px 16px 0; border-bottom: 1px solid currentColor; }
+.project-page-header h2 { margin: 0; font-size: 16px; line-height: 1.4; font-weight: 200; letter-spacing: .12em; }
+.project-page-count { font: 20px/1 "Cormorant Garamond", Georgia, serif; opacity: .65; white-space: nowrap; }
+.project-page-main { display: grid; grid-template-columns: minmax(0, 1.9fr) minmax(0, 1fr); gap: clamp(28px, 4vw, 64px); min-height: 0; align-items: center; }
+.project-page-main .project-cover { height: 100%; min-height: 0; aspect-ratio: auto; }
+.project-info { min-width: 0; }
+.project-page .project-heading { display: block; margin: 0; }
+.project-page .project-heading h3 { font-size: clamp(32px, 3.5vw, 58px); line-height: 1.4; letter-spacing: .06em; }
+.project-page .project-meta { margin-top: 24px; font-size: 16px; line-height: 1.8; }
+.project-page .project-award { margin-top: 24px; padding-top: 16px; font-size: 14px; }
+.project-pagination { display: flex; justify-content: flex-end; gap: 12px; }
+.project-pagination button { display: grid; place-items: center; width: 36px; height: 36px; border: 1px solid currentColor; border-radius: 50%; background: transparent; color: inherit; font: 22px/1 "Cormorant Garamond", Georgia, serif; cursor: pointer; }
+.project-pagination button:hover { opacity: .65; }
+.project-pagination button:disabled { opacity: .2; cursor: default; }
+.project-pagination button:focus-visible { outline: 1px solid currentColor; outline-offset: 4px; }
+.project-heading h3:focus { outline: none; }
+.project-open:not(.project-page-main) { display: block; }
 .project-cover { position: relative; display: grid; place-items: center; width: 100%; aspect-ratio: 1.48; overflow: hidden; background: #f1debf; color: var(--portfolio-blue); }
 .project-card:nth-child(2n) .project-cover { background: #244bc4; color: #f1debf; }
 .project-card:nth-child(3n) .project-cover { background: #0a204e; color: #ffb576; }
@@ -138,8 +156,6 @@ html[lang="en"] .quick-view .choice-label { font-size: clamp(19px, 1.75vw, 27px)
 .project-award > span { flex-shrink: 0; }
 .games-section { background: var(--portfolio-navy); color: var(--portfolio-paper); }
 .games-section .portfolio-heading { color: var(--portfolio-orange); }
-.games-section .project-card:first-child { grid-column: 1 / -1; }
-.games-section .project-card:first-child .project-cover { aspect-ratio: 2.3; }
 .games-section .project-cover { background: #173f96; color: #f4b77b; }
 .games-section .project-card:nth-child(2) .project-cover { background: #f1debf; color: #123fce; }
 .games-section .project-card:nth-child(3) .project-cover { background: #dd7f3b; color: #0a204e; }
@@ -172,6 +188,10 @@ html[lang="en"] .portfolio-heading h2 { font: clamp(55px, 7.5vw, 112px)/.95 "Cor
 html[lang="en"] .project-heading h3 { font-size: clamp(30px, 3vw, 44px); line-height: 1.05; letter-spacing: -.01em; }
 html[lang="en"] .project-meta { font-size: 20px; line-height: 1.4; }
 html[lang="en"] .project-award { font-size: 18px; line-height: 1.4; }
+html[lang="en"] .project-page-header h2 { font: 24px/1 "Cormorant Garamond", Georgia, serif; letter-spacing: 0; }
+html[lang="en"] .project-page .project-heading h3 { font: clamp(40px, 4.5vw, 68px)/1.05 "Cormorant Garamond", Georgia, serif; letter-spacing: -.02em; }
+html[lang="en"] .project-page .project-meta { font-size: 23px; line-height: 1.4; }
+html[lang="en"] .project-page .project-award { font-size: 20px; line-height: 1.3; }
 html[lang="en"] .cover-caption { font-size: 18px; letter-spacing: .02em; }
 html[lang="en"] #detail-title { font: clamp(34px, 5vw, 68px)/1 "Cormorant Garamond", Georgia, serif; letter-spacing: 0; }
 @media (min-width: 1800px) {
@@ -181,7 +201,7 @@ html[lang="en"] #detail-title { font: clamp(34px, 5vw, 68px)/1 "Cormorant Garamo
   .quick-view { --portfolio-side: 116px; --portfolio-gutter: 32px; }
   .profile-composition { gap: 18px; }
   .profile-name { font-size: 76px; }
-  .project-grid { column-gap: 26px; }
+  .project-page-main { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 26px; }
   html[lang="en"] .profile-name { font-size: 80px; }
 }
 @media (max-width: 700px) {
@@ -215,8 +235,16 @@ html[lang="en"] #detail-title { font: clamp(34px, 5vw, 68px)/1 "Cormorant Garamo
   .portfolio-heading h2 { font-size: 28px; letter-spacing: .07em; }
   .heading-english { font-size: clamp(42px, 10vw, 65px); line-height: 1; margin-top: 8px; }
   .section-index { font-size: 13px; margin-bottom: 24px; }
-  .project-grid { grid-template-columns: minmax(0, 1fr); row-gap: 40px; }
-  .visual-section .project-card:nth-child(even) { margin-top: 0; }
+  .project-page { padding-top: 27px; padding-bottom: 18px; gap: 16px; }
+  .project-page-header { padding: 0 35px 12px 0; gap: 14px; }
+  .project-page-header h2 { font-size: 13px; letter-spacing: .05em; }
+  .project-page-count { font-size: 17px; }
+  .project-page-main { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(80px, 1fr) auto; align-items: stretch; gap: 20px; }
+  .project-page .project-heading h3 { font-size: 28px; line-height: 1.35; }
+  .project-page .project-meta { margin-top: 10px; font-size: 13px; line-height: 1.7; }
+  .project-page .project-award { margin-top: 12px; padding-top: 10px; font-size: 12px; line-height: 1.6; }
+  .project-pagination { gap: 10px; }
+  .project-pagination button { width: 30px; height: 30px; font-size: 20px; }
   .project-cover { aspect-ratio: 1.22; }
   .cover-number { font-size: 94px; }
   .cover-caption { left: 17px; bottom: 16px; font-size: 12px; }
@@ -224,8 +252,6 @@ html[lang="en"] #detail-title { font: clamp(34px, 5vw, 68px)/1 "Cormorant Garamo
   .project-heading h3 { font-size: 25px; }
   .project-meta { font-size: 13px; }
   .project-award { font-size: 12px; margin-top: 13px; padding-top: 11px; }
-  .games-section .project-card:first-child { grid-column: auto; }
-  .games-section .project-card:first-child .project-cover { aspect-ratio: 1.22; }
   .project-detail { width: calc(100vw - 30px); max-height: 94svh; padding: 22px; }
   .detail-toolbar { font-size: 12px; }
   #detail-title { margin-block: 25px; }
@@ -237,6 +263,10 @@ html[lang="en"] #detail-title { font: clamp(34px, 5vw, 68px)/1 "Cormorant Garamo
   html[lang="en"] .project-heading h3 { font-size: 34px; }
   html[lang="en"] .project-meta { font-size: 18px; }
   html[lang="en"] .project-award { font-size: 17px; }
+  html[lang="en"] .project-page-header h2 { font-size: 18px; }
+  html[lang="en"] .project-page .project-heading h3 { font-size: 32px; }
+  html[lang="en"] .project-page .project-meta { font-size: 18px; line-height: 1.3; }
+  html[lang="en"] .project-page .project-award { font-size: 17px; line-height: 1.25; }
 }
 @media (max-width: 700px) and (max-height: 740px) {
   .profile-section { padding-top: 22px; padding-bottom: 18px; }
@@ -247,6 +277,16 @@ html[lang="en"] #detail-title { font: clamp(34px, 5vw, 68px)/1 "Cormorant Garamo
   .mode-console { width: min(100%, 30svh, 260px); }
 }
 @media (max-height: 520px) and (orientation: landscape) {
+  .project-page { padding-top: 20px; padding-bottom: 14px; gap: 12px; }
+  .project-page-header { padding-bottom: 10px; }
+  .project-page-main { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); gap: 24px; }
+  .project-page .project-heading h3 { font-size: 28px; }
+  .project-page .project-meta { margin-top: 12px; font-size: 13px; }
+  .project-page .project-award { margin-top: 12px; padding-top: 10px; font-size: 12px; }
+  .project-pagination button { width: 30px; height: 30px; font-size: 20px; }
+  html[lang="en"] .project-page .project-heading h3 { font-size: 34px; }
+  html[lang="en"] .project-page .project-meta { font-size: 18px; }
+  html[lang="en"] .project-page .project-award { font-size: 16px; }
   .quick-rail { top: 8px; bottom: 8px; }
   .rail-monogram { margin-top: 10px; font-size: 26px; }
   .quick-navigation { gap: 6px; padding-block: 12px; }

@@ -8,8 +8,8 @@
   const data = PORTFOLIO_CONTENT;
   const projects = data.groups.flatMap((group) => group.projects);
   const labels = {
-    zh: { about: "个人介绍", growth: "成长过程", visual: "图片影像", games: "交互 / 游戏", nav: "内容分区", close: "关闭作品详情", detail: "作品详情", play: "游玩", empty: "作品展示预留区域" },
-    en: { about: "About", growth: "Growth", visual: "Images & Film", games: "Interaction & Games", nav: "Sections", close: "Close project details", detail: "Project details", play: "Play", empty: "Reserved project presentation area" },
+    zh: { about: "个人介绍", growth: "成长过程", visual: "图片影像", games: "交互 / 游戏", nav: "内容分区", close: "关闭作品详情", detail: "作品详情", play: "游玩", empty: "作品展示预留区域", previousWork: "上一个作品", nextWork: "下一个作品" },
+    en: { about: "About", growth: "Growth", visual: "Images & Film", games: "Interaction & Games", nav: "Sections", close: "Close project details", detail: "Project details", play: "Play", empty: "Reserved project presentation area", previousWork: "Previous work", nextWork: "Next work" },
   };
   let language = "zh";
   let view = "profile";
@@ -47,17 +47,26 @@
     return `<header class="portfolio-heading reveal"><div class="section-index"><span>${count(index)} / 04</span>${total ? `<span>${count(total)}</span>` : ""}</div><h2>${escape(text(title))}</h2>${language === "zh" ? `<p class="heading-english" lang="en">${escape(english)}</p>` : ""}</header>`;
   }
 
-  function projectCard(project, index) {
+  function projectCard(project, group) {
+    const globalIndex = projects.indexOf(project);
+    const previous = projects[globalIndex - 1];
+    const next = projects[globalIndex + 1];
     const cover = project.cover
       ? `<img src="${escape(project.cover)}" alt="${escape(text(project.title))}" loading="lazy" style="object-position:${escape(project.coverPosition)}">`
-      : `<span class="cover-number" aria-hidden="true">${count(index + 1)}</span><span class="cover-caption">${escape(text(project.kind))}</span>`;
-    return `<article class="project-card reveal" data-project-card="${escape(project.id)}">
-      <a class="project-open" href="#project-${escape(project.id)}" data-project="${escape(project.id)}" aria-label="${escape(text(project.title))} · ${labels[language].detail}">
+      : `<span class="cover-number" aria-hidden="true">${count(globalIndex + 1)}</span><span class="cover-caption">${escape(text(project.kind))}</span>`;
+    return `<article id="project-${escape(project.id)}" class="project-card project-page" data-project-card="${escape(project.id)}" aria-labelledby="title-${escape(project.id)}">
+      <header class="project-page-header"><h2>${escape(text(group.title))}</h2><span class="project-page-count">${count(globalIndex + 1)} / ${count(projects.length)}</span></header>
+      <a class="project-open project-page-main reveal" href="#project-${escape(project.id)}" data-project="${escape(project.id)}" aria-label="${escape(text(project.title))} · ${labels[language].detail}">
         <div class="project-cover${project.cover ? " has-image" : ""}">${cover}<span class="cover-corners" aria-hidden="true"></span><span class="project-arrow" aria-hidden="true">↗</span></div>
-        <div class="project-heading"><h3>${escape(text(project.title))}</h3><span class="project-number">${count(index + 1)}</span></div>
+        <div class="project-info"><div class="project-heading"><h3 id="title-${escape(project.id)}">${escape(text(project.title))}</h3></div>
+          <div class="project-meta"><p>${project.role ? `${escape(text(project.role))}<span> / </span>` : ""}${escape(text(project.kind))}</p><p>${escape(project.tools)}<span> · </span>${escape(text(project.duration))}</p></div>
+          ${project.award ? `<p class="project-award"><span aria-hidden="true">✦</span>${escape(text(project.award))}</p>` : ""}
+        </div>
       </a>
-      <div class="project-meta"><p>${project.role ? `${escape(text(project.role))}<span> / </span>` : ""}${escape(text(project.kind))}</p><p>${escape(project.tools)}<span> · </span>${escape(text(project.duration))}</p></div>
-      ${project.award ? `<p class="project-award"><span aria-hidden="true">✦</span>${escape(text(project.award))}</p>` : ""}
+      <nav class="project-pagination" aria-label="${escape(text(project.title))}">
+        <button type="button" data-project-scroll="${previous ? escape(previous.id) : ""}" aria-label="${escape(labels[language].previousWork + (previous ? " · " + text(previous.title) : ""))}"${previous ? "" : " disabled"}>↑</button>
+        <button type="button" data-project-scroll="${next ? escape(next.id) : ""}" aria-label="${escape(labels[language].nextWork + (next ? " · " + text(next.title) : ""))}"${next ? "" : " disabled"}>↓</button>
+      </nav>
     </article>`;
   }
 
@@ -93,7 +102,7 @@
       <section id="growth" class="portfolio-section growth-section" aria-labelledby="growth-heading">
         ${window.GrowthMountain.render(data.timeline, language, sectionHeading({ zh: labels.zh.growth, en: labels.en.growth }, "Growth", 2), data.growthChart)}
       </section>
-      ${data.groups.map((group, index) => `<section id="${escape(group.id)}" class="portfolio-section projects-section ${escape(group.id)}-section" aria-labelledby="${escape(group.id)}-heading">${sectionHeading(group.title, group.english, index + 3, group.projects.length)}<div class="project-grid">${group.projects.map(projectCard).join("")}</div></section>`).join("")}`;
+      ${data.groups.map((group) => `<section id="${escape(group.id)}" class="portfolio-section projects-section ${escape(group.id)}-section" aria-labelledby="${escape(group.id)}-heading"><div class="project-grid">${group.projects.map((project) => projectCard(project, group)).join("")}</div></section>`).join("")}`;
     // 标题 ID 与分区的可访问名称保持对应。
     for (const section of content.querySelectorAll(".portfolio-section:not(.profile-section)")) {
       section.querySelector("h2").id = `${section.id}-heading`;
@@ -222,6 +231,16 @@
   }
 
   root.addEventListener("click", (event) => {
+    const pageButton = event.target.closest("[data-project-scroll]");
+    if (pageButton && !pageButton.disabled) {
+      const target = document.getElementById(`project-${pageButton.dataset.projectScroll}`);
+      const top = root.scrollTop + target.getBoundingClientRect().top - root.getBoundingClientRect().top;
+      root.scrollTo({ top, behavior: motion.matches ? "instant" : "smooth" });
+      const heading = target.querySelector("h3");
+      heading.tabIndex = -1;
+      heading.focus({ preventScroll: true });
+      return;
+    }
     const scrollLink = event.target.closest("[data-scroll], .rail-monogram");
     if (scrollLink) {
       event.preventDefault();
