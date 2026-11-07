@@ -20,6 +20,7 @@ const PORTFOLIO_CONTENT = {
     historyWaves: [0, 3, 8, 2, 12, 6, 16, 5, 20, 30, -8, 34, -4, 38],
     acceleration: 2.6,
     trendRise: 650,
+    futureWaves: [[0.05, 50], [0.14, 8], [0.34, 60], [0.45, -15], [0.78, 180], [0.88, 0], [1.06, 0], [1.25, 0]],
     historyShare: 1 / 3,
     scrollDistance: 1800,
   },

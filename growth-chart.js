@@ -67,7 +67,7 @@
     });
     const last = points.at(-1);
     const present = (last.x - 100) / (width - 100);
-    const swells = [[.05, 50], [.12, 20], [.22, 14], [.35, 7], [.5, 5], [.67, 2], [.85, 0], [1.06, 0], [1.25, 0]];
+    const swells = settings.futureWaves || [[.05, 50], [.14, 8], [.34, 60], [.45, -15], [.78, 180], [.88, 0], [1.06, 0], [1.25, 0]];
     const future = [last, ...swells.map(([distance, wave]) => {
       const position = present + (1 - present) * distance;
       return { x: 100 + position * (width - 100), y: trend(position) - wave };
