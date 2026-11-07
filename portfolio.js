@@ -3,16 +3,26 @@
   const root = document.querySelector(".quick-view");
   const content = root.querySelector(".portfolio-content");
   const navigation = root.querySelector(".quick-navigation");
+  const header = root.querySelector(".quick-header");
+  const wheel = root.querySelector(".work-wheel");
+  const wheelOptions = root.querySelector(".work-wheel-options");
+  const wheelStar = root.querySelector(".work-wheel-star");
+  const wheelScrim = root.querySelector(".work-wheel-scrim");
   const dialog = document.querySelector(".project-detail");
   const motion = matchMedia("(prefers-reduced-motion: reduce)");
   const data = PORTFOLIO_CONTENT;
   const projects = data.groups.flatMap((group) => group.projects);
   const labels = {
-    zh: { about: "个人介绍", growth: "成长过程", visual: "图片影像", games: "交互 / 游戏", nav: "内容分区", close: "关闭作品详情", detail: "作品详情", play: "游玩", empty: "作品展示预留区域", previousWork: "上一个作品", nextWork: "下一个作品" },
-    en: { about: "About", growth: "Growth", visual: "Images & Film", games: "Interaction & Games", nav: "Sections", close: "Close project details", detail: "Project details", play: "Play", empty: "Reserved project presentation area", previousWork: "Previous work", nextWork: "Next work" },
+    zh: { about: "个人介绍", growth: "成长过程", visual: "图片影像", games: "交互 / 游戏", nav: "内容分区", close: "关闭作品详情", detail: "作品详情", play: "游玩", empty: "作品展示预留区域", chooseWork: "选择作品", closeWheel: "收起作品轮盘" },
+    en: { about: "About", growth: "Growth", visual: "Images & Film", games: "Interaction & Games", nav: "Sections", close: "Close project details", detail: "Project details", play: "Play", empty: "Reserved project presentation area", chooseWork: "Choose a work", closeWheel: "Close work selector" },
   };
   let language = "zh";
   let view = "profile";
+  let panel = "growth";
+  let workGroup = "visual";
+  let selectedProjectId = null;
+  let wheelOpen = false;
+  let growthScroll = 0;
   let activeSection = "about";
   let openedProject = null;
   let nameFlipped = false;
@@ -49,8 +59,6 @@
 
   function projectCard(project, group) {
     const globalIndex = projects.indexOf(project);
-    const previous = projects[globalIndex - 1];
-    const next = projects[globalIndex + 1];
     const cover = project.cover
       ? `<img src="${escape(project.cover)}" alt="${escape(text(project.title))}" loading="lazy" style="object-position:${escape(project.coverPosition)}">`
       : `<span class="cover-number" aria-hidden="true">${count(globalIndex + 1)}</span><span class="cover-caption">${escape(text(project.kind))}</span>`;
@@ -63,11 +71,94 @@
           ${project.award ? `<p class="project-award"><span aria-hidden="true">✦</span>${escape(text(project.award))}</p>` : ""}
         </div>
       </a>
-      <nav class="project-pagination" aria-label="${escape(text(project.title))}">
-        <button type="button" data-project-scroll="${previous ? escape(previous.id) : ""}" aria-label="${escape(labels[language].previousWork + (previous ? " · " + text(previous.title) : ""))}"${previous ? "" : " disabled"}>↑</button>
-        <button type="button" data-project-scroll="${next ? escape(next.id) : ""}" aria-label="${escape(labels[language].nextWork + (next ? " · " + text(next.title) : ""))}"${next ? "" : " disabled"}>↓</button>
-      </nav>
     </article>`;
+  }
+
+  function renderWheel() {
+    wheelOptions.innerHTML = projects.map((project, index) => {
+      const angle = -60 + index * 120 / Math.max(1, projects.length - 1);
+      const radians = angle * Math.PI / 180;
+      const group = data.groups.find((item) => item.projects.includes(project));
+      return `<button class="wheel-work" type="button" data-wheel-project="${escape(project.id)}" data-work-group="${group.id}" style="--wheel-x:${(Math.cos(radians) * .72).toFixed(5)};--wheel-y:${(Math.sin(radians) * .72).toFixed(5)}" title="${escape(text(project.title))}" aria-label="${escape(text(project.title))}"><span class="wheel-number" aria-hidden="true">${count(index + 1)}</span><span class="wheel-title">${escape(text(project.title))}</span></button>`;
+    }).join("");
+    wheel.setAttribute("aria-label", labels[language].chooseWork);
+    wheelStar.setAttribute("aria-label", labels[language].chooseWork);
+    wheelStar.title = labels[language].chooseWork;
+    wheel.querySelector(".work-wheel-close").setAttribute("aria-label", labels[language].closeWheel);
+  }
+
+  function syncPanels() {
+    const quick = view === "quick";
+    const works = quick && panel === "works";
+    const selectedGroup = data.groups.find((group) => group.projects.some((project) => project.id === selectedProjectId));
+    const displayedGroup = selectedGroup?.id || workGroup;
+    root.dataset.view = view;
+    root.dataset.panel = panel;
+    root.dataset.workGroup = displayedGroup;
+    root.dataset.wheelOpen = String(works && wheelOpen);
+    header.hidden = !quick;
+    content.querySelector("#about").hidden = quick;
+    content.querySelector("#growth").hidden = !quick || panel !== "growth";
+    data.groups.forEach((group) => {
+      const section = document.getElementById(group.id);
+      section.hidden = !works || selectedGroup?.id !== group.id;
+      group.projects.forEach((project) => {
+        document.getElementById(`project-${project.id}`).hidden = !works || project.id !== selectedProjectId;
+      });
+    });
+    content.querySelector(".work-empty").hidden = !works || Boolean(selectedProjectId);
+    content.querySelector(".work-empty-category").textContent = labels[language][workGroup];
+    content.inert = works && wheelOpen;
+    wheel.hidden = !works;
+    wheel.inert = !wheelOpen;
+    wheel.setAttribute("aria-hidden", String(!works || !wheelOpen));
+    wheelStar.hidden = !works || wheelOpen;
+    wheelStar.setAttribute("aria-expanded", String(wheelOpen));
+    wheelScrim.hidden = !works || !wheelOpen;
+    wheelOptions.querySelectorAll("[data-wheel-project]").forEach((button) => {
+      if (button.dataset.wheelProject === selectedProjectId) button.setAttribute("aria-current", "true");
+      else button.removeAttribute("aria-current");
+    });
+    activeSection = !quick ? "about" : works ? displayedGroup : "growth";
+    navigation.querySelectorAll(".section-link").forEach((button) => {
+      if (button.dataset.section === activeSection) button.setAttribute("aria-current", "page");
+      else button.removeAttribute("aria-current");
+    });
+    document.body.dataset.quickSection = activeSection;
+    document.body.dataset.quickBackdrop = activeSection;
+    root.setAttribute("aria-label", quick ? labels[language][activeSection] : labels[language].about);
+    if (works) root.scrollTop = 0;
+  }
+
+  function openWheel(group = workGroup) {
+    if (panel === "growth") growthScroll = root.scrollTop;
+    panel = "works";
+    workGroup = group;
+    wheelOpen = true;
+    syncPanels();
+    const current = wheelOptions.querySelector(`[data-wheel-project="${selectedProjectId}"]`);
+    const firstInGroup = wheelOptions.querySelector(`[data-work-group="${group}"]`);
+    (current?.dataset.workGroup === group ? current : firstInGroup)?.focus({ preventScroll: true });
+  }
+
+  function closeWheel() {
+    wheelOpen = false;
+    syncPanels();
+    wheelStar.focus({ preventScroll: true });
+  }
+
+  function chooseProject(id) {
+    const project = projects.find((item) => item.id === id);
+    if (!project) return;
+    selectedProjectId = id;
+    workGroup = data.groups.find((group) => group.projects.includes(project)).id;
+    panel = "works";
+    wheelOpen = false;
+    syncPanels();
+    observeReveals();
+    const heading = document.getElementById(`title-${id}`);
+    heading.tabIndex = -1;
+    heading.focus({ preventScroll: true });
   }
 
   function namePage(value, className, hidden) {
@@ -87,12 +178,10 @@
   function render() {
     const profile = data.profile;
     root.dataset.view = view;
-    root.querySelector(".quick-rail").hidden = view === "profile";
     root.setAttribute("aria-label", view === "profile" ? labels[language].about : SCENE_SETTINGS.selection.labels[language].quick);
     navigation.setAttribute("aria-label", labels[language].nav);
-    navigation.innerHTML = ["about", "growth", "visual", "games"].map((id, index) => `<a class="rail-link" href="#${id}" data-scroll="${id}"${view === "profile" && id !== "about" ? " hidden" : ""}><span class="rail-number">${count(index + 1)}</span><span>${labels[language][id]}</span></a>`).join("");
-    root.querySelector(".rail-progress").hidden = view === "profile";
-    root.querySelector(".rail-monogram").setAttribute("aria-label", labels[language].about);
+    navigation.innerHTML = ["about", "growth", "visual", "games"].map((id) => `<button class="section-link" type="button" data-section="${id}">${labels[language][id]}</button>`).join("");
+    root.querySelector(".nav-home").setAttribute("aria-label", labels[language].about);
     content.innerHTML = `
       <section id="about" class="portfolio-section profile-section" aria-labelledby="profile-name">
         <div class="profile-topline"><span>${labels[language].about}</span><span lang="en">2024 — 2026</span></div>
@@ -102,14 +191,14 @@
       <section id="growth" class="portfolio-section growth-section" aria-labelledby="growth-heading">
         ${window.GrowthMountain.render(data.timeline, language, sectionHeading({ zh: labels.zh.growth, en: labels.en.growth }, "Growth", 2), data.growthChart)}
       </section>
-      ${data.groups.map((group) => `<section id="${escape(group.id)}" class="portfolio-section projects-section ${escape(group.id)}-section" aria-labelledby="${escape(group.id)}-heading"><div class="project-grid">${group.projects.map((project) => projectCard(project, group)).join("")}</div></section>`).join("")}`;
+      ${data.groups.map((group) => `<section id="${escape(group.id)}" class="portfolio-section projects-section ${escape(group.id)}-section" aria-labelledby="${escape(group.id)}-heading"><div class="project-grid">${group.projects.map((project) => projectCard(project, group)).join("")}</div></section>`).join("")}
+      <section class="work-empty" aria-labelledby="work-empty-title" hidden><p class="work-empty-category"></p><h2 id="work-empty-title">${labels[language].chooseWork}</h2></section>`;
     // 标题 ID 与分区的可访问名称保持对应。
     for (const section of content.querySelectorAll(".portfolio-section:not(.profile-section)")) {
       section.querySelector("h2").id = `${section.id}-heading`;
     }
-    content.querySelectorAll(".portfolio-section").forEach((section) => {
-      section.hidden = section.id === "about" ? view !== "profile" : view !== "quick";
-    });
+    renderWheel();
+    syncPanels();
     content.querySelectorAll(".project-cover img").forEach((image) => {
       image.addEventListener("error", () => {
         const cover = image.parentElement;
@@ -151,21 +240,10 @@
 
   function updateScrollState() {
     if (root.hidden) return;
-    const sections = [...content.querySelectorAll(".portfolio-section:not([hidden])")];
-    const offset = root.scrollTop + root.clientHeight * .3;
-    const current = sections.filter((section) => section.offsetTop <= offset).at(-1) || sections[0];
-    activeSection = current.id;
-    navigation.querySelectorAll(".rail-link").forEach((link) => {
-      if (link.dataset.scroll === activeSection) link.setAttribute("aria-current", "location");
-      else link.removeAttribute("aria-current");
-    });
-    const progress = root.scrollTop / Math.max(1, root.scrollHeight - root.clientHeight);
-    root.querySelector(".rail-progress > span").style.transform = `scaleY(${Math.max(.03, progress)})`;
-    document.body.dataset.quickSection = activeSection;
-    const starY = document.querySelector(".language-star").getBoundingClientRect().y + 25;
-    const starSection = sections.filter((section) => section.offsetTop <= root.scrollTop + starY).at(-1) || sections[0];
-    document.body.dataset.quickBackdrop = starSection.id;
-    window.GrowthMountain.update();
+    if (view === "quick" && panel === "growth") {
+      growthScroll = root.scrollTop;
+      window.GrowthMountain.update();
+    } else if (root.scrollTop !== 0) root.scrollTop = 0;
   }
 
   function navigate(id) {
@@ -173,13 +251,18 @@
       root.dispatchEvent(new CustomEvent("portfolio:profile"));
       return;
     }
-    const target = document.getElementById(id);
-    if (!target || target.hidden || !root.contains(target)) return;
-    root.scrollTo({ top: target.offsetTop, behavior: motion.matches ? "instant" : "smooth" });
-    // 焦点跟随页内导航，阅读顺序与视觉位置一致。
-    const heading = target.querySelector("h1, h2");
-    heading.tabIndex = -1;
-    heading.focus({ preventScroll: true });
+    if (id === "visual" || id === "games") {
+      openWheel(id);
+    } else if (id === "growth") {
+      panel = "growth";
+      wheelOpen = false;
+      syncPanels();
+      root.scrollTop = growthScroll;
+      updateScrollState();
+      const heading = document.getElementById("growth-heading");
+      heading.tabIndex = -1;
+      heading.focus({ preventScroll: true });
+    }
   }
 
   function renderDetail(project) {
@@ -231,20 +314,22 @@
   }
 
   root.addEventListener("click", (event) => {
-    const pageButton = event.target.closest("[data-project-scroll]");
-    if (pageButton && !pageButton.disabled) {
-      const target = document.getElementById(`project-${pageButton.dataset.projectScroll}`);
-      const top = root.scrollTop + target.getBoundingClientRect().top - root.getBoundingClientRect().top;
-      root.scrollTo({ top, behavior: motion.matches ? "instant" : "smooth" });
-      const heading = target.querySelector("h3");
-      heading.tabIndex = -1;
-      heading.focus({ preventScroll: true });
+    const workButton = event.target.closest("[data-wheel-project]");
+    if (workButton) {
+      chooseProject(workButton.dataset.wheelProject);
       return;
     }
-    const scrollLink = event.target.closest("[data-scroll], .rail-monogram");
-    if (scrollLink) {
-      event.preventDefault();
-      navigate(scrollLink.dataset.scroll || "about");
+    if (event.target.closest("[data-wheel-close]")) {
+      closeWheel();
+      return;
+    }
+    if (event.target.closest(".work-wheel-star")) {
+      openWheel();
+      return;
+    }
+    const sectionButton = event.target.closest("[data-section]");
+    if (sectionButton) {
+      navigate(sectionButton.dataset.section);
       return;
     }
     const projectLink = event.target.closest("[data-project]");
@@ -253,6 +338,21 @@
     openedProject = projects.find((item) => item.id === projectLink.dataset.project);
     renderDetail(openedProject);
     dialog.showModal();
+  });
+  root.addEventListener("keydown", (event) => {
+    if (!wheelOpen || panel !== "works" || view !== "quick") return;
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeWheel();
+      return;
+    }
+    if (!event.target.closest(".work-wheel")) return;
+    const buttons = [...wheelOptions.querySelectorAll("button")];
+    const index = buttons.indexOf(document.activeElement);
+    const destinations = { ArrowDown: (index + 1) % buttons.length, ArrowUp: (index + buttons.length - 1) % buttons.length, Home: 0, End: buttons.length - 1 };
+    if (!(event.key in destinations)) return;
+    event.preventDefault();
+    buttons[destinations[event.key]].focus({ preventScroll: true });
   });
   root.addEventListener("scroll", () => {
     if (scrollPending) return;
@@ -271,8 +371,7 @@
   });
   motion.addEventListener("change", observeReveals);
   function getPosition() {
-    const section = document.getElementById(activeSection);
-    return { id: activeSection, offset: section ? root.scrollTop - section.offsetTop : 0 };
+    return { id: activeSection, offset: view === "quick" && panel === "growth" ? root.scrollTop : 0 };
   }
   window.PortfolioQuick = {
     getPosition,
@@ -280,13 +379,15 @@
       language = next;
       render();
       if (!root.hidden) {
-        const current = document.getElementById(position.id);
-        root.scrollTop = current.offsetTop + position.offset;
+        root.scrollTop = panel === "growth" && view === "quick" ? position.offset : 0;
         updateScrollState();
       }
     },
     setView(next) {
       view = next === "quick" ? "quick" : "profile";
+      panel = "growth";
+      wheelOpen = false;
+      growthScroll = 0;
       activeSection = view === "profile" ? "about" : "growth";
       nameFlipped = false;
       render();

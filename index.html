@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="./journey.css">
   <link rel="stylesheet" href="./portfolio.css">
   <link rel="stylesheet" href="./growth-chart.css">
+  <link rel="stylesheet" href="./work-wheel.css">
   <script src="./settings.js" defer></script>
   <script src="./portfolio-data.js" defer></script>
   <script src="./app.js" defer></script>
@@ -30,12 +31,20 @@
     <button class="enter-scene" type="button" aria-label="进入个人介绍"></button>
   </main>
   <main class="quick-view" data-view="profile" aria-label="个人介绍" hidden>
-    <aside class="quick-rail">
-      <a class="rail-monogram" href="#about" aria-label="个人介绍">M<span>✦</span></a>
+    <header class="quick-header">
+      <button class="nav-home" type="button" data-section="about" aria-label="个人介绍">M<span>✦</span></button>
       <nav class="quick-navigation" aria-label="内容分区"></nav>
-      <span class="rail-progress" aria-hidden="true"><span></span></span>
-    </aside>
+    </header>
     <div class="portfolio-content"></div>
+    <div class="work-wheel-scrim" data-wheel-close aria-hidden="true" hidden></div>
+    <nav id="work-wheel" class="work-wheel" aria-label="选择作品" hidden>
+      <svg class="wheel-decoration" viewBox="0 0 640 640" aria-hidden="true"><circle cx="320" cy="320" r="312"/><circle cx="320" cy="320" r="292"/><circle class="wheel-inner-orbit" cx="320" cy="320" r="222"/><path d="M320 8V34M320 606v26M606 320h26M320 246a74 74 0 0 1 0 148"/><circle class="wheel-center" cx="320" cy="320" r="7"/></svg>
+      <button class="work-wheel-close" type="button" data-wheel-close aria-label="收起作品轮盘">×</button>
+      <div class="work-wheel-options"></div>
+    </nav>
+    <button class="work-wheel-star" type="button" aria-label="选择作品" aria-controls="work-wheel" aria-expanded="false" hidden>
+      <svg viewBox="0 0 100 140" aria-hidden="true"><path d="M50 2 55 53Q56 63 65 65L98 70 65 75Q56 77 55 87L50 138 45 87Q44 77 35 75L2 70 35 65Q44 63 45 53Z" fill="currentColor"/></svg>
+    </button>
   </main>
   <section class="showcase-view" aria-label="观赏模式" hidden>
     <button class="return-profile" type="button">返回个人介绍</button>
