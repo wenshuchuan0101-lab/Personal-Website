@@ -91,8 +91,7 @@
         <div class="profile-bottom"><p class="profile-roles">${profile.roles.map((role) => `<span>${escape(text(role))}</span>`).join('<span class="role-slash" aria-hidden="true">/</span>')}</p></div>
       </section>
       <section id="growth" class="portfolio-section growth-section" aria-labelledby="growth-heading">
-        ${sectionHeading({ zh: labels.zh.growth, en: labels.en.growth }, "Growth", 2)}
-        <ol class="growth-list">${data.timeline.map((item) => `<li class="growth-item reveal"><span class="growth-date">${escape(item.date)}</span><h3>${escape(text(item.label))}</h3>${item.works.length ? `<p class="growth-works">${item.works.map((work) => escape(text(work))).join(" / ")}</p>` : ""}</li>`).join("")}</ol>
+        ${window.GrowthMountain.render(data.timeline, language, sectionHeading({ zh: labels.zh.growth, en: labels.en.growth }, "Growth", 2), data.growthChart)}
       </section>
       ${data.groups.map((group, index) => `<section id="${escape(group.id)}" class="portfolio-section projects-section ${escape(group.id)}-section" aria-labelledby="${escape(group.id)}-heading">${sectionHeading(group.title, group.english, index + 3, group.projects.length)}<div class="project-grid">${group.projects.map(projectCard).join("")}</div></section>`).join("")}`;
     // 标题 ID 与分区的可访问名称保持对应。
@@ -117,6 +116,7 @@
       if (event.pointerType === "mouse") setNameFlipped(false);
     });
     nameButton.addEventListener("click", () => setNameFlipped(!nameFlipped));
+    window.GrowthMountain.mount(root, data.timeline, language, data.growthChart);
     observeReveals();
     updateScrollState();
     if (openedProject) renderDetail(openedProject);
@@ -156,6 +156,7 @@
     const starY = document.querySelector(".language-star").getBoundingClientRect().y + 25;
     const starSection = sections.filter((section) => section.offsetTop <= root.scrollTop + starY).at(-1) || sections[0];
     document.body.dataset.quickBackdrop = starSection.id;
+    window.GrowthMountain.update();
   }
 
   function navigate(id) {

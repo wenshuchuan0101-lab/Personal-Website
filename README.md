@@ -14,6 +14,12 @@
 - `portfolio.css`：开头的 `--portfolio-blue`、`--portfolio-navy`、`--portfolio-orange`、`--portfolio-paper` 调整配色；`--portfolio-side` 和 `--portfolio-gutter` 调整正文留白。侧栏宽度、字号、作品比例和动效也在此文件修改。
 - `portfolio.js`：内容渲染、滚动定位、分区高亮、淡入、作品详情空位及语言联动。
 
+成长过程使用深蓝底、蓝紫色山体的折线时间图。学习内容为白字，作品为橙字；节点带轻微辉光，滚动时沿时间推进，抵达最新记录后最后一段折线变橙色，早期节点和文字缩小，视角拉远，后方山脊向上延伸。延伸部分没有虚构日期或经历。下方箭头可以逐项查看所有记录，支持键盘左右方向键、Home 和 End；系统设置减少动态效果时，默认显示完整山体，箭头仍可查看各阶段。
+
+- `portfolio-data.js` 的 `timeline` 继续保存全部成长文案，`kind: "study"` 显示白色学习内容，`kind: "work"` 显示橙色作品；学习阶段的 `works` 字段仍以橙色显示。
+- `growthChart.elevations` 调整各节点造型高度，数值范围 0—1，仅用于山势构图，不是能力或成绩数据。增添成长记录后，没有填写高度的节点也会自动生成造型。`growthChart.scrollDistance` 调整这段滚动叙事的长度。
+- `growth-chart.css` 调整深蓝、蓝紫、白和橙的配色、辉光和布局；`growth-chart.js` 负责折线、山体、视角缩放与当前记录。所有图形均为可编辑 SVG，没有固定成图片。
+
 将封面文件放在 `assets/` 下，在相应作品中填写 `cover: "./assets/文件名.jpg"`；`coverPosition` 控制裁切位置，例如 `"center"` 或 `"50% 30%"`。封面路径为空时保留带编号的色块，不请求不存在的图片。
 
 每个作品的 `detail` 对象预留后续素材：

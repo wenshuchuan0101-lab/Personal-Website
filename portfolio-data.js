@@ -15,74 +15,93 @@ const PORTFOLIO_CONTENT = {
       { zh: "AIGC影像游戏全流程", en: "Full-process AIGC filmmaking & game production" },
     ],
   },
+  // 山脊高度只用于造型，不表示分数；数组可随成长记录增删调整。
+  growthChart: {
+    elevations: [0.12, 0.19, 0.15, 0.3, 0.25, 0.43, 0.36, 0.55, 0.49, 0.68, 0.61, 0.82, 0.74, 0.91],
+    scrollDistance: 1800,
+  },
   timeline: [
     {
       date: "2024.09 — 2024.12",
+      kind: "study",
       label: { zh: "造型基础", en: "Fundamentals of Form" },
       works: [],
     },
     {
       date: "2024.12 — 2025.03",
+      kind: "study",
       label: { zh: "色彩规律", en: "Principles of Color" },
       works: [],
     },
     {
       date: "2025.03 — 2025.04",
+      kind: "study",
       label: { zh: "项目策划与执行", en: "Project Planning & Execution" },
       works: [],
     },
     {
       date: "2025.04 — 2025.05",
+      kind: "study",
       label: { zh: "图像叙事基础", en: "Fundamentals of Visual Storytelling" },
       works: [],
     },
     {
       date: "2025.05 — 2025.09",
+      kind: "study",
       label: { zh: "软件基础", en: "Software Fundamentals" },
       works: [],
     },
     {
       date: "2025.09 — 2025.10",
+      kind: "study",
       label: { zh: "动画造型基础", en: "Fundamentals of Animation Design" },
       works: [],
     },
     {
       date: "2025.10 — 2025.11",
+      kind: "study",
       label: { zh: "运动规律", en: "Principles of Motion" },
       works: [],
     },
     {
       date: "2025.11 — 2025.12",
+      kind: "study",
       label: { zh: "AIGC影像", en: "AIGC Film" },
       works: [{ zh: "花房", en: "The Flower Room" }],
     },
     {
       date: "2025.12 — 2026.02",
+      kind: "study",
       label: { zh: "视听语言与编导基础", en: "Fundamentals of Audiovisual Language & Directing" },
       works: [{ zh: "巴别塔", en: "Tower of Babel" }],
     },
     {
       date: "2026.05",
+      kind: "work",
       label: { zh: "鱼龙舞", en: "Yulong Dance" },
       works: [],
     },
     {
       date: "2026.07",
+      kind: "work",
       label: { zh: "藏锋", en: "Cangfeng" },
       works: [],
     },
     {
       date: "2026.09",
+      kind: "work",
       label: { zh: "Zephyrus", en: "Zephyrus" },
       works: [],
     },
     {
       date: "2026.10",
+      kind: "work",
       label: { zh: "怪诞花园 / 花房", en: "Grotesque Garden / The Flower Room" },
       works: [],
     },
     {
       date: "2026.11",
+      kind: "work",
       label: { zh: "课堂狂想 / 第四色温", en: "Classroom Rhapsody / The Fourth Color Temperature" },
       works: [],
     },
