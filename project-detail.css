@@ -34,6 +34,7 @@ html[lang="en"] .work-detail-category { font-size: 18px; }
 .case-copy { grid-column: span 4; min-width: 0; padding: 0 0 0 12px; }
 .case-spread[data-emphasis="true"] > .case-copy { grid-column: span 2; }
 .case-copy p { margin: 0; white-space: pre-wrap; }
+.case-copy-title { margin: 0 0 16px; color: #ffb576; font-size: clamp(18px, 2vw, 26px); font-weight: 200; line-height: 1.6; letter-spacing: .08em; }
 .case-image-open { display: block; width: 100%; margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; cursor: zoom-in; }
 .work-detail-body .case-image img { display: block; width: 100%; max-height: none; height: auto; margin: 0; }
 .case-image-number { margin-top: 9px; color: #e3d9c77d; font: 14px/1 "Cormorant Garamond", Georgia, serif; letter-spacing: .08em; }

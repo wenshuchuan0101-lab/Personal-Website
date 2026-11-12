@@ -73,12 +73,19 @@
         spread.dataset.sourceName = item.sourceName || "";
         const copy = document.createElement("div");
         copy.className = "case-copy";
+        const itemTitle = text(item.title);
+        if (itemTitle) {
+          const heading = document.createElement("h3");
+          heading.className = "case-copy-title";
+          heading.textContent = itemTitle;
+          copy.append(heading);
+        }
         if (text(item.text)) {
           const paragraph = document.createElement("p");
           paragraph.textContent = text(item.text);
           copy.append(paragraph);
         }
-        spread.append(imageFigure(item.src, text(project.title), index, index === 0), copy);
+        spread.append(imageFigure(item.src, itemTitle || text(project.title), index, index === 0), copy);
         spreads.append(spread);
       });
       section.append(spreads);

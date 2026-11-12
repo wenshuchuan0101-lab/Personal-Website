@@ -142,6 +142,7 @@ const PORTFOLIO_CONTENT = {
               { src: "./assets/yulong-dance-poster.png", sourceName: "鱼龙舞.png", text: { zh: "", en: "" } },
               { src: "./assets/yulong-showcase-02.jpg", sourceName: "鱼龙舞.jpg", text: { zh: "", en: "" } },
               { src: "./assets/yulong-showcase-03.png", sourceName: "鱼龙舞 (2).png", emphasis: true, text: { zh: "", en: "" } },
+              { src: "./assets/yulong-scene-concept.jpg", sourceName: "场景概念设计图.jpg", title: { zh: "场景概念设计图", en: "Scene Concept Design" }, text: { zh: "", en: "" } },
             ],
             video: "",
             posterImages: [],
