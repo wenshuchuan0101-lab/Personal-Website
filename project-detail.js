@@ -11,9 +11,12 @@
   const imageViewer = document.querySelector(".detail-image-viewer");
   const originalImage = imageViewer.querySelector("img");
   let previousOverflow = "";
+  let galleryObserver;
+  let resizeGallery;
+  window.addEventListener("resize", () => resizeGallery?.());
   const labels = {
-    zh: { back: "返回", title: "作品详情", empty: "作品展示预留区域", play: "游玩", showcase: "作品展示", concept: "概念设计", whitebox: "白盒搭建", openImage: "查看原图", closeImage: "关闭图片" },
-    en: { back: "Back", title: "Project details", empty: "Reserved project presentation area", play: "Play", showcase: "Showcase", concept: "Concept Design", whitebox: "Whitebox Build", openImage: "View original image", closeImage: "Close image" },
+    zh: { back: "返回", title: "作品详情", empty: "作品展示预留区域", play: "游玩", showcase: "作品展示", concept: "概念设计", conceptGallery: "概念设计展示", whitebox: "白盒搭建", openImage: "查看原图", closeImage: "关闭图片" },
+    en: { back: "Back", title: "Project details", empty: "Reserved project presentation area", play: "Play", showcase: "Showcase", concept: "Concept Design", conceptGallery: "Concept Design Showcase", whitebox: "Whitebox Build", openImage: "View original image", closeImage: "Close image" },
   };
   function imageFigure(source, title, index, eager = false) {
     const figure = document.createElement("figure");
@@ -60,7 +63,7 @@
     return section;
   }
   function renderCaseStudy(detail) {
-    const total = [detail.showcase, detail.conceptImages, detail.whiteboxImages].filter((images) => images?.length).length;
+    const total = [detail.showcase, detail.conceptGallery, detail.conceptImages, detail.whiteboxImages].filter((images) => images?.length).length;
     let index = 0;
     if (detail.showcase?.length) {
       const section = caseSection("showcase", ++index, total);
@@ -91,6 +94,77 @@
       section.append(spreads);
       body.append(section);
     }
+    if (detail.conceptGallery?.length) {
+      const section = caseSection("conceptGallery", ++index, total);
+      const gallery = document.createElement("div");
+      gallery.className = "concept-accordion";
+      gallery.setAttribute("role", "group");
+      gallery.setAttribute("aria-label", labels[language].conceptGallery);
+      const caption = document.createElement("p");
+      caption.className = "concept-accordion-count";
+      caption.setAttribute("aria-live", "polite");
+      let active = 0;
+      const buttons = [];
+      const resize = () => {
+        const item = detail.conceptGallery[active];
+        const image = buttons[active].querySelector("img");
+        const ratio = image.naturalWidth ? image.naturalWidth / image.naturalHeight : item.width / item.height;
+        const width = Math.min(gallery.clientWidth * .72, innerHeight * .68 * ratio);
+        gallery.style.setProperty("--concept-active-width", `${width}px`);
+        gallery.style.setProperty("--concept-height", `${width / ratio}px`);
+      };
+      const select = (index) => {
+        active = index;
+        buttons.forEach((button, i) => button.setAttribute("aria-pressed", String(i === active)));
+        caption.textContent = `${String(active + 1).padStart(2, "0")} / ${String(buttons.length).padStart(2, "0")}`;
+        resize();
+      };
+      detail.conceptGallery.forEach((item, index) => {
+        const button = document.createElement("button");
+        button.className = "concept-panel";
+        button.type = "button";
+        button.dataset.imageSource = item.src;
+        button.setAttribute("aria-label", `${labels[language].conceptGallery} · ${index + 1} / ${detail.conceptGallery.length}`);
+        const image = document.createElement("img");
+        image.src = item.src;
+        image.alt = `${labels[language].conceptGallery} · ${index + 1}`;
+        image.width = item.width;
+        image.height = item.height;
+        image.decoding = "async";
+        image.draggable = false;
+        image.style.objectPosition = item.position || "center";
+        image.addEventListener("load", () => { if (index === active) resize(); });
+        button.append(image);
+        button.addEventListener("pointerenter", (event) => { if (event.pointerType === "mouse") select(index); });
+        button.addEventListener("focus", () => { if (!button.matches(":active")) select(index); });
+        // 触屏首次点按展开，再次点按查看原图。
+        let wasSelected = true;
+        button.addEventListener("pointerdown", () => { wasSelected = active === index; });
+        button.addEventListener("click", (event) => {
+          if (event.detail > 0 && !wasSelected) {
+            event.stopPropagation();
+            select(index);
+          }
+        });
+        button.addEventListener("keydown", (event) => {
+          const next = event.key === "ArrowRight" ? (index + 1) % buttons.length
+            : event.key === "ArrowLeft" ? (index - 1 + buttons.length) % buttons.length
+            : event.key === "Home" ? 0 : event.key === "End" ? buttons.length - 1 : null;
+          if (next === null) return;
+          event.preventDefault();
+          select(next);
+          buttons[next].focus({ preventScroll: true });
+        });
+        buttons.push(button);
+        gallery.append(button);
+      });
+      section.append(gallery, caption);
+      body.append(section);
+      select(0);
+      resizeGallery = resize;
+      galleryObserver = new ResizeObserver(resize);
+      galleryObserver.observe(gallery);
+    }
     if (detail.conceptImages?.length) {
       const section = caseSection("concept", ++index, total);
       const grid = document.createElement("div");
@@ -109,6 +183,8 @@
     }
   }
   function render() {
+    galleryObserver?.disconnect();
+    resizeGallery = undefined;
     const words = labels[language];
     document.documentElement.lang = language === "zh" ? "zh-CN" : "en";
     document.title = project ? `${text(project.title)} · ${words.title}` : words.title;
@@ -119,7 +195,7 @@
     languageButton.setAttribute("aria-label", language === "zh" ? "Switch to English" : "切换为中文");
     body.replaceChildren();
     const detail = project?.detail;
-    const hasCaseStudy = Boolean(detail?.showcase?.length || detail?.conceptImages?.length || detail?.whiteboxImages?.length);
+    const hasCaseStudy = Boolean(detail?.showcase?.length || detail?.conceptGallery?.length || detail?.conceptImages?.length || detail?.whiteboxImages?.length);
     document.body.dataset.detailLayout = hasCaseStudy ? "case-study" : "plain";
     imageViewer.setAttribute("aria-label", words.openImage);
     imageViewer.querySelector("button").setAttribute("aria-label", words.closeImage);

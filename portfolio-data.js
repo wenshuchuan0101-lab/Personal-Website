@@ -250,6 +250,17 @@ const PORTFOLIO_CONTENT = {
           coverPosition: "center",
           detail: {
             description: { zh: "", en: "" },
+            // 顺序、图片及局部裁切位置均可替换；悬停展开时完整显示原图。
+            conceptGallery: [
+              { src: "./assets/grotesque-garden-concept-01.jpg", width: 2684, height: 1244, position: "50% 50%" },
+              { src: "./assets/grotesque-garden-concept-02.jpg", width: 2660, height: 1264, position: "50% 50%" },
+              { src: "./assets/grotesque-garden-concept-03.jpg", width: 2672, height: 1262, position: "50% 50%" },
+              { src: "./assets/grotesque-garden-concept-04.jpg", width: 8007, height: 1080, position: "50% 50%" },
+              { src: "./assets/grotesque-garden-concept-05.jpg", width: 2330, height: 1280, position: "50% 50%" },
+              { src: "./assets/grotesque-garden-concept-06.jpg", width: 1768, height: 1179, position: "50% 50%" },
+              { src: "./assets/grotesque-garden-concept-07.jpg", width: 1618, height: 1080, position: "50% 50%" },
+              { src: "./assets/grotesque-garden-concept-08.jpg", width: 1024, height: 648, position: "50% 50%" },
+            ],
             images: [],
             video: "",
             posterImages: [],

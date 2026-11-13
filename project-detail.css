@@ -42,6 +42,15 @@ html[lang="en"] .work-detail-category { font-size: 18px; }
 .case-concept-grid .case-image-open { background: #e0e0e0; }
 .case-concept-grid img { aspect-ratio: 16 / 9; object-fit: contain; }
 .case-whitebox-images { display: grid; gap: 30px; width: 64%; }
+.concept-accordion { display: flex; width: 100%; height: var(--concept-height, 400px); gap: 0; transition: height .65s cubic-bezier(.22,.68,.2,1); }
+.concept-panel { position: relative; flex: 1 1 0; min-width: 0; height: 100%; margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; overflow: hidden; cursor: pointer; transition: flex-basis .65s cubic-bezier(.22,.68,.2,1), flex-grow .65s cubic-bezier(.22,.68,.2,1); }
+.concept-panel[aria-pressed="true"] { flex: 0 0 var(--concept-active-width, 72%); cursor: zoom-in; }
+.work-detail-body .concept-panel img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; max-height: none; max-width: none; margin: 0; object-fit: cover; }
+.concept-panel:focus-visible { z-index: 1; outline-offset: -3px !important; }
+.concept-accordion-count { margin: 14px 0 0; color: #ffb576; font: 16px/1 "Cormorant Garamond", Georgia, serif; letter-spacing: .12em; }
+@media (prefers-reduced-motion: reduce) {
+  .concept-accordion, .concept-panel { transition: none; }
+}
 .detail-image-viewer { width: fit-content; max-width: calc(100vw - 40px); max-height: calc(100svh - 40px); padding: 16px; border: 1px solid #f5efe42b; background: #080820; color: #f5efe4; overflow: auto; }
 .detail-image-viewer::backdrop { background: #020510ed; backdrop-filter: blur(8px); }
 .detail-image-original { display: block; width: auto; max-width: calc(100vw - 76px); height: auto; max-height: calc(100svh - 76px); object-fit: contain; }
