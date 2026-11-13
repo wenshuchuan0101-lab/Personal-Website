@@ -11,13 +11,14 @@
   const imageViewer = document.querySelector(".detail-image-viewer");
   const originalImage = imageViewer.querySelector("img");
   let previousOverflow = "";
-  let galleryObserver;
-  let resizeGallery;
+  const galleryObservers = [];
+  const galleryResizers = [];
+  const resizeGalleries = () => galleryResizers.forEach((resize) => resize());
   let detailPage = parameters.get("page") === "2" ? 1 : 0;
-  window.addEventListener("resize", () => resizeGallery?.());
+  window.addEventListener("resize", resizeGalleries);
   const labels = {
-    zh: { back: "返回", title: "作品详情", empty: "作品展示预留区域", play: "游玩", showcase: "作品展示", promo: "宣传动画", introduction: "作品介绍", kind: "类型", tools: "工具", pages: "展示分页", concept: "概念设计", conceptGallery: "概念设计展示", whitebox: "白盒搭建", openImage: "查看原图", closeImage: "关闭图片" },
-    en: { back: "Back", title: "Project details", empty: "Reserved project presentation area", play: "Play", showcase: "Showcase", promo: "Promotional Animation", introduction: "About the Project", kind: "Type", tools: "Tools", pages: "Showcase pages", concept: "Concept Design", conceptGallery: "Concept Design Showcase", whitebox: "Whitebox Build", openImage: "View original image", closeImage: "Close image" },
+    zh: { back: "返回", title: "作品详情", empty: "作品展示预留区域", play: "游玩", showcase: "作品展示", promo: "宣传动画", introduction: "作品介绍", kind: "类型", tools: "工具", pages: "展示分页", concept: "概念设计", conceptGallery: "概念设计展示", storyboardGallery: "分镜设计", composition: "构图测试", whitebox: "白盒搭建", openImage: "查看原图", closeImage: "关闭图片" },
+    en: { back: "Back", title: "Project details", empty: "Reserved project presentation area", play: "Play", showcase: "Showcase", promo: "Promotional Animation", introduction: "About the Project", kind: "Type", tools: "Tools", pages: "Showcase pages", concept: "Concept Design", conceptGallery: "Concept Design Showcase", storyboardGallery: "Storyboard Design", composition: "Composition Test", whitebox: "Whitebox Build", openImage: "View original image", closeImage: "Close image" },
   };
   function imageFigure(source, title, index, eager = false) {
     const figure = document.createElement("figure");
@@ -39,7 +40,7 @@
     figure.append(button, number);
     return figure;
   }
-  function caseSection(kind, index, total) {
+  function caseSection(kind, index, total, customTitle) {
     const section = document.createElement("section");
     section.className = `case-section case-${kind}`;
     section.id = `case-${kind}`;
@@ -51,14 +52,14 @@
     number.textContent = `${String(index).padStart(2, "0")} / ${String(total).padStart(2, "0")}`;
     const title = document.createElement("h2");
     title.id = `case-${kind}-title`;
-    title.textContent = labels[language][kind];
+    title.textContent = text(customTitle) || labels[language][kind];
     section.setAttribute("aria-labelledby", title.id);
     heading.append(number, title);
     if (language === "zh") {
       const english = document.createElement("p");
       english.lang = "en";
       english.className = "case-section-english";
-      english.textContent = labels.en[kind];
+      english.textContent = customTitle?.en || labels.en[kind];
       heading.append(english);
     }
     section.append(heading);
@@ -104,7 +105,7 @@
     return figure;
   }
   function renderCaseStudy(detail) {
-    const total = [detail.promo?.src, detail.showcase?.length, detail.conceptGallery?.length, detail.conceptImages?.length, detail.whiteboxImages?.length].filter(Boolean).length;
+    const total = [detail.promo?.src, detail.showcase?.length, detail.conceptGallery?.length, detail.storyboardGallery?.length, detail.compositionImages?.length, detail.conceptImages?.length, detail.whiteboxImages?.length].filter(Boolean).length;
     let index = 0;
     if (detail.promo?.src) {
       const section = caseSection("promo", ++index, total);
@@ -153,23 +154,26 @@
       section.append(spreads);
       body.append(section);
     }
-    if (detail.conceptGallery?.length) {
-      const section = caseSection("conceptGallery", ++index, total);
+    for (const [kind, images] of [["conceptGallery", detail.conceptGallery], ["storyboardGallery", detail.storyboardGallery]]) {
+      if (!images?.length) continue;
+      const customTitle = kind === "conceptGallery" ? detail.conceptGalleryTitle : undefined;
+      const title = text(customTitle) || labels[language][kind];
+      const section = caseSection(kind, ++index, total, customTitle);
       const gallery = document.createElement("div");
       gallery.className = "concept-accordion";
       gallery.setAttribute("role", "group");
-      gallery.setAttribute("aria-label", labels[language].conceptGallery);
+      gallery.setAttribute("aria-label", title);
       const caption = document.createElement("p");
       caption.className = "concept-accordion-count";
       caption.setAttribute("aria-live", "polite");
       let active = 0;
       const buttons = [];
       const resize = () => {
-        const item = detail.conceptGallery[active];
+        const item = images[active];
         const image = buttons[active].querySelector("img");
         const ratio = image.naturalWidth ? image.naturalWidth / image.naturalHeight : item.width / item.height;
         // 所有窄幅共用固定高度，切换时只改变横向比例。
-        const widest = Math.max(...detail.conceptGallery.map((item, index) => {
+        const widest = Math.max(...images.map((item, index) => {
           const image = buttons[index].querySelector("img");
           return image.naturalWidth ? image.naturalWidth / image.naturalHeight : item.width / item.height;
         }));
@@ -183,15 +187,15 @@
         caption.textContent = `${String(active + 1).padStart(2, "0")} / ${String(buttons.length).padStart(2, "0")}`;
         resize();
       };
-      detail.conceptGallery.forEach((item, index) => {
+      images.forEach((item, index) => {
         const button = document.createElement("button");
         button.className = "concept-panel";
         button.type = "button";
         button.dataset.imageSource = item.src;
-        button.setAttribute("aria-label", `${labels[language].conceptGallery} · ${index + 1} / ${detail.conceptGallery.length}`);
+        button.setAttribute("aria-label", `${title} · ${index + 1} / ${images.length}`);
         const image = document.createElement("img");
         image.src = item.src;
-        image.alt = `${labels[language].conceptGallery} · ${index + 1}`;
+        image.alt = `${title} · ${index + 1}`;
         image.width = item.width;
         image.height = item.height;
         image.decoding = "async";
@@ -224,17 +228,26 @@
         gallery.append(button);
       });
       section.append(gallery, caption);
-      if (detail.conceptPanoramas?.length) {
+      if (kind === "conceptGallery" && detail.conceptPanoramas?.length) {
         const panoramas = document.createElement("div");
         panoramas.className = "concept-panoramas";
-        detail.conceptPanoramas.forEach((item, index) => panoramas.append(imageFigure(item.src, labels[language].conceptGallery, detail.conceptGallery.length + index)));
+        detail.conceptPanoramas.forEach((item, index) => panoramas.append(imageFigure(item.src, title, images.length + index)));
         section.append(panoramas);
       }
       body.append(section);
       select(0);
-      resizeGallery = resize;
-      galleryObserver = new ResizeObserver(resize);
-      galleryObserver.observe(gallery);
+      galleryResizers.push(resize);
+      const observer = new ResizeObserver(resize);
+      observer.observe(gallery);
+      galleryObservers.push(observer);
+    }
+    if (detail.compositionImages?.length) {
+      const section = caseSection("composition", ++index, total);
+      const images = document.createElement("div");
+      images.className = "case-composition-images";
+      detail.compositionImages.forEach((source, index) => images.append(imageFigure(source, labels[language].composition, index)));
+      section.append(images);
+      body.append(section);
     }
     if (detail.conceptImages?.length) {
       const section = caseSection("concept", ++index, total);
@@ -274,7 +287,7 @@
         history.pushState(null, "", url);
         navigation.scrollIntoView({ block: "start" });
       }
-      requestAnimationFrame(() => resizeGallery?.());
+      requestAnimationFrame(resizeGalleries);
     };
     sections.forEach((section, index) => {
       const button = document.createElement("button");
@@ -292,8 +305,8 @@
     showPage(detailPage);
   }
   function render() {
-    galleryObserver?.disconnect();
-    resizeGallery = undefined;
+    galleryObservers.splice(0).forEach((observer) => observer.disconnect());
+    galleryResizers.length = 0;
     const words = labels[language];
     document.documentElement.lang = language === "zh" ? "zh-CN" : "en";
     document.title = project ? `${text(project.title)} · ${words.title}` : words.title;
@@ -307,7 +320,7 @@
     const award = document.querySelector(".work-detail-award");
     award.hidden = !detail?.showAward || !text(project?.award);
     award.textContent = award.hidden ? "" : `${language === "zh" ? "奖项：" : "Award: "}${text(project.award)}`;
-    const hasCaseStudy = Boolean(detail?.promo?.src || detail?.showcase?.length || detail?.conceptGallery?.length || detail?.conceptImages?.length || detail?.whiteboxImages?.length);
+    const hasCaseStudy = Boolean(detail?.promo?.src || detail?.showcase?.length || detail?.conceptGallery?.length || detail?.storyboardGallery?.length || detail?.compositionImages?.length || detail?.conceptImages?.length || detail?.whiteboxImages?.length);
     document.body.dataset.detailLayout = hasCaseStudy ? "case-study" : "plain";
     document.body.dataset.detailPaginated = String(Boolean(detail?.paginated));
     imageViewer.setAttribute("aria-label", words.openImage);
