@@ -139,9 +139,9 @@ const PORTFOLIO_CONTENT = {
             images: [],
             // 原文件名倒序；最后一张为较大的展示图，text 是旁边预留的文字。
             showcase: [
-              { src: "./assets/yulong-dance-poster.png", sourceName: "鱼龙舞.png", text: { zh: "", en: "" } },
+              { src: "./assets/yulong-dance-poster.png", sourceName: "鱼龙舞.png", emphasis: true, text: { zh: "", en: "" } },
               { src: "./assets/yulong-showcase-02.jpg", sourceName: "鱼龙舞.jpg", text: { zh: "", en: "" } },
-              { src: "./assets/yulong-showcase-03.png", sourceName: "鱼龙舞 (2).png", emphasis: true, text: { zh: "", en: "" } },
+              { src: "./assets/yulong-showcase-03.png", sourceName: "鱼龙舞 (2).png", text: { zh: "", en: "" } },
               { src: "./assets/yulong-scene-concept.jpg", sourceName: "场景概念设计图.jpg", title: { zh: "场景概念设计图", en: "Scene Concept Design" }, text: { zh: "", en: "" } },
               { src: "./assets/yulong-unlit-render.jpg", sourceName: "无灯光渲染图.jpg", title: { zh: "无灯光渲染图", en: "Unlit Render" }, text: { zh: "", en: "" } },
             ],
