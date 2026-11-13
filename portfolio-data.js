@@ -235,7 +235,7 @@ const PORTFOLIO_CONTENT = {
           title: { zh: "怪诞花园", en: "Grotesque Garden" },
           kind: { zh: "交互 / 游戏", en: "Interaction / Game" },
           role: null,
-          tools: "Godot + Codex + Tripo",
+          tools: "Godot＋Midjourney＋Codex",
           duration: { zh: "一个月", en: "1 month" },
           award: {
             zh: "Tripo世界构建黑客松S1 Tripo方向赛道冠军",
@@ -250,6 +250,19 @@ const PORTFOLIO_CONTENT = {
           coverPosition: "center",
           detail: {
             description: { zh: "", en: "" },
+            paginated: true,
+            promo: {
+              src: "./assets/grotesque-garden-promo.mp4",
+              poster: "./assets/grotesque-garden-promo-cover.jpg",
+              introduction: {
+                title: { zh: "《怪诞花园》", en: "Grotesque Garden" },
+                kind: { zh: "交互游戏", en: "Interactive Game" },
+                text: {
+                  zh: "《怪诞花园》的初想法出自于一场展览，我们想要把一个光怪陆离的，由各种不同的材质，风格和色彩构成的花园搬到线上，我们让玩家可以变成蝴蝶，虫子，小猫，以不同的视角穿梭在这个美丽的花园里，从想法到制作落地，大概花了三个多周的时间，我们将这件作品带去上海的邮轮，在线下也搭建了这样的花园，蝴蝶仍然在飞，祝你玩的开心。",
+                  en: "Grotesque Garden began with an exhibition. We wanted to bring an extraordinary garden online, combining a variety of materials, styles and colors. Players can become butterflies, insects or cats, exploring this beautiful garden from different perspectives. From the first idea to the finished work, the project took just over three weeks. We then brought it aboard a cruise ship in Shanghai and built a physical garden there, too. The butterflies are still flying. Have fun.",
+                },
+              },
+            },
             // 顺序、图片及局部裁切位置均可替换；悬停展开时完整显示原图。
             conceptGallery: [
               { src: "./assets/grotesque-garden-concept-01.jpg", width: 2684, height: 1244, position: "50% 50%" },

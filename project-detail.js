@@ -13,10 +13,11 @@
   let previousOverflow = "";
   let galleryObserver;
   let resizeGallery;
+  let detailPage = parameters.get("page") === "2" ? 1 : 0;
   window.addEventListener("resize", () => resizeGallery?.());
   const labels = {
-    zh: { back: "返回", title: "作品详情", empty: "作品展示预留区域", play: "游玩", showcase: "作品展示", concept: "概念设计", conceptGallery: "概念设计展示", whitebox: "白盒搭建", openImage: "查看原图", closeImage: "关闭图片" },
-    en: { back: "Back", title: "Project details", empty: "Reserved project presentation area", play: "Play", showcase: "Showcase", concept: "Concept Design", conceptGallery: "Concept Design Showcase", whitebox: "Whitebox Build", openImage: "View original image", closeImage: "Close image" },
+    zh: { back: "返回", title: "作品详情", empty: "作品展示预留区域", play: "游玩", showcase: "作品展示", promo: "宣传动画", introduction: "作品介绍", kind: "类型", tools: "工具", pages: "展示分页", concept: "概念设计", conceptGallery: "概念设计展示", whitebox: "白盒搭建", openImage: "查看原图", closeImage: "关闭图片" },
+    en: { back: "Back", title: "Project details", empty: "Reserved project presentation area", play: "Play", showcase: "Showcase", promo: "Promotional Animation", introduction: "About the Project", kind: "Type", tools: "Tools", pages: "Showcase pages", concept: "Concept Design", conceptGallery: "Concept Design Showcase", whitebox: "Whitebox Build", openImage: "View original image", closeImage: "Close image" },
   };
   function imageFigure(source, title, index, eager = false) {
     const figure = document.createElement("figure");
@@ -41,6 +42,7 @@
   function caseSection(kind, index, total) {
     const section = document.createElement("section");
     section.className = `case-section case-${kind}`;
+    section.id = `case-${kind}`;
     section.dataset.caseSection = kind;
     const heading = document.createElement("header");
     heading.className = "case-section-heading";
@@ -63,8 +65,44 @@
     return section;
   }
   function renderCaseStudy(detail) {
-    const total = [detail.showcase, detail.conceptGallery, detail.conceptImages, detail.whiteboxImages].filter((images) => images?.length).length;
+    const total = [detail.promo?.src, detail.showcase?.length, detail.conceptGallery?.length, detail.conceptImages?.length, detail.whiteboxImages?.length].filter(Boolean).length;
     let index = 0;
+    if (detail.promo?.src) {
+      const section = caseSection("promo", ++index, total);
+      const video = document.createElement("video");
+      video.className = "case-promo-video";
+      video.src = detail.promo.src;
+      video.poster = detail.promo.poster || project.poster || "";
+      video.controls = true;
+      video.playsInline = true;
+      video.preload = "metadata";
+      video.setAttribute("aria-label", labels[language].promo);
+      section.append(video);
+      const introduction = detail.promo.introduction;
+      if (introduction) {
+        const article = document.createElement("article");
+        article.className = "case-project-introduction";
+        const label = document.createElement("p");
+        label.className = "case-introduction-label";
+        label.textContent = labels[language].introduction;
+        const title = document.createElement("h3");
+        title.textContent = text(introduction.title) || text(project.title);
+        const metadata = document.createElement("dl");
+        for (const [key, value] of [["kind", text(introduction.kind)], ["tools", project.tools]]) {
+          const term = document.createElement("dt");
+          term.textContent = `${labels[language][key]}：`;
+          const definition = document.createElement("dd");
+          definition.textContent = value;
+          metadata.append(term, definition);
+        }
+        const paragraph = document.createElement("p");
+        paragraph.className = "case-introduction-text";
+        paragraph.textContent = text(introduction.text);
+        article.append(label, title, metadata, paragraph);
+        section.append(article);
+      }
+      body.append(section);
+    }
     if (detail.showcase?.length) {
       const section = caseSection("showcase", ++index, total);
       const spreads = document.createElement("div");
@@ -181,6 +219,44 @@
       section.append(images);
       body.append(section);
     }
+    if (detail.paginated) renderPagination();
+  }
+  function renderPagination() {
+    const sections = [...body.querySelectorAll(":scope > .case-section")];
+    const navigation = document.createElement("nav");
+    navigation.className = "case-pagination";
+    navigation.setAttribute("aria-label", labels[language].pages);
+    detailPage = Math.min(detailPage, sections.length - 1);
+    const showPage = (index, updateHistory = false) => {
+      body.querySelectorAll("video").forEach((video) => video.pause());
+      detailPage = index;
+      sections.forEach((section, i) => { section.hidden = i !== index; });
+      [...navigation.children].forEach((button, i) => {
+        if (i === index) button.setAttribute("aria-current", "page");
+        else button.removeAttribute("aria-current");
+      });
+      if (updateHistory) {
+        const url = new URL(location.href);
+        url.searchParams.set("page", String(index + 1));
+        history.pushState(null, "", url);
+        navigation.scrollIntoView({ block: "start" });
+      }
+      requestAnimationFrame(() => resizeGallery?.());
+    };
+    sections.forEach((section, index) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.setAttribute("aria-controls", section.id);
+      const number = document.createElement("span");
+      number.textContent = String(index + 1).padStart(2, "0");
+      const title = document.createElement("span");
+      title.textContent = labels[language][section.dataset.caseSection];
+      button.append(number, title);
+      button.addEventListener("click", () => showPage(index, true));
+      navigation.append(button);
+    });
+    body.prepend(navigation);
+    showPage(detailPage);
   }
   function render() {
     galleryObserver?.disconnect();
@@ -195,8 +271,9 @@
     languageButton.setAttribute("aria-label", language === "zh" ? "Switch to English" : "切换为中文");
     body.replaceChildren();
     const detail = project?.detail;
-    const hasCaseStudy = Boolean(detail?.showcase?.length || detail?.conceptGallery?.length || detail?.conceptImages?.length || detail?.whiteboxImages?.length);
+    const hasCaseStudy = Boolean(detail?.promo?.src || detail?.showcase?.length || detail?.conceptGallery?.length || detail?.conceptImages?.length || detail?.whiteboxImages?.length);
     document.body.dataset.detailLayout = hasCaseStudy ? "case-study" : "plain";
+    document.body.dataset.detailPaginated = String(Boolean(detail?.paginated));
     imageViewer.setAttribute("aria-label", words.openImage);
     imageViewer.querySelector("button").setAttribute("aria-label", words.closeImage);
     const hasContent = detail && (hasCaseStudy || text(detail.description) || detail.images.length || detail.video || detail.posterImages.length || detail.playUrl);
@@ -263,6 +340,12 @@
     const url = new URL(location.href);
     url.searchParams.set("lang", language);
     history.replaceState(null, "", url);
+    render();
+  });
+  window.addEventListener("popstate", () => {
+    body.querySelectorAll("video").forEach((video) => video.pause());
+    detailPage = new URLSearchParams(location.search).get("page") === "2" ? 1 : 0;
+    language = new URLSearchParams(location.search).get("lang") === "en" ? "en" : "zh";
     render();
   });
   render();
