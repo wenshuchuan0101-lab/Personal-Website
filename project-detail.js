@@ -64,6 +64,45 @@
     section.append(heading);
     return section;
   }
+  function projectIntroduction(introduction) {
+    const article = document.createElement("article");
+    article.className = "case-project-introduction";
+    const label = document.createElement("p");
+    label.className = "case-introduction-label";
+    label.textContent = labels[language].introduction;
+    const title = document.createElement("h3");
+    title.textContent = text(introduction.title) || text(project.title);
+    const metadata = document.createElement("dl");
+    for (const [key, value] of [["kind", text(introduction.kind)], ["tools", introduction.tools || project.tools]]) {
+      const term = document.createElement("dt");
+      term.textContent = `${labels[language][key]}：`;
+      const definition = document.createElement("dd");
+      definition.textContent = value;
+      metadata.append(term, definition);
+    }
+    const paragraph = document.createElement("p");
+    paragraph.className = "case-introduction-text";
+    paragraph.textContent = text(introduction.text);
+    article.append(label, title, metadata, paragraph);
+    return article;
+  }
+  function videoFigure(item, title, index) {
+    const figure = document.createElement("figure");
+    figure.className = "case-image case-video";
+    const video = document.createElement("video");
+    video.src = item.src;
+    video.poster = item.poster || "";
+    video.controls = true;
+    video.playsInline = true;
+    video.preload = "metadata";
+    if (item.width && item.height) video.style.aspectRatio = `${item.width} / ${item.height}`;
+    video.setAttribute("aria-label", title);
+    const number = document.createElement("figcaption");
+    number.className = "case-image-number";
+    number.textContent = String(index + 1).padStart(2, "0");
+    figure.append(video, number);
+    return figure;
+  }
   function renderCaseStudy(detail) {
     const total = [detail.promo?.src, detail.showcase?.length, detail.conceptGallery?.length, detail.conceptImages?.length, detail.whiteboxImages?.length].filter(Boolean).length;
     let index = 0;
@@ -79,28 +118,7 @@
       video.setAttribute("aria-label", labels[language].promo);
       section.append(video);
       const introduction = detail.promo.introduction;
-      if (introduction) {
-        const article = document.createElement("article");
-        article.className = "case-project-introduction";
-        const label = document.createElement("p");
-        label.className = "case-introduction-label";
-        label.textContent = labels[language].introduction;
-        const title = document.createElement("h3");
-        title.textContent = text(introduction.title) || text(project.title);
-        const metadata = document.createElement("dl");
-        for (const [key, value] of [["kind", text(introduction.kind)], ["tools", project.tools]]) {
-          const term = document.createElement("dt");
-          term.textContent = `${labels[language][key]}：`;
-          const definition = document.createElement("dd");
-          definition.textContent = value;
-          metadata.append(term, definition);
-        }
-        const paragraph = document.createElement("p");
-        paragraph.className = "case-introduction-text";
-        paragraph.textContent = text(introduction.text);
-        article.append(label, title, metadata, paragraph);
-        section.append(article);
-      }
+      if (introduction) section.append(projectIntroduction(introduction));
       body.append(section);
     }
     if (detail.showcase?.length) {
@@ -126,7 +144,10 @@
           paragraph.textContent = text(item.text);
           copy.append(paragraph);
         }
-        spread.append(imageFigure(item.src, itemTitle || text(project.title), index, index === 0), copy);
+        const media = item.type === "video" ? videoFigure(item, itemTitle || text(project.title), index)
+          : imageFigure(item.src, itemTitle || text(project.title), index, index === 0);
+        spread.append(media, copy);
+        if (item.introduction) spread.append(projectIntroduction(item.introduction));
         spreads.append(spread);
       });
       section.append(spreads);
@@ -147,9 +168,14 @@
         const item = detail.conceptGallery[active];
         const image = buttons[active].querySelector("img");
         const ratio = image.naturalWidth ? image.naturalWidth / image.naturalHeight : item.width / item.height;
-        const width = Math.min(gallery.clientWidth * .72, innerHeight * .68 * ratio);
-        gallery.style.setProperty("--concept-active-width", `${width}px`);
-        gallery.style.setProperty("--concept-height", `${width / ratio}px`);
+        // 所有窄幅共用固定高度，切换时只改变横向比例。
+        const widest = Math.max(...detail.conceptGallery.map((item, index) => {
+          const image = buttons[index].querySelector("img");
+          return image.naturalWidth ? image.naturalWidth / image.naturalHeight : item.width / item.height;
+        }));
+        const height = Math.min(gallery.clientWidth * .72 / widest, innerHeight * .68);
+        gallery.style.setProperty("--concept-active-width", `${height * ratio}px`);
+        gallery.style.setProperty("--concept-height", `${height}px`);
       };
       const select = (index) => {
         active = index;
@@ -173,7 +199,8 @@
         image.style.objectPosition = item.position || "center";
         image.addEventListener("load", () => { if (index === active) resize(); });
         button.append(image);
-        button.addEventListener("pointerenter", (event) => { if (event.pointerType === "mouse") select(index); });
+        // 跟随实际鼠标移动；卡片自身展开时不触发相邻项反复切换。
+        button.addEventListener("pointermove", (event) => { if (event.pointerType === "mouse" && active !== index) select(index); });
         button.addEventListener("focus", () => { if (!button.matches(":active")) select(index); });
         // 触屏首次点按展开，再次点按查看原图。
         let wasSelected = true;
@@ -197,6 +224,12 @@
         gallery.append(button);
       });
       section.append(gallery, caption);
+      if (detail.conceptPanoramas?.length) {
+        const panoramas = document.createElement("div");
+        panoramas.className = "concept-panoramas";
+        detail.conceptPanoramas.forEach((item, index) => panoramas.append(imageFigure(item.src, labels[language].conceptGallery, detail.conceptGallery.length + index)));
+        section.append(panoramas);
+      }
       body.append(section);
       select(0);
       resizeGallery = resize;
@@ -271,6 +304,9 @@
     languageButton.setAttribute("aria-label", language === "zh" ? "Switch to English" : "切换为中文");
     body.replaceChildren();
     const detail = project?.detail;
+    const award = document.querySelector(".work-detail-award");
+    award.hidden = !detail?.showAward || !text(project?.award);
+    award.textContent = award.hidden ? "" : `${language === "zh" ? "奖项：" : "Award: "}${text(project.award)}`;
     const hasCaseStudy = Boolean(detail?.promo?.src || detail?.showcase?.length || detail?.conceptGallery?.length || detail?.conceptImages?.length || detail?.whiteboxImages?.length);
     document.body.dataset.detailLayout = hasCaseStudy ? "case-study" : "plain";
     document.body.dataset.detailPaginated = String(Boolean(detail?.paginated));

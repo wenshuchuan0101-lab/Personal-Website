@@ -122,11 +122,11 @@ const PORTFOLIO_CONTENT = {
         {
           id: "yulong-dance",
           title: { zh: "鱼龙舞", en: "Yulong Dance" },
-          kind: { zh: "图片", en: "Image" },
+          kind: { zh: "渲染图", en: "Rendered Images" },
           role: { zh: "全流程", en: "Full production" },
-          tools: "UE5 + Tripo",
+          tools: "UE＋Tripo＋ChatGPT",
           duration: { zh: "4天", en: "4 days" },
-          award: { zh: "Tripo智创未来三等奖", en: "Third Prize, Tripo 智创未来" },
+          award: { zh: "Tripo智创三维三等奖", en: "Third Prize, Tripo 智创三维" },
           // 海报、裁切位置、介绍侧边和简介均可独立替换。
           poster: "./assets/yulong-dance-poster.png",
           posterPosition: "center",
@@ -136,12 +136,24 @@ const PORTFOLIO_CONTENT = {
           coverPosition: "center",
           detail: {
             description: { zh: "", en: "" },
+            showAward: true,
             images: [],
-            // 原文件名倒序；最后一张为较大的展示图，text 是旁边预留的文字。
+            // 第一张放大并附简介；三张渲染图之后是视频，其后保留设计图。
             showcase: [
-              { src: "./assets/yulong-dance-poster.png", sourceName: "鱼龙舞.png", emphasis: true, text: { zh: "", en: "" } },
+              {
+                src: "./assets/yulong-dance-poster.png", sourceName: "鱼龙舞.png", emphasis: true, text: { zh: "", en: "" },
+                introduction: {
+                  title: { zh: "《鱼龙舞》", en: "Yulong Dance" },
+                  kind: { zh: "渲染图", en: "Rendered Images" },
+                  text: {
+                    zh: "《鱼龙舞》的想法来自于辛弃疾的词《青玉案·元夕》中的“凤箫声动，玉壶光转，一夜鱼龙舞。”想要用ue来复刻千年前的北宋临安的风光，从想法到做出来花了四天的时间，系列作品还有《登临意》《白发生》两张正在制作，借助三维的力量，让古诗和历史里描绘的景象可以被我们看到。",
+                    en: "Yulong Dance was inspired by Xin Qiji’s poem Qing Yu An · Yuan Xi: ‘Flutes sing, the moon turns, and fish and dragons dance through the night.’ Using Unreal Engine, I wanted to recreate the scenery of Lin’an during the Northern Song dynasty a thousand years ago. The work took four days from idea to completion. Two other images in the series, Deng Lin Yi and Bai Fa Sheng, are still in progress. Through 3D, the scenes described in classical poetry and history can become visible to us.",
+                  },
+                },
+              },
               { src: "./assets/yulong-showcase-02.jpg", sourceName: "鱼龙舞.jpg", text: { zh: "", en: "" } },
               { src: "./assets/yulong-showcase-03.png", sourceName: "鱼龙舞 (2).png", text: { zh: "", en: "" } },
+              { type: "video", src: "./assets/yulong-showcase-video.mp4", poster: "./assets/yulong-showcase-video-cover.jpg", width: 1280, height: 720, title: { zh: "视频展示", en: "Video Showcase" }, text: { zh: "", en: "" } },
               { src: "./assets/yulong-scene-concept.jpg", sourceName: "场景概念设计图.jpg", title: { zh: "场景概念设计图", en: "Scene Concept Design" }, text: { zh: "", en: "" } },
               { src: "./assets/yulong-unlit-render.jpg", sourceName: "无灯光渲染图.jpg", title: { zh: "无灯光渲染图", en: "Unlit Render" }, text: { zh: "", en: "" } },
             ],
@@ -154,9 +166,9 @@ const PORTFOLIO_CONTENT = {
         {
           id: "cangfeng",
           title: { zh: "藏锋", en: "Cangfeng" },
-          kind: { zh: "视频", en: "Film" },
+          kind: { zh: "cg影像", en: "CG Film" },
           role: { zh: "全流程", en: "Full production" },
-          tools: "UE5 + Tripo",
+          tools: "UE＋Tripo＋ChatGPT＋Codex＋Maya",
           duration: { zh: "三个周", en: "3 weeks" },
           award: null,
           // 海报、裁切位置、介绍侧边和简介均可独立替换。
@@ -168,6 +180,19 @@ const PORTFOLIO_CONTENT = {
           coverPosition: "center",
           detail: {
             description: { zh: "", en: "" },
+            showcase: [
+              {
+                type: "video", src: "./assets/cangfeng-showcase-video.mp4", poster: "./assets/cangfeng-showcase-video-cover.jpg", width: 1728, height: 1080, emphasis: true, text: { zh: "", en: "" },
+                introduction: {
+                  title: { zh: "《藏锋》", en: "Cangfeng" },
+                  kind: { zh: "cg影像", en: "CG Film" },
+                  text: {
+                    zh: "《藏锋》为tripo世界之外渲染大赛而做，意在尝试表达中国传统水墨江湖的侠气，尝试通过视觉错位与空间尺度的转换，探索观看、认知与真实世界之间的关系。作品以一场雨幕中的江湖对决展开。两位侠客刀光剑影，剑锋交错，观众仿佛置身于一个完整而宏大的武侠世界。然而，随着镜头不断后移，原本真实的空间逐渐显露出另一重面貌——这场激烈的交锋，不过是映照在剑身上的一瞬倒影，而剑正静静地握在一位少年手中。\n\n我希望通过这种由局部到整体、由虚幻到真实的视角转换，打破观众对画面空间的固有认知。我们习惯于相信眼前所见，却很少意识到，自己的视角本身也存在边界。所谓世界之外，未必是遥远的未知，也可能是一直存在于眼前、却从未被察觉的另一种真实。\n\n作品以中国传统文化中的“藏锋”为精神内核，将含蓄、克制与蓄势的东方美学融入现代三维动画表达。宋式建筑、雨雾、剑影与随风而动的纱帘，共同构建出一个静谧而富有张力的空间。宏大的江湖与安静的持剑者形成对照，动与静、虚与实相互映照。",
+                    en: "Cangfeng was created for Tripo’s Beyond the World rendering competition. It seeks to convey the chivalric spirit of the Chinese ink-wash martial world, exploring the relationship between seeing, knowing and reality through shifts in visual perspective and spatial scale. The film opens with a duel in the rain. Two swordsmen exchange blows, their blades crossing in what appears to be a vast, fully realized martial world. As the camera pulls back, however, that seemingly real space reveals another identity: the entire battle is a fleeting reflection on a sword blade, while the sword itself rests quietly in a young man’s hand.\n\nBy moving from a detail to the whole, from illusion to reality, I hope to challenge the audience’s assumptions about the space within an image. We tend to trust what we see, rarely recognizing that our own perspective has limits. Beyond the world need not mean a distant unknown; it may be another reality that has always been before our eyes, yet remained unnoticed.\n\nThe work draws on the traditional Chinese idea of cangfeng—concealing one’s edge—bringing subtlety, restraint and latent strength into contemporary 3D animation. Song-style architecture, rain and mist, sword shadows and gauze curtains moving in the wind create a quiet space charged with tension. The expansive martial world and the still figure holding the sword reflect one another, as do motion and stillness, illusion and reality.",
+                  },
+                },
+              },
+            ],
             images: [],
             video: "",
             posterImages: [],
@@ -238,8 +263,8 @@ const PORTFOLIO_CONTENT = {
           tools: "Godot＋Midjourney＋Codex",
           duration: { zh: "一个月", en: "1 month" },
           award: {
-            zh: "Tripo世界构建黑客松S1 Tripo方向赛道冠军",
-            en: "Champion, Tripo Track, Tripo Worldbuilding Hackathon S1",
+            zh: "TripothonS1世界构建黑客松Tripo方向赛道冠军",
+            en: "Champion, Tripo Track, Tripothon S1 Worldbuilding Hackathon",
           },
           // 海报、裁切位置、介绍侧边和简介均可独立替换。
           poster: "./assets/grotesque-garden-poster.png",
@@ -250,6 +275,7 @@ const PORTFOLIO_CONTENT = {
           coverPosition: "center",
           detail: {
             description: { zh: "", en: "" },
+            showAward: true,
             paginated: true,
             promo: {
               src: "./assets/grotesque-garden-promo.mp4",
@@ -268,11 +294,13 @@ const PORTFOLIO_CONTENT = {
               { src: "./assets/grotesque-garden-concept-01.jpg", width: 2684, height: 1244, position: "50% 50%" },
               { src: "./assets/grotesque-garden-concept-02.jpg", width: 2660, height: 1264, position: "50% 50%" },
               { src: "./assets/grotesque-garden-concept-03.jpg", width: 2672, height: 1262, position: "50% 50%" },
-              { src: "./assets/grotesque-garden-concept-04.jpg", width: 8007, height: 1080, position: "50% 50%" },
               { src: "./assets/grotesque-garden-concept-05.jpg", width: 2330, height: 1280, position: "50% 50%" },
               { src: "./assets/grotesque-garden-concept-06.jpg", width: 1768, height: 1179, position: "50% 50%" },
               { src: "./assets/grotesque-garden-concept-07.jpg", width: 1618, height: 1080, position: "50% 50%" },
               { src: "./assets/grotesque-garden-concept-08.jpg", width: 1024, height: 648, position: "50% 50%" },
+            ],
+            conceptPanoramas: [
+              { src: "./assets/grotesque-garden-concept-04.jpg", width: 8007, height: 1080 },
             ],
             images: [],
             video: "",

@@ -8,6 +8,8 @@ body.work-detail-page { height: auto; min-height: 100svh; overflow: visible; mar
 .detail-language svg { width: 100%; height: 100%; }
 .work-detail-main { max-width: 1320px; margin: 0 auto; padding: clamp(42px, 8vw, 110px) clamp(24px, 7vw, 100px) 100px; }
 #work-detail-title { margin: 0 0 64px; font-size: clamp(32px, 5vw, 72px); font-weight: 200; line-height: 1.4; letter-spacing: .08em; overflow-wrap: anywhere; }
+.work-detail-main:has(> .work-detail-award:not([hidden])) #work-detail-title { margin-bottom: 12px; }
+.work-detail-award { margin: 0 0 clamp(30px, 4vw, 52px); color: #e8c76a; font-size: clamp(13px, 1.4vw, 18px); line-height: 1.9; overflow-wrap: anywhere; }
 .work-detail-body { display: grid; gap: 44px; }
 .work-detail-body img, .work-detail-body video { display: block; max-width: 100%; max-height: 100svh; height: auto; margin: 0 auto; }
 .work-detail-description { max-width: 760px; margin: 0; white-space: pre-wrap; }
@@ -42,12 +44,15 @@ html[lang="en"] .work-detail-category { font-size: 18px; }
 .case-concept-grid .case-image-open { background: #e0e0e0; }
 .case-concept-grid img { aspect-ratio: 16 / 9; object-fit: contain; }
 .case-whitebox-images { display: grid; gap: 30px; width: 64%; }
-.concept-accordion { display: flex; width: 100%; height: var(--concept-height, 400px); gap: 0; transition: height .65s cubic-bezier(.22,.68,.2,1); }
+.concept-accordion { display: flex; width: 100%; height: var(--concept-height, 400px); gap: 0; }
 .concept-panel { position: relative; flex: 1 1 0; min-width: 0; height: 100%; margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; overflow: hidden; cursor: pointer; transition: flex-basis .65s cubic-bezier(.22,.68,.2,1), flex-grow .65s cubic-bezier(.22,.68,.2,1); }
 .concept-panel[aria-pressed="true"] { flex: 0 0 var(--concept-active-width, 72%); cursor: zoom-in; }
 .work-detail-body .concept-panel img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; max-height: none; max-width: none; margin: 0; object-fit: cover; }
 .concept-panel:focus-visible { z-index: 1; outline-offset: -3px !important; }
 .concept-accordion-count { margin: 14px 0 0; color: #ffb576; font: 16px/1 "Cormorant Garamond", Georgia, serif; letter-spacing: .12em; }
+.concept-panoramas { display: grid; gap: 32px; margin-top: clamp(32px, 5vw, 64px); }
+.work-detail-body .case-video video { display: block; width: 100%; max-height: none; height: auto; margin: 0; }
+.case-spread > .case-project-introduction { grid-column: 1 / span 10; margin: 6px 0 0; }
 .work-detail-page[data-detail-paginated="true"] .work-detail-main { padding-top: clamp(28px, 4vw, 56px); }
 .work-detail-page[data-detail-paginated="true"] #work-detail-title { margin-bottom: 28px; font-size: clamp(32px, 4vw, 60px); }
 .work-detail-page[data-detail-paginated="true"] .work-detail-body { gap: 26px; }
@@ -84,6 +89,8 @@ html[lang="en"] .case-section-heading h2 { font: clamp(34px, 4vw, 58px)/1.1 "Cor
   .case-spread > .case-image { grid-column: 1; width: 86%; }
   .case-spread[data-emphasis="true"] > .case-image { grid-column: 1; width: 100%; }
   .case-copy, .case-spread[data-emphasis="true"] > .case-copy { grid-column: 1; min-height: 72px; padding: 0; }
+  .case-spread > .case-project-introduction { grid-column: 1; }
+  .case-spread:has(> .case-project-introduction) > .case-copy:empty { display: none; }
   .case-concept-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
   .case-whitebox-images { width: 100%; }
   .detail-image-viewer { max-width: calc(100vw - 20px); max-height: calc(100svh - 30px); padding: 8px; }
