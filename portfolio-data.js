@@ -153,9 +153,9 @@ const PORTFOLIO_CONTENT = {
               },
               { src: "./assets/yulong-showcase-02.jpg", sourceName: "鱼龙舞.jpg", text: { zh: "", en: "" } },
               { src: "./assets/yulong-showcase-03.png", sourceName: "鱼龙舞 (2).png", text: { zh: "", en: "" } },
-              { type: "video", src: "./assets/yulong-showcase-video.mp4", poster: "./assets/yulong-showcase-video-cover.jpg", width: 1280, height: 720, title: { zh: "视频展示", en: "Video Showcase" }, text: { zh: "", en: "" } },
-              { src: "./assets/yulong-scene-concept.jpg", sourceName: "场景概念设计图.jpg", title: { zh: "场景概念设计图", en: "Scene Concept Design" }, text: { zh: "", en: "" } },
+              { type: "video", src: "./assets/yulong-showcase-video.mp4?v=2", poster: "./assets/yulong-showcase-video-cover.jpg?v=2", width: 1280, height: 520, title: { zh: "视频展示", en: "Video Showcase" }, text: { zh: "", en: "" } },
               { src: "./assets/yulong-unlit-render.jpg", sourceName: "无灯光渲染图.jpg", title: { zh: "无灯光渲染图", en: "Unlit Render" }, text: { zh: "", en: "" } },
+              { src: "./assets/yulong-scene-concept.jpg", sourceName: "场景概念设计图.jpg", title: { zh: "场景概念设计图", en: "Scene Concept Design" }, text: { zh: "", en: "" } },
             ],
             video: "",
             posterImages: [],
@@ -172,7 +172,7 @@ const PORTFOLIO_CONTENT = {
           duration: { zh: "一个月", en: "1 month" },
           award: null,
           // 海报、裁切位置、介绍侧边和简介均可独立替换。
-          poster: "",
+          poster: "./assets/cangfeng-poster.png",
           posterPosition: "center",
           introSide: "left",
           introduction: { zh: "", en: "" },
@@ -293,8 +293,10 @@ const PORTFOLIO_CONTENT = {
             showAward: true,
             paginated: true,
             promo: {
-              src: "./assets/grotesque-garden-promo.mp4",
-              poster: "./assets/grotesque-garden-promo-cover.jpg",
+              src: "./assets/grotesque-garden-promo.mp4?v=2",
+              poster: "./assets/grotesque-garden-promo-cover.jpg?v=2",
+              width: 1908,
+              height: 1066,
               introduction: {
                 title: { zh: "《怪诞花园》", en: "Grotesque Garden" },
                 kind: { zh: "交互游戏", en: "Interactive Game" },

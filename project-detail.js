@@ -116,6 +116,7 @@
       video.controls = true;
       video.playsInline = true;
       video.preload = "metadata";
+      if (detail.promo.width && detail.promo.height) video.style.aspectRatio = `${detail.promo.width} / ${detail.promo.height}`;
       video.setAttribute("aria-label", labels[language].promo);
       section.append(video);
       const introduction = detail.promo.introduction;

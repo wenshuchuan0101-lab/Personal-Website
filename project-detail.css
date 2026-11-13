@@ -51,7 +51,7 @@ html[lang="en"] .work-detail-category { font-size: 18px; }
 .concept-panel:focus-visible { z-index: 1; outline-offset: -3px !important; }
 .concept-accordion-count { margin: 14px 0 0; color: #ffb576; font: 16px/1 "Cormorant Garamond", Georgia, serif; letter-spacing: .12em; }
 .concept-panoramas { display: grid; gap: 32px; margin-top: clamp(32px, 5vw, 64px); }
-.work-detail-body .case-video video { display: block; width: 100%; max-height: none; height: auto; margin: 0; }
+.work-detail-body .case-video video { display: block; width: 100%; max-height: none; height: auto; margin: 0; padding: 0; border: 0; background: transparent; object-fit: contain; }
 .case-spread > .case-project-introduction { grid-column: 1 / span 10; margin: 6px 0 0; }
 .work-detail-page[data-detail-paginated="true"] .work-detail-main { padding-top: clamp(28px, 4vw, 56px); }
 .work-detail-page[data-detail-paginated="true"] #work-detail-title { margin-bottom: 28px; font-size: clamp(32px, 4vw, 60px); }
@@ -61,7 +61,7 @@ html[lang="en"] .work-detail-category { font-size: 18px; }
 .case-pagination button > span:first-child { font: 16px/1 "Cormorant Garamond", Georgia, serif; }
 .case-pagination button[aria-current="page"] { border-bottom-color: #ffb576; color: #ffb576; }
 .case-section[hidden] { display: none; }
-.work-detail-body .case-promo-video { display: block; width: 100%; max-height: 74svh; height: auto; margin: 0; aspect-ratio: 1920 / 1078; background: #080820; }
+.work-detail-body .case-promo-video { display: block; width: 100%; max-height: none; height: auto; margin: 0; padding: 0; border: 0; background: transparent; object-fit: contain; }
 .case-project-introduction { max-width: 900px; margin: clamp(32px, 5vw, 64px) 0 0; }
 .case-introduction-label { margin: 0 0 10px; color: #aaa5de; font-size: 14px; letter-spacing: .12em; }
 .case-project-introduction h3 { margin: 0 0 24px; color: #ffb576; font-size: clamp(24px, 2.8vw, 38px); font-weight: 200; }
