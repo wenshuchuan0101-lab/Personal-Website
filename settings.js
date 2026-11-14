@@ -5,7 +5,7 @@ const SCENE_SETTINGS = {
   chinese: "关于想象力的一切",
   englishLines: ["Tread softly because you tread", "on my dreams."],
   transition: {
-    milliseconds: 2300,
+    milliseconds: 6200,
     colors: ["#ffab4d", "#f4eee3", "#b7c9ff"],
   },
   meteor: {
