@@ -83,7 +83,7 @@
     const panels = project.posterPanels?.filter((panel) => panel.src) || [];
     const activePanel = Math.min(posterPanelIndices.get(project.id) || 0, Math.max(0, panels.length - 1));
     const background = panels.length ? `<div class="project-poster poster-panels" role="group" aria-label="${escape(text(project.title))}" data-poster-project="${escape(project.id)}">${panels.map((panel, index) => `<button class="poster-panel" type="button" data-poster-index="${index}" aria-label="${escape(text(project.title))} · ${count(index + 1)} / ${count(panels.length)}" aria-pressed="${index === activePanel}" style="--poster-weight:${index === activePanel ? expandedPosterWeight : 1}"><img src="${escape(panel.src)}" alt="" loading="lazy" decoding="async" draggable="false" style="object-position:${escape(panel.position || "center")}"></button>`).join("")}</div>` : `<div class="project-poster" aria-hidden="true">${image}</div>`;
-    return `<article id="project-${escape(project.id)}" class="project-card project-page" data-project-card="${escape(project.id)}" data-poster-layout="${panels.length ? "panels" : "single"}" data-intro-side="${project.introSide === "right" ? "right" : "left"}" aria-labelledby="title-${escape(project.id)}">
+    return `<article id="project-${escape(project.id)}" class="project-card project-page" data-project-card="${escape(project.id)}" data-poster-layout="${project.liveScene ? "live" : panels.length ? "panels" : "single"}" data-intro-side="${project.introSide === "right" ? "right" : "left"}" aria-labelledby="title-${escape(project.id)}">
       ${background}
       <div class="project-brief">
         <div class="project-kicker"><span>${escape(text(group.title))}</span><span>${count(globalIndex + 1)} / ${count(projects.length)}</span></div>
@@ -247,7 +247,52 @@
     document.body.dataset.quickBackdrop = activeSection;
     root.setAttribute("aria-label", quick ? labels[language][activeSection] : labels[language].about);
     if (works) root.scrollTop = 0;
+    syncLiveScenes(works);
   }
+
+  function syncLiveScenes(works) {
+    for (const project of projects.filter(item => item.liveScene)) {
+      const article = document.getElementById(`project-${project.id}`);
+      const selected = works && project.id === selectedProjectId;
+      let frame = article.querySelector('.project-live-scene');
+      if (!selected) {
+        frame?.remove();
+        delete article.dataset.sceneReady;
+        delete article.dataset.sceneFailed;
+        continue;
+      }
+      // Preview the still poster while turning the wheel; start WebGL after confirming.
+      if (!frame && !wheelOpen && !article.dataset.sceneFailed) {
+        frame = document.createElement('iframe');
+        frame.className = 'project-live-scene';
+        frame.title = `${text(project.title)} · ${language === 'zh' ? '可交互办公室' : 'Interactive office'}`;
+        const url = new URL(project.liveScene, location.href);
+        url.searchParams.set('lang', language);
+        frame.src = url.href;
+        frame.addEventListener('load', () => frame.contentWindow?.postMessage({type:'office:state', paused:wheelOpen || root.hidden}, location.origin));
+        article.querySelector('.project-poster').append(frame);
+      }
+      frame?.contentWindow?.postMessage({type:'office:state', paused:wheelOpen || root.hidden}, location.origin);
+    }
+  }
+
+  addEventListener('message', event => {
+    if (event.origin !== location.origin) return;
+    const frame = [...content.querySelectorAll('.project-live-scene')].find(item => item.contentWindow === event.source);
+    if (!frame) return;
+    const article = frame.closest('[data-project-card]');
+    if (event.data?.type === 'office:ready') {
+      article.dataset.sceneReady = 'true';
+      frame.contentWindow.postMessage({type:'office:state', paused:wheelOpen || root.hidden}, location.origin);
+    } else if (event.data?.type === 'office:error') {
+      article.dataset.sceneFailed = 'true';
+      delete article.dataset.sceneReady;
+      frame.remove();
+    } else if (event.data?.type === 'office:escape') {
+      window.focus();
+      wheelStar.focus({preventScroll:true});
+    }
+  });
 
   function markWheelSelection() {
     wheelOptions.querySelectorAll("[data-wheel-project]").forEach((button) => {

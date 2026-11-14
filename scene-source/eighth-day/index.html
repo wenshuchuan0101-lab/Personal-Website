@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>星期八 · 办公室</title></head>
+<body>
+  <canvas id="world" tabindex="0" aria-label="星期八办公室，WASD 移动，右键拖动转动视角"></canvas>
+  <p id="loading" role="status">正在进入办公室…</p>
+  <p id="hint">点击场景 · WASD 移动 · 右键拖动视角</p>
+  <script type="module">
+    const en = new URLSearchParams(location.search).get('lang') === 'en';
+    if(en){document.documentElement.lang='en';document.title='The Eighth Day · Office';document.getElementById('loading').textContent='Entering the office…';document.getElementById('hint').textContent='Click scene · WASD to move · Right-drag to look';document.getElementById('world').setAttribute('aria-label','The Eighth Day office. WASD to move. Right-drag to look.');}
+    import('./src/main.js').catch(error => {
+      console.error(error);
+      document.getElementById('loading').textContent=en?'Office preview unavailable':'办公室暂时无法加载';
+      document.getElementById('hint').hidden=true;
+      parent.postMessage({type:'office:error'},location.origin);
+    });
+  </script>
+</body>
+</html>

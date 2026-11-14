@@ -114,7 +114,7 @@ const PORTFOLIO_CONTENT = {
     {
       date: "2026.11",
       kind: "work",
-      label: { zh: "课堂狂想 / 第四色温", en: "Classroom Rhapsody / The Fourth Color Temperature" },
+      label: { zh: "课堂狂想 / 星期八", en: "Classroom Rhapsody / The Eighth Day" },
       works: [],
     },
   ],
@@ -366,15 +366,17 @@ const PORTFOLIO_CONTENT = {
         },
         {
           id: "fourth-color-temperature",
-          title: { zh: "第四色温", en: "The Fourth Color Temperature" },
+          title: { zh: "星期八", en: "The Eighth Day" },
           kind: { zh: "交互 / 游戏", en: "Interaction / Game" },
           role: null,
-          // 工具名称沿用原文档拼写，之后可直接在此修改。
-          tools: "Codex + Chatgpt + Thres JS + Claude",
+          // 工具名称可直接在此修改。
+          tools: "Codex + ChatGPT + Three.js + Claude",
           duration: { zh: "2个月", en: "2 months" },
           award: null,
           // 海报、裁切位置、介绍侧边和简介均可独立替换。
-          poster: "",
+          poster: "./assets/eighth-day-office-poster.png",
+          // 同源的独立 Three.js 展示版，仅在选中本作品后加载。
+          liveScene: "./scenes/eighth-day/index.html",
           posterPosition: "center",
           introSide: "left",
           introduction: { zh: "", en: "" },
