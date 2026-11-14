@@ -1,5 +1,7 @@
 # 关于想象力的一切
 
+Zephyrus 详情为三页：「作品介绍」展示 `assets/zephyrus-introduction.jpg`、日期与介绍原文；「开场动画」展示 `assets/zephyrus-opening.mp4`（完整画幅、声音及约 44.65 秒时长，1080p 网页版）；「海报展示」沿原顺序展示五张海报，悬停横向展开，手机可点按。内容、日期、媒体路径、尺寸及页序均在 `portfolio-data.js` 的 Zephyrus `detail` 内修改：`showcase`、`promo`、`conceptGallery`、`sectionOrder` 分别控制第一页、视频页、海报页和页面顺序。原始视频与图片文件保留不变。
+
 「星期八 / The Eighth Day」的作品选择页已接入可交互的 Three.js 办公室背景。只保留主办公区内的 WASD 行走和右键拖动转头，视点高度固定，桌椅及墙体有碰撞限制。原办公室工程独立保留；可编辑源代码、配置和构建说明见 [scene-source/eighth-day/README.md](scene-source/eighth-day/README.md)。`portfolio-data.js` 中该作品的 `liveScene`、`poster` 可分别更换交互场景与备用海报。页面只在选中作品后加载场景，轮盘打开时暂停，离开作品时卸载。
 
 单屏首页使用提供的蓝白天体图片，中英文同屏以高饱和橙色显示。背景保持原图颜色。流星定时从左向右沿天体边缘外侧的圆弧划过，点击天空空白处也会触发，并直接进入个人介绍页。月面和文字区域不触发流星。

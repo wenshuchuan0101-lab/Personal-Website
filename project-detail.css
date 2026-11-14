@@ -65,6 +65,9 @@ html[lang="en"] .work-detail-category { font-size: 18px; }
 .case-project-introduction { max-width: 900px; margin: clamp(32px, 5vw, 64px) 0 0; }
 .case-introduction-label { margin: 0 0 10px; color: #aaa5de; font-size: 14px; letter-spacing: .12em; }
 .case-project-introduction h3 { margin: 0 0 24px; color: #ffb576; font-size: clamp(24px, 2.8vw, 38px); font-weight: 200; }
+.case-introduction-date { margin: -12px 0 24px; color: #aaa5de; font-size: 16px; letter-spacing: .06em; }
+.case-showcase[data-full-width="true"] .case-spread > .case-image { grid-column: 1 / -1; width: 100%; }
+.case-showcase[data-full-width="true"] .case-spread > .case-copy:empty { display: none; }
 .case-project-introduction dl { display: grid; grid-template-columns: max-content 1fr; column-gap: 6px; row-gap: 6px; margin: 0 0 28px; }
 .case-project-introduction dt { color: #aaa5de; }
 .case-project-introduction dd { min-width: 0; margin: 0; overflow-wrap: anywhere; }

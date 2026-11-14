@@ -337,8 +337,8 @@ const PORTFOLIO_CONTENT = {
           title: { zh: "Zephyrus（风语）", en: "Zephyrus" },
           kind: { zh: "交互 / 游戏", en: "Interaction / Game" },
           role: null,
-          tools: "Godot + Codex",
-          duration: { zh: "一个月", en: "1 month" },
+          tools: "Godot＋Midjourney＋Codex＋Tripo＋ChatGPT＋AE＋Suno",
+          duration: { zh: "约三个月 · 制作中", en: "About 3 months · In development" },
           award: null,
           // 海报、裁切位置、介绍侧边和简介均可独立替换。
           poster: "./assets/zephyrus-poster-01.png",
@@ -357,12 +357,46 @@ const PORTFOLIO_CONTENT = {
           coverPosition: "center",
           detail: {
             description: { zh: "", en: "" },
+            paginated: true,
+            sectionOrder: ["showcase", "promo", "conceptGallery"],
+            showcaseTitle: { zh: "作品介绍", en: "About the Project" },
+            showcaseFullWidth: true,
+            showcase: [
+              {
+                src: "./assets/zephyrus-introduction.jpg",
+                emphasis: true,
+                introduction: {
+                  title: { zh: "《Zephyrus》", en: "Zephyrus" },
+                  date: "2026.9-2026.10",
+                  kind: { zh: "交互游戏", en: "Interactive Game" },
+                  text: {
+                    zh: "《Zephyrus》风语，创意来自于学院三下乡的防风治沙项目，依托于三下乡孵化，意在借助游戏的强互动性特质用来宣传，从初想法到完成大约耗费三个月，目前仍在制作中，玩家化身为探险者，穿梭于沙漠，石林，破败的房屋和遗迹之间，在和风沙怪物战斗的旅程中学习如何和风沙共处，保护土地。\n——唯有土地是值得我们付出一切的。",
+                    en: "Zephyrus, or Whisper of the Wind, grew out of the college’s rural outreach project on windbreaks and desertification control. Developed through this initiative, it uses the interactivity of games to raise awareness. About three months have passed from the first idea to the current version, and development is ongoing. Players become explorers, travelling through deserts, stone forests, ruined houses and ancient remains. As they battle creatures of wind and sand, they learn how to live with these forces and protect the land.\n—Only the land is worth giving everything for.",
+                  },
+                },
+              },
+            ],
+            promo: {
+              title: { zh: "开场动画", en: "Opening Animation" },
+              src: "./assets/zephyrus-opening.mp4",
+              poster: "./assets/zephyrus-introduction.jpg",
+              width: 1920,
+              height: 1080,
+            },
+            conceptGalleryTitle: { zh: "海报展示", en: "Poster Gallery" },
+            conceptGallery: [
+              { src: "./assets/zephyrus-poster-01.png", width: 1526, height: 1030, position: "75% 50%" },
+              { src: "./assets/zephyrus-poster-02.png", width: 1526, height: 1030, position: "48% 50%" },
+              { src: "./assets/zephyrus-poster-03.jpg", width: 1525, height: 1031, position: "49% 50%" },
+              { src: "./assets/zephyrus-poster-04.jpg", width: 1526, height: 1031, position: "54% 50%" },
+              { src: "./assets/zephyrus-poster-05.png", width: 1536, height: 1024, position: "48% 50%" },
+            ],
             images: [],
             video: "",
             posterImages: [],
             playUrl: "",
           },
-          slots: { conceptImages: 6, videos: 0, posters: 5, descriptionCharacters: 300 },
+          slots: { conceptImages: 6, videos: 1, posters: 5, descriptionCharacters: 300 },
         },
         {
           id: "fourth-color-temperature",

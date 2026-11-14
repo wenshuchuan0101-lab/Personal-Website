@@ -14,7 +14,8 @@
   const galleryObservers = [];
   const galleryResizers = [];
   const resizeGalleries = () => galleryResizers.forEach((resize) => resize());
-  let detailPage = parameters.get("page") === "2" ? 1 : 0;
+  const pageIndex = () => Math.max(0, Math.floor(Number(new URLSearchParams(location.search).get("page")) || 1) - 1);
+  let detailPage = pageIndex();
   window.addEventListener("resize", resizeGalleries);
   const labels = {
     zh: { back: "返回", title: "作品详情", empty: "作品展示预留区域", play: "游玩", showcase: "作品展示", promo: "宣传动画", introduction: "作品介绍", kind: "类型", tools: "工具", pages: "展示分页", concept: "概念设计", conceptGallery: "概念设计展示", storyboardGallery: "分镜设计", composition: "构图测试", whitebox: "白盒搭建", openImage: "查看原图", closeImage: "关闭图片" },
@@ -84,7 +85,14 @@
     const paragraph = document.createElement("p");
     paragraph.className = "case-introduction-text";
     paragraph.textContent = text(introduction.text);
-    article.append(label, title, metadata, paragraph);
+    article.append(label, title);
+    if (text(introduction.date)) {
+      const date = document.createElement("p");
+      date.className = "case-introduction-date";
+      date.textContent = text(introduction.date);
+      article.append(date);
+    }
+    article.append(metadata, paragraph);
     return article;
   }
   function videoFigure(item, title, index) {
@@ -108,7 +116,7 @@
     const total = [detail.promo?.src, detail.showcase?.length, detail.conceptGallery?.length, detail.storyboardGallery?.length, detail.compositionImages?.length, detail.conceptImages?.length, detail.whiteboxImages?.length].filter(Boolean).length;
     let index = 0;
     if (detail.promo?.src) {
-      const section = caseSection("promo", ++index, total);
+      const section = caseSection("promo", ++index, total, detail.promo.title);
       const video = document.createElement("video");
       video.className = "case-promo-video";
       video.src = detail.promo.src;
@@ -117,14 +125,15 @@
       video.playsInline = true;
       video.preload = "metadata";
       if (detail.promo.width && detail.promo.height) video.style.aspectRatio = `${detail.promo.width} / ${detail.promo.height}`;
-      video.setAttribute("aria-label", labels[language].promo);
+      video.setAttribute("aria-label", text(detail.promo.title) || labels[language].promo);
       section.append(video);
       const introduction = detail.promo.introduction;
       if (introduction) section.append(projectIntroduction(introduction));
       body.append(section);
     }
     if (detail.showcase?.length) {
-      const section = caseSection("showcase", ++index, total);
+      const section = caseSection("showcase", ++index, total, detail.showcaseTitle);
+      if (detail.showcaseFullWidth) section.dataset.fullWidth = "true";
       const spreads = document.createElement("div");
       spreads.className = "case-spreads";
       detail.showcase.forEach((item, index) => {
@@ -266,6 +275,15 @@
       section.append(images);
       body.append(section);
     }
+    if (detail.sectionOrder?.length) {
+      const sections = [...body.querySelectorAll(":scope > .case-section")];
+      const order = [...detail.sectionOrder, ...sections.map(section => section.dataset.caseSection)];
+      const sorted = [...new Set(order)].map(kind => sections.find(section => section.dataset.caseSection === kind)).filter(Boolean);
+      sorted.forEach((section, index) => {
+        section.querySelector(".case-section-index").textContent = `${String(index + 1).padStart(2, "0")} / ${String(sorted.length).padStart(2, "0")}`;
+        body.append(section);
+      });
+    }
     if (detail.paginated) renderPagination();
   }
   function renderPagination() {
@@ -297,7 +315,7 @@
       const number = document.createElement("span");
       number.textContent = String(index + 1).padStart(2, "0");
       const title = document.createElement("span");
-      title.textContent = labels[language][section.dataset.caseSection];
+      title.textContent = section.querySelector("h2").textContent;
       button.append(number, title);
       button.addEventListener("click", () => showPage(index, true));
       navigation.append(button);
@@ -394,7 +412,7 @@
   });
   window.addEventListener("popstate", () => {
     body.querySelectorAll("video").forEach((video) => video.pause());
-    detailPage = new URLSearchParams(location.search).get("page") === "2" ? 1 : 0;
+    detailPage = pageIndex();
     language = new URLSearchParams(location.search).get("lang") === "en" ? "en" : "zh";
     render();
   });
