@@ -9,7 +9,7 @@
   async function run({prepare,root,origin,background='#123fce',includeVisual=false,budgetMilliseconds=10000}) {
     if(busy)return;busy=true;
     const previousInert=root.inert,saved=new Map(),tasks=[],cleanup=[];
-    let canvas,frame,timer,finish,nameButton,phaseStyle,interrupted=false,cancelSetup,visualStarted=false;
+    let canvas,frame,timer,finish,nameButton,phaseStyle,interrupted=false,cancelSetup,visualStarted=false,wheelStarted=false,growthReturned=false;
     const firstVisualId=PORTFOLIO_CONTENT.groups.find(group=>group.id==='visual')?.projects[0]?.id;
     const aborted=new Promise(resolve=>{cancelSetup=resolve;});
     const settle=()=>{interrupted=true;cancelSetup();finish?.();};
@@ -18,6 +18,13 @@
     const onHidden=()=>{if(document.hidden)settle();};
     const snapshot=node=>{if(!saved.has(node))saved.set(node,node.getAttribute('style'));};
     const restore=node=>{const value=saved.get(node);if(value==null)node.removeAttribute('style');else node.setAttribute('style',value);};
+    const returnToGrowth=()=>{
+      if(!includeVisual||growthReturned||root.dataset.view!=='quick')return;
+      window.PortfolioQuick.setView('quick');
+      root.scrollTop=Math.max(0,root.querySelector('#growth').offsetHeight-root.clientHeight);
+      window.GrowthMountain.preview(null);window.GrowthMountain.update();growthReturned=true;
+      if(report?.view==='growth')report.phases.push('growth');
+    };
     try {
       if(motion.matches){prepare();return;}
       const config=SCENE_SETTINGS.transition||{},width=innerWidth,height=innerHeight;
@@ -31,11 +38,11 @@
       prepare();root.inert=true;await Promise.race([document.fonts.ready,aborted]);await nextFrame();
       if(interrupted)return;
       const profile=root.dataset.view==='profile',duration=Math.min(9400,Math.max(4500,Number(profile?config.profileMilliseconds:config.growthMilliseconds)||9400));
-      const combined=includeVisual&&!profile&&Boolean(firstVisualId),introEnd=.18,buildEnd=.75,visualAt=.48;
+      const combined=includeVisual&&!profile&&Boolean(firstVisualId),introEnd=.18,buildEnd=.75,visualAt=.40,wheelAt=.59,returnAt=.77;
       const en=document.documentElement.lang==='en',label=(zh,english)=>en?english:zh;
       if(!profile)window.GrowthMountain.preview(1);
       root.querySelectorAll('.console-ticks,.console-orbits').forEach(node=>{snapshot(node);node.style.animationPlayState='paused';});
-      phaseStyle=document.createElement('style');phaseStyle.textContent='body[data-swarm-transition] .reveal{opacity:1!important;transform:none!important;transition:none!important}';document.head.append(phaseStyle);
+      phaseStyle=document.createElement('style');phaseStyle.textContent='body[data-swarm-transition] .reveal{opacity:1!important;transform:none!important;transition:none!important}body[data-swarm-transition] .work-wheel,body[data-swarm-transition] .wheel-work{transition:none!important}';document.head.append(phaseStyle);
       await nextFrame();
       if(interrupted)return;
       const visible=node=>{
@@ -65,6 +72,18 @@
         const r=node.getBoundingClientRect(),state=group(node);
         job({kind:'media',start,end,point:p=>({x:lerp(r.left,r.right,smooth(p)),y:r.top+r.height*.5}),update:p=>{
           node.style.setProperty('visibility','visible','important');node.style.clipPath=`inset(0 ${(1-smooth(p))*100}% 0 0)`;
+        }},state);
+      }
+      function svgTextJob(node,start,end){
+        if(!visible(node))return;
+        const ns='http://www.w3.org/2000/svg',svg=node.ownerSVGElement,b=node.getBBox(),matrix=node.getScreenCTM(),state=group(node);
+        let defs=svg.querySelector('defs');if(!defs){defs=document.createElementNS(ns,'defs');svg.prepend(defs);cleanup.push(()=>defs.remove());}
+        const clip=document.createElementNS(ns,'clipPath'),rect=document.createElementNS(ns,'rect');
+        clip.id=`swarm-number-${tasks.length}`;clip.setAttribute('clipPathUnits','userSpaceOnUse');
+        rect.setAttribute('x',b.x-2);rect.setAttribute('y',b.y-2);rect.setAttribute('height',b.height+4);rect.setAttribute('width',0);clip.append(rect);defs.append(clip);cleanup.push(()=>clip.remove());
+        node.style.clipPath=`url(#${clip.id})`;
+        job({kind:'numeral',start,end,point:p=>new DOMPoint(b.x+b.width*p,b.y+b.height*.65).matrixTransform(matrix),update:p=>{
+          node.style.setProperty('visibility','visible','important');rect.setAttribute('width',(b.width+4)*p);
         }},state);
       }
       function svgJobs(node,parts,start,end,title){
@@ -182,26 +201,49 @@
       const fraction=n=>{const value=Math.sin(n*127.1+311.7)*43758.5453;return value-Math.floor(value);};
       const agents=Array.from({length:count},(_,id)=>({id,jobs:[],available:0,depth:.25+fraction(id+1)*.75,lane:id%3,order:Math.floor(id/3),heading:0,motion:null})),tour=agents[0];
       const depthOrder=[...agents].sort((a,b)=>a.depth-b.depth);
+      const pixelPace=1350,cadence=.72,pacing=[];
+      function taskSeconds(task){
+        if(task.kind==='text')return .10+Math.min(45,task.letters.length)*.012;
+        if(task.kind==='interaction')return duration/1000*.35;
+        const points=Array.from({length:17},(_,i)=>task.point(i/16));
+        const distance=points.slice(1).reduce((sum,p,i)=>sum+Math.hypot(p.x-points[i].x,p.y-points[i].y),0);
+        return Math.max(.13,Math.min(.85,.07+distance/pixelPace));
+      }
       function schedule(batch,from,to){
         const sourceEnd=Math.max(...batch.map(task=>task.end));
         batch.forEach(task=>{
-          task.start=from+task.start/sourceEnd*(to-from);task.end=from+task.end/sourceEnd*(to-from);
+          // One drawing/typing pace across every scene, rather than squeezing each
+          // scene's original timeline by a different amount. Stagger the starts.
+          task.start=from+task.start/sourceEnd*(to-from)*.38;
+          task.end=task.start+taskSeconds(task)*cadence/(duration/1000);
           if(task.kind==='interaction'){task.start=.30;task.end=.65;}
         });
         batch.sort((a,b)=>a.start-b.start).forEach(task=>{
-          const agent=['interaction','overview'].includes(task.kind)?tour:agents.slice(1).reduce((a,b)=>a.available<=b.available?a:b),requested=task.start;
-          task.start=Math.max(task.start,agent.available+.001);task.end+=task.start-requested;agent.jobs.push(task);agent.available=task.end;task.agent=agent.id;
+          const arrival=agent=>{
+            const previous=agent.jobs.at(-1);if(!previous)return task.start;
+            const a=previous.point(1),b=task.point(0),travel=Math.hypot(a.x-b.x,a.y-b.y)*cadence/pixelPace/(duration/1000);
+            return Math.max(task.start,agent.available+travel);
+          };
+          const agent=['interaction','overview'].includes(task.kind)?tour:agents.slice(1).reduce((a,b)=>arrival(a)<=arrival(b)?a:b),requested=task.start;
+          task.start=arrival(agent);task.end+=task.start-requested;agent.jobs.push(task);agent.available=task.end;task.agent=agent.id;
         });
         const latest=Math.max(...batch.map(task=>task.end));
+        pacing.push({from,to,scale:Math.min(1,(to-from)/(latest-from))});
         if(latest>to)batch.forEach(task=>{task.start=from+(task.start-from)*(to-from)/(latest-from);task.end=from+(task.end-from)*(to-from)/(latest-from);});
         agents.forEach(agent=>{agent.available=Math.max(0,...agent.jobs.map(task=>task.end));});
       }
-      schedule(tasks,introEnd,combined ? .465 : buildEnd);
+      schedule(tasks,introEnd,combined ? visualAt-.015 : buildEnd);
       const end=1;
-      report={view:profile?'profile':'growth',phases:[profile?'profile':'growth'],taskCount:tasks.length,cursorCount:count,duration:Math.round(duration*end),nameFlips:0,completed:0,idleCursors:0,visitedMilestones:[],types:tasks.reduce((all,task)=>(all[task.kind]=(all[task.kind]||0)+1,all),{})};
-      function beginVisual(){
+      report={view:profile?'profile':'growth',phases:[profile?'profile':'growth'],taskCount:tasks.length,cursorCount:count,duration:Math.round(duration*end),nameFlips:0,completed:0,idleCursors:0,visitedMilestones:[],pacing,types:tasks.reduce((all,task)=>(all[task.kind]=(all[task.kind]||0)+1,all),{})};
+      function freezeTasks(){
         // Freeze finished geometry before the real portfolio renderer replaces its DOM.
         for(const task of tasks){complete(task);const tip=task.point(1);task.point=()=>tip;}
+      }
+      function updateReport(){
+        report.taskCount=tasks.length;report.types=tasks.reduce((all,task)=>(all[task.kind]=(all[task.kind]||0)+1,all),{});
+      }
+      function beginVisual(){
+        freezeTasks();
         window.PortfolioQuick.showProject(firstVisualId);visualStarted=true;canvas.dataset.contentPhase='visual';report.phases.push('visual');
         const article=root.querySelector(`#project-${firstVisualId}`),offset=tasks.length;
         mediaJob(article.querySelector('.project-poster'),.10,.55);
@@ -215,11 +257,33 @@
         dragBox(article.querySelector('.project-poster'),.005,.15);
         dragBox(article.querySelector('.project-brief'),.08,.27);
         dragBox(article.querySelector('.project-enter'),.55,.70);
-        schedule(tasks.slice(offset),visualAt+.015,buildEnd-.01);
-        report.taskCount=tasks.length;report.types=tasks.reduce((all,task)=>(all[task.kind]=(all[task.kind]||0)+1,all),{});
+        schedule(tasks.slice(offset),visualAt+.01,wheelAt-.015);
+        updateReport();
+      }
+      function beginWheel(){
+        freezeTasks();root.querySelector('.work-wheel-star').click();wheelStarted=true;report.phases.push('wheel');
+        const wheel=root.querySelector('.work-wheel'),offset=tasks.length;
+        const ticks=[...wheel.querySelectorAll('.clock-ticks path')].filter(visible);
+        ticks.forEach((node,i)=>svgJobs(node,1,.12+i/ticks.length*.25,.23+i/ticks.length*.25,label('钟面刻度','Clock tick')));
+        wheel.querySelectorAll('.clock-inner-ring').forEach((node,i)=>svgJobs(node,6,.04+i*.04,.27+i*.04,label('钟面内环','Clock ring')));
+        wheel.querySelectorAll('.clock-segment-outer,.clock-segment-inner').forEach((node,i)=>svgJobs(node,2,.22+i*.018,.41+i*.018,label('半圆钟面','Clock segment')));
+        const numerals=[...wheel.querySelectorAll('.clock-number text')].filter(visible);
+        numerals.forEach((node,i)=>svgTextJob(node,.35+i*.025,.54+i*.025));
+        wheel.querySelectorAll('.clock-hand > *').forEach((node,i)=>svgJobs(node,2,.50+i*.025,.68+i*.025,label('钟面指针','Clock hand')));
+        const cards=[...wheel.querySelectorAll('.wheel-work')].filter(node=>getComputedStyle(node).visibility==='visible'&&visible(node));
+        cards.forEach((card,i)=>{
+          const delay=i*.045;
+          borderJobs(card,.46+delay,.57+delay,label('作品卡片','Work card'));
+          mediaJob(card.querySelector('.wheel-thumbnail'),.57+delay,.73+delay);
+          card.querySelectorAll('.wheel-number,.wheel-title').forEach((node,j)=>textJob(node,.64+delay+j*.03,.79+delay+j*.03,label('卡片文字','Card text')));
+          dragBox(card,.29+delay,.45+delay);
+        });
+        const close=wheel.querySelector('.work-wheel-close');textJob(close,.80,.94,label('关闭轮盘','Close selector'));borderJobs(close,.73,.81,label('关闭按钮','Close button'));
+        schedule(tasks.slice(offset),wheelAt+.01,buildEnd);
+        report.wheel={ticks:ticks.length,numerals:numerals.length,cards:cards.length,tasks:tasks.length-offset};updateReport();
       }
       function edge(point,id){const distances=[point.x,width-point.x,point.y,height-point.y],side=distances.indexOf(Math.min(...distances)),offset=(id%5-2)*18;return side===0?{x:-40,y:Math.max(24,Math.min(height-24,point.y+offset))}:side===1?{x:width+40,y:Math.max(24,Math.min(height-24,point.y+offset))}:side===2?{x:Math.max(24,Math.min(width-24,point.x+offset)),y:-40}:{x:Math.max(24,Math.min(width-24,point.x+offset)),y:height+40};}
-      function swim(a,b,p,id){const dx=b.x-a.x,dy=b.y-a.y,d=Math.max(1,Math.hypot(dx,dy)),bend=Math.min(110,d*.28)*(id%2?1:-1),u=1-p,c1={x:a.x+dx*.32-dy/d*bend,y:a.y+dy*.32+dx/d*bend},c2={x:a.x+dx*.72-dy/d*bend*.6,y:a.y+dy*.72+dx/d*bend*.6};return{x:u*u*u*a.x+3*u*u*p*c1.x+3*u*p*p*c2.x+p*p*p*b.x,y:u*u*u*a.y+3*u*u*p*c1.y+3*u*p*p*c2.y+p*p*p*b.y};}
+      function swim(a,b,p,id){const dx=b.x-a.x,dy=b.y-a.y,d=Math.max(1,Math.hypot(dx,dy)),bend=Math.min(110,d*.28)*(id%2?1:-1),u=1-p,c1={x:a.x+dx/3-dy/d*bend,y:a.y+dy/3+dx/d*bend},c2={x:a.x+dx*2/3-dy/d*bend*.6,y:a.y+dy*2/3+dx/d*bend*.6};return{x:u*u*u*a.x+3*u*u*p*c1.x+3*u*p*p*c2.x+p*p*p*b.x,y:u*u*u*a.y+3*u*u*p*c1.y+3*u*p*p*c2.y+p*p*p*b.y};}
       function strokeTask(task,p){
         if(!task.points||task.state?.restored||(!task.state&&task.complete))return;ctx.save();if(task.clip){ctx.beginPath();ctx.rect(task.clip.left,task.clip.top,task.clip.width,task.clip.height);ctx.clip();}
         ctx.strokeStyle=task.color;ctx.lineWidth=task.lineWidth;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();const last=Math.floor(p*(task.points.length-1));task.points.slice(0,last+1).forEach((point,i)=>i?ctx.lineTo(point.x,point.y):ctx.moveTo(point.x,point.y));const tip=pointOn(task.points,p);ctx.lineTo(tip.x,tip.y);ctx.stroke();ctx.restore();
@@ -241,7 +305,7 @@
       canvas.style.background='transparent';
       const marginX=Math.min(220,width*.34),marginY=Math.min(170,height*.23);
       const start={x:Math.max(marginX,Math.min(width-marginX,origin?.x??width/2)),y:Math.max(marginY,Math.min(height-marginY,origin?.y??height/2))};
-      const lastPositions=new Map(),launchOrigins=new Map();
+      const lastPositions=new Map(),launchOrigins=new Map();let departureSide;
       const schoolPaths=[
         [[-155,-35],[-75,-130],[155,-80],[70,90]],
         [[70,-145],[190,-25],[100,145],[-45,75]],
@@ -269,15 +333,15 @@
           agent.heading=Math.atan2(agent.motion.vy,agent.motion.vx);
         }
         const m=agent.motion,dx=target.x-m.x,dy=target.y-m.y,d=Math.max(1,Math.hypot(dx,dy));
-        const speedLimit=(ending?width*.45+130:Math.min(330,width*.34+95))*(.82+agent.depth*.24),speed=Math.min(speedLimit,d*(ending?4.8:3.6));
+        const speedLimit=Math.min(520,width*.4+150)*(.88+agent.depth*.12),speed=Math.min(speedLimit,d*4);
         let vx=dx/d*speed,vy=dy/d*speed,alignX=0,alignY=0,neighbors=0;
         for(const other of agents){if(other===agent||!other.motion)continue;const ox=m.x-other.motion.x,oy=m.y-other.motion.y,dist=Math.hypot(ox,oy);
           if(dist>0&&dist<22){const push=(1-dist/22)*85;vx+=ox/dist*push;vy+=oy/dist*push;}
           if(dist<95&&other.lane===agent.lane){alignX+=other.motion.vx;alignY+=other.motion.vy;neighbors++;}
         }
         if(neighbors){vx+=(alignX/neighbors-m.vx)*.10;vy+=(alignY/neighbors-m.vy)*.10;}
-        const response=1-Math.exp(-(ending?5.4:4.2)*dt);let ax=(vx-m.vx)*response,ay=(vy-m.vy)*response;
-        const acceleration=Math.hypot(ax,ay),limit=(ending?1600:850)*dt;if(acceleration>limit){ax*=limit/acceleration;ay*=limit/acceleration;}
+        const response=1-Math.exp(-4.8*dt);let ax=(vx-m.vx)*response,ay=(vy-m.vy)*response;
+        const acceleration=Math.hypot(ax,ay),limit=1100*dt;if(acceleration>limit){ax*=limit/acceleration;ay*=limit/acceleration;}
         m.vx+=ax;m.vy+=ay;const velocity=Math.hypot(m.vx,m.vy);if(velocity>speedLimit){m.vx*=speedLimit/velocity;m.vy*=speedLimit/velocity;}
         m.x+=m.vx*dt;m.y+=m.vy*dt;
         const desired=Math.atan2(m.vy,m.vx),turn=Math.atan2(Math.sin(desired-agent.heading),Math.cos(desired-agent.heading));
@@ -288,8 +352,11 @@
         finish=resolve;const began=performance.now();let previousTime=began;
         function paint(now){
           const t=(now-began)/duration,dt=Math.min(.034,Math.max(.001,(now-previousTime)/1000));previousTime=now;
-          ctx.clearRect(0,0,width,height);canvas.dataset.stage=t<introEnd?'arriving':t<.77?'building':'departing';canvas.dataset.progress=t.toFixed(4);canvas.dataset.contentPhase=visualStarted?'visual':profile?'profile':'growth';
+          ctx.clearRect(0,0,width,height);canvas.dataset.stage=t<introEnd?'arriving':t<returnAt?'building':'departing';canvas.dataset.progress=t.toFixed(4);
           if(combined&&!visualStarted&&t>=visualAt)beginVisual();
+          if(combined&&!wheelStarted&&t>=wheelAt)beginWheel();
+          if(combined&&!growthReturned&&t>=returnAt){freezeTasks();returnToGrowth();}
+          canvas.dataset.contentPhase=growthReturned?'growth':wheelStarted?'wheel':visualStarted?'visual':profile?'profile':'growth';
           for(const task of tasks){if(t<task.start)continue;const p=clamp((t-task.start)/(task.end-task.start));if(!task.complete){task.update?.(p);if(p===1)complete(task);}if(task.kind==='trace')strokeTask(task,p);if(task.kind==='box'&&p<1)drawDragBox(task,p);}
           let active=0;
           for(const agent of depthOrder){
@@ -299,21 +366,24 @@
               active+=Number(cursor(point,agent.jobs[0],agent.id,true,agent.heading,0));continue;
             }
             if(t>=.77){
+              if(departureSide==null){const positions=[...lastPositions.values()];departureSide=positions.reduce((sum,p)=>sum+p.x,0)/Math.max(1,positions.length)<width/2?-1:1;}
               const last=agent.jobs.at(-1),seconds=(t-.77)*duration/1000,lag=agent.order*.035+(1-agent.depth)*.12,p=smooth((seconds-lag)/1.95);
-              const target=swim({x:width*.81,y:height*.77},{x:width+170,y:height+70},p,agent.lane);
-              target.x-=agent.order*9;target.y+=(agent.lane-1.5)*13+Math.sin(seconds*2.4-agent.order*.2)*13;
+              const target=swim({x:width*(departureSide<0?.19:.81),y:height*.77},{x:departureSide<0?-170:width+170,y:height+70},p,agent.lane);
+              target.x-=departureSide*agent.order*9;target.y+=(agent.lane-1.5)*13+Math.sin(seconds*2.4-agent.order*.2)*13;
               const point=steer(agent,target,dt,true);ctx.save();ctx.globalAlpha=1-smooth((t-.97)/.03);
               active+=Number(cursor(point,last,agent.id,true,agent.heading,0));ctx.restore();continue;
             }
             if(!launchOrigins.has(agent.id))launchOrigins.set(agent.id,lastPositions.get(agent.id)||openingPoint(agent,introEnd*duration/1000));
             const current=agent.jobs.find(task=>t>=task.start&&t<task.end);if(current){const p=clamp((t-current.start)/(current.end-current.start)),point=current.point(p);record(agent,point,dt);agent.heading=-Math.PI*.66;active+=Number(cursor(point,current,agent.id,false,0,p));continue;}
-            const next=agent.jobs.find(task=>task.start>t),previous=[...agent.jobs].reverse().find(task=>task.end<=t),lead=.018;let a,b,p,task;
+            const next=agent.jobs.find(task=>task.start>t),previous=[...agent.jobs].reverse().find(task=>task.end<=t);
+            const travelSeconds=next&&previous?Math.hypot(next.point(0).x-previous.point(1).x,next.point(0).y-previous.point(1).y)*cadence/pixelPace:0;
+            const lead=Math.max(.025,Math.min(.12,travelSeconds/(duration/1000)));let a,b,p,task;
             if(next&&!previous){a=launchOrigins.get(agent.id);b=next.point(0);p=(t-introEnd)/(next.start-introEnd);task=next;}
             else if(next&&previous&&next.start-previous.end<lead*2){a=previous.point(1);b=next.point(0);p=(t-previous.end)/(next.start-previous.end);task=next;}
             else if(next&&t>=next.start-lead){b=next.point(0);a=edge(b,agent.id);p=(t-next.start+lead)/lead;task=next;}
             else if(previous&&t<previous.end+lead){a=previous.point(1);b=edge(a,agent.id);p=(t-previous.end)/lead;task=previous;}
             else{record(agent,edge(agent.jobs.at(-1).point(1),agent.id),dt);continue;}
-            p=smooth(p);const point=swim(a,b,p,agent.id),ahead=swim(a,b,Math.min(1,p+.015),agent.id);record(agent,point,dt);agent.heading=Math.atan2(ahead.y-point.y,ahead.x-point.x);active+=Number(cursor(point,task,agent.id,true,agent.heading,p));
+            p=clamp(p);const point=swim(a,b,p,agent.id),ahead=swim(a,b,Math.min(1,p+.015),agent.id);record(agent,point,dt);agent.heading=Math.atan2(ahead.y-point.y,ahead.x-point.x);active+=Number(cursor(point,task,agent.id,true,agent.heading,p));
           }
           report.completed=tasks.filter(task=>task.complete).length;canvas.dataset.activeCursors=String(active);canvas.dataset.taskCount=String(tasks.length);
           report.cursors=agents.filter(agent=>agent.motion).map(agent=>({id:agent.id,x:agent.motion.x,y:agent.motion.y,heading:agent.heading,depth:agent.depth}));
@@ -324,7 +394,7 @@
     }finally{
       cancelAnimationFrame(frame);clearTimeout(timer);window.removeEventListener('resize',settle);document.removeEventListener('keydown',onKey,true);document.removeEventListener('visibilitychange',onHidden);
       if(nameButton?.isConnected&&nameButton.dataset.flipped==='true')nameButton.click();saved.forEach((value,node)=>restore(node));cleanup.forEach(fn=>fn());phaseStyle?.remove();
-      if(includeVisual&&!visualStarted&&root.dataset.view==='quick'&&firstVisualId)window.PortfolioQuick.showProject(firstVisualId);
+      returnToGrowth();
       window.GrowthMountain.preview(null);canvas?.remove();root.inert=previousInert;delete document.body.dataset.swarmTransition;busy=false;
     }
   }
