@@ -35,12 +35,12 @@
       prepare();
       root.inert = true;
       await new Promise(requestAnimationFrame);
-      const selectors = ".quick-header,.profile-topline,.profile-name,.profile-education,.mode-console,.profile-bottom,.growth-chart,.growth-footer,.growth-stage > .portfolio-heading";
+      const selectors = ".quick-header,.profile-topline,.profile-name,.profile-education,.profile-facts > div,.mode-console,.profile-bottom,.growth-chart,.growth-footer,.growth-stage > .portfolio-heading";
       const tasks = [...root.querySelectorAll(selectors)].map((node) => {
         const r = node.getBoundingClientRect();
         if (r.width <= 0 || r.height <= 0) return null;
         const letters = [];
-        if (node.matches(".profile-topline,.profile-name,.profile-education,.profile-bottom,.portfolio-heading")) {
+        if (node.matches(".profile-topline,.profile-name,.profile-education,.profile-facts > div,.profile-bottom,.portfolio-heading")) {
           const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
           let text;
           while ((text = walker.nextNode())) {

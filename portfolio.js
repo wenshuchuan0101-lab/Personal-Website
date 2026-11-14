@@ -321,7 +321,7 @@
     content.innerHTML = `
       <section id="about" class="portfolio-section profile-section" aria-labelledby="profile-name">
         <div class="profile-topline"><span>${labels[language].about}</span><span lang="en">2024 — 2026</span></div>
-        <div class="profile-composition"><div class="profile-copy"><h1 id="profile-name" class="profile-name"><button class="profile-name-flip" type="button" data-flipped="${nameFlipped}" aria-pressed="${nameFlipped}" aria-label="${escape(text(profile.name))} / ${escape(text(profile.alias))}">${namePage(profile.name, "name-primary", nameFlipped)}${namePage(profile.alias, "name-alias", !nameFlipped)}</button></h1><p class="profile-education">${escape(text(profile.education))}</p></div>${modeConsole()}</div>
+        <div class="profile-composition"><div class="profile-copy"><h1 id="profile-name" class="profile-name"><button class="profile-name-flip" type="button" data-flipped="${nameFlipped}" aria-pressed="${nameFlipped}" aria-label="${escape(text(profile.name))} / ${escape(text(profile.alias))}">${namePage(profile.name, "name-primary", nameFlipped)}${namePage(profile.alias, "name-alias", !nameFlipped)}</button></h1><p class="profile-education">${escape(text(profile.education))}</p><dl class="profile-facts">${(profile.facts || []).map((fact) => `<div><dt>${escape(text(fact.label))}</dt><dd>${escape(text(fact.value))}</dd></div>`).join("")}</dl></div>${modeConsole()}</div>
         <div class="profile-bottom"><p class="profile-roles">${profile.roles.map((role) => `<span>${escape(text(role))}</span>`).join('<span class="role-slash" aria-hidden="true">/</span>')}</p></div>
       </section>
       <section id="growth" class="portfolio-section growth-section" aria-labelledby="growth-heading">

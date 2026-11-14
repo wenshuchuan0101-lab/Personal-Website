@@ -9,6 +9,12 @@ const PORTFOLIO_CONTENT = {
       zh: "西安美术学院大三动画专业学生",
       en: "Third-year animation student at Xi’an Academy of Fine Arts",
     },
+    facts: [
+      { label: { zh: "创作能力", en: "Creative Skills" }, value: { zh: "AIGC 影视动画全流程 / AIGC 游戏全流程", en: "End-to-end AIGC film & animation / AIGC game production" } },
+      { label: { zh: "发展方向", en: "Career Focus" }, value: { zh: "策划 / 导演 / 后期 / 宣发", en: "Planning / Directing / Post-production / Promotion" } },
+      { label: { zh: "创作理念", en: "Creative Philosophy" }, value: { zh: "探索 AI 时代的创作方式，拓展想象与表达的边界", en: "Exploring creative practice in the AI era, expanding the boundaries of imagination and expression" } },
+      { label: { zh: "个人兴趣", en: "Interests" }, value: { zh: "辩论", en: "Debate" } },
+    ],
     roles: [
       { zh: "策划", en: "Planning" },
       { zh: "后期", en: "Post-production" },

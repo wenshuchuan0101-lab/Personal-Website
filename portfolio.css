@@ -83,6 +83,11 @@ body[data-scene="quick"][data-quick-backdrop="games"] .language-star { --star-ce
 .profile-name:focus, .portfolio-heading h2:focus { outline: none; }
 .profile-roman { display: block; margin: 0; font: clamp(39px, 5.2vw, 86px)/1.05 "Cormorant Garamond", Georgia, serif; letter-spacing: -.025em; transform: scaleY(.8); transform-origin: left top; }
 .profile-education { max-width: 500px; margin: 36px 0 0; font-size: clamp(16px, 1.6vw, 21px); line-height: 1.9; letter-spacing: .08em; text-wrap: balance; }
+.profile-facts { display: grid; gap: 13px; margin: 24px 0 0; max-width: 700px; font-size: clamp(13px, 1.15vw, 17px); line-height: 1.85; letter-spacing: .025em; }
+.profile-facts > div { display: grid; grid-template-columns: max-content minmax(0, 1fr); column-gap: 20px; }
+.profile-facts dt { color: var(--portfolio-orange); }
+.profile-facts dd { min-width: 0; margin: 0; color: #ffe3bd; }
+html[lang="en"] .profile-facts { font-size: clamp(15px, 1.5vw, 21px); line-height: 1.35; letter-spacing: 0; }
 .mode-console { position: relative; width: 100%; max-width: 440px; aspect-ratio: 1; justify-self: center; color: var(--portfolio-orange); }
 .console-diagram { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
 .console-line, .console-inner, .console-orbits { fill: none; stroke: currentColor; stroke-width: .9; opacity: .42; }
@@ -311,6 +316,37 @@ html[lang="en"] #detail-title { font: clamp(34px, 5vw, 68px)/1 "Cormorant Garamo
   html[lang="en"] .profile-education { font-size: 18px; line-height: 1.2; margin-top: 10px; }
   html[lang="en"] .profile-roles { font-size: 16px; line-height: 1.2; }
   html[lang="en"] .quick-view .choice-label { font-size: 18px; }
+}
+@media (max-width: 700px) {
+  .profile-facts { margin-top: 18px; gap: 8px; font-size: 13px; line-height: 1.7; letter-spacing: 0; }
+  .profile-facts > div { column-gap: 12px; }
+  html[lang="en"] .profile-facts { font-size: 16px; line-height: 1.25; }
+  html[lang="en"] .profile-facts > div { grid-template-columns: 88px minmax(0, 1fr); }
+  .profile-section:has(.profile-facts) .profile-bottom { display: none; }
+}
+@media (max-width: 700px) and (max-height: 740px) {
+  .profile-section { padding-top: 18px; padding-bottom: 14px; }
+  .profile-composition { gap: 14px; justify-content: space-evenly; padding-block: 8px; }
+  .profile-name, html[lang="en"] .profile-name { font-size: 40px; }
+  .profile-roman { font-size: 28px; margin-top: 3px; }
+  html[lang="en"] .profile-roman { font-size: 16px; margin-top: 6px; }
+  .profile-education { margin-top: 8px; font-size: 12px; line-height: 1.5; }
+  html[lang="en"] .profile-education { font-size: 16px; line-height: 1.15; margin-top: 8px; }
+  .profile-facts { margin-top: 12px; gap: 6px; font-size: 12px; line-height: 1.5; }
+  html[lang="en"] .profile-facts { font-size: 13px; line-height: 1.2; }
+  html[lang="en"] .profile-facts > div { grid-template-columns: 74px minmax(0, 1fr); }
+  .mode-console { width: 100%; max-width: 300px; height: 108px; aspect-ratio: auto; }
+  .console-diagram { width: 126px; height: 126px; left: 50%; top: -9px; transform: translateX(-50%); }
+  .console-options { width: 100%; gap: 10px; }
+  .quick-view .mode-option { min-height: 40px; }
+}
+@media (max-height: 520px) and (min-width: 701px) {
+  .profile-section:has(.profile-facts) .profile-bottom { display: none; }
+  .profile-facts { margin-top: 12px; gap: 5px; font-size: 12px; line-height: 1.45; }
+  html[lang="en"] .profile-facts { font-size: 14px; line-height: 1.15; }
+  .profile-name, html[lang="en"] .profile-name { font-size: 38px; }
+  .profile-roman { font-size: 24px; }
+  .profile-education { margin-top: 8px; font-size: 12px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .reveal { opacity: 1; transform: none; transition: none; }
