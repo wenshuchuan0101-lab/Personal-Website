@@ -61,8 +61,20 @@
       const colors = config.colors || ["#ffab4d", "#f4eee3", "#b7c9ff"];
       const count = Math.max(width < 600 ? 6 : 9, tasks.length);
       const start = { x: Math.max(65, Math.min(width - 65, origin?.x ?? width / 2)), y: Math.max(80, Math.min(height - 80, origin?.y ?? height / 2)) };
-      const drawCursor = (x, y, color, alpha, scale = 1, type = "arrow") => {
+      const fish = Array.from({ length: count }, (_, i) => {
+        const angle = i * 2.39996;
+        return { x: width / 2 + Math.cos(angle) * width * .68,
+          y: height / 2 + Math.sin(angle) * height * .68,
+          vx: -Math.sin(angle) * 90, vy: Math.cos(angle) * 90,
+          heading: angle + Math.PI / 2, pace: .82 + (i * .173 % .39), trail: [] };
+      });
+      const pointer = { x: 0, y: 0, active: false };
+      canvas.addEventListener("pointermove", (event) => { pointer.x = event.clientX; pointer.y = event.clientY; pointer.active = true; }, { passive: true });
+      canvas.addEventListener("pointerleave", () => { pointer.active = false; });
+      const swim = Math.max(.2, Math.min(2, Number(config.swimStrength) || 1));
+      const drawCursor = (x, y, color, alpha, scale = 1, type = "arrow", rotation = 0) => {
         ctx.save(); ctx.translate(x, y); ctx.scale(scale, scale); ctx.globalAlpha = alpha;
+        if (type === "arrow") ctx.rotate(rotation);
         if (type !== "arrow") {
           ctx.strokeStyle = color; ctx.lineWidth = 1.6;
           ctx.shadowColor = color; ctx.shadowBlur = 6;
@@ -92,7 +104,10 @@
         document.addEventListener("visibilitychange", hidden);
         timer = setTimeout(resolve, duration + 900);
         const began = performance.now();
+        let previous = began;
         function paint(now) {
+          const dt = Math.min(.034, Math.max(.001, (now - previous) / 1000));
+          previous = now;
           const t = clamp((now - began) / duration);
           canvas.dataset.stage = t < .23 ? "arriving" : t < .81 ? "building" : "departing";
           ctx.clearRect(0, 0, width, height);
@@ -134,15 +149,20 @@
           ctx.globalAlpha = 1;
           if (t < .24) drawStar(start.x, start.y, 18 + Math.sin(t * 30) * 5, smooth(t / .06) * (1 - smooth((t - .17) / .07)));
           for (let i = 0; i < count; i++) {
+            const agent = fish[i];
             const task = tasks[i % tasks.length];
-            const angle = i / count * Math.PI * 2 + t * 9;
+            const seconds = (now - began) / 1000;
+            const angle = i * 2.39996 + seconds * agent.pace * 1.7;
             const radius = Math.min(width * .18, 75);
-            const orbitX = start.x + Math.cos(angle) * radius, orbitY = start.y + Math.sin(angle) * radius;
+            const pulse = .8 + .22 * Math.sin(seconds * 2.1 + i * 1.7);
+            const orbitX = start.x + Math.cos(angle) * radius * pulse;
+            const orbitY = start.y + Math.sin(angle) * radius * .73 * pulse;
             const arrive = smooth((t - i * .006) / .12);
             let x = width / 2 + Math.cos(i * 2.4) * width * .85;
             let y = height / 2 + Math.sin(i * 2.4) * height * .85;
             x += (orbitX - x) * arrive; y += (orbitY - y) * arrive;
             const spread = smooth((t - .16) / Math.max(.04, task.begin - .16));
+            const idle = task.progress >= 1 || t < task.begin;
             let targetX = task.x + task.w * task.drag, targetY = task.y + task.h * task.drag;
             let cursorType = "arrow";
             if (task.drag > 0 && task.drag < 1) cursorType = "crosshair";
@@ -151,13 +171,64 @@
               targetX = letter.x + letter.w; targetY = letter.y + letter.h / 2; cursorType = "text";
             }
             if (i >= tasks.length) { targetX = task.x - 12; targetY = task.y + task.h * task.drag; cursorType = "arrow"; }
+            if (idle) {
+              targetX += Math.cos(angle + .8) * 25 * swim;
+              targetY += Math.sin(angle * 1.13) * 19 * swim;
+            }
             x += (targetX - x) * spread; y += (targetY - y) * spread;
             const gather = smooth((t - .81 - (i % 3) * .01) / .12);
             x += (start.x + Math.cos(angle) * radius * .4 - x) * gather;
             y += (start.y + Math.sin(angle) * radius * .4 - y) * gather;
             const collapse = smooth((t - .94) / .06);
             x += (start.x - x) * collapse; y += (start.y - y) * collapse;
-            drawCursor(x, y, colors[i % colors.length], smooth(t / .03) * (1 - collapse), 1.15 * (1 - collapse), gather > .1 ? "arrow" : cursorType);
+            const working = t >= task.begin && task.progress < 1 && gather < .1 && i < tasks.length;
+            const free = working ? .12 : 1;
+            const dx = x - agent.x, dy = y - agent.y, distance = Math.hypot(dx, dy);
+            const speedLimit = (width < 600 ? 780 : 1350) * agent.pace;
+            const desiredSpeed = Math.min(speedLimit, distance * (working ? 18 : 5.5 + gather * 6));
+            let desiredX = dx / Math.max(1, distance) * desiredSpeed;
+            let desiredY = dy / Math.max(1, distance) * desiredSpeed;
+            // A lateral current bends each approach; it subsides near a working tip.
+            const current = Math.min(120, distance * .7) * Math.sin(seconds * 2.6 + i * 1.8) * free * swim;
+            desiredX += -dy / Math.max(1, distance) * current;
+            desiredY += dx / Math.max(1, distance) * current;
+            let alignX = 0, alignY = 0, neighbors = 0;
+            for (let j = 0; j < fish.length; j++) {
+              if (j === i) continue;
+              const other = fish[j], sx = agent.x - other.x, sy = agent.y - other.y;
+              const separation = Math.hypot(sx, sy);
+              if (separation < 43 && separation > .01) {
+                const repel = (1 - separation / 43) * 210 * free * (1 - collapse) * swim;
+                desiredX += sx / separation * repel; desiredY += sy / separation * repel;
+              }
+              if (separation < 125) { alignX += other.vx; alignY += other.vy; neighbors++; }
+            }
+            if (neighbors) {
+              desiredX += (alignX / neighbors - agent.vx) * .18 * free;
+              desiredY += (alignY / neighbors - agent.vy) * .18 * free;
+            }
+            if (pointer.active && free > .5 && collapse < .1) {
+              const px = agent.x - pointer.x, py = agent.y - pointer.y, d = Math.hypot(px, py);
+              if (d < 90 && d > .01) { const push = (1 - d / 90) * 270; desiredX += px / d * push; desiredY += py / d * push; }
+            }
+            // Persistent velocity provides acceleration and braking, never a position snap.
+            const response = 1 - Math.exp(-(working ? 18 : 5.8 + gather * 5) * dt);
+            agent.vx += (desiredX - agent.vx) * response;
+            agent.vy += (desiredY - agent.vy) * response;
+            const speed = Math.hypot(agent.vx, agent.vy);
+            if (speed > speedLimit) { agent.vx *= speedLimit / speed; agent.vy *= speedLimit / speed; }
+            agent.x += agent.vx * dt; agent.y += agent.vy * dt;
+            const heading = working ? 0 : Math.atan2(agent.vy, agent.vx) + Math.PI * .66;
+            const turn = Math.atan2(Math.sin(heading - agent.heading), Math.cos(heading - agent.heading));
+            agent.heading += Math.max(-6 * dt, Math.min(6 * dt, turn * (1 - Math.exp(-8 * dt))));
+            agent.trail.push({ x: agent.x, y: agent.y });
+            if (agent.trail.length > 7) agent.trail.shift();
+            if (!working && speed > 70) {
+              ctx.save(); ctx.globalAlpha = .14 * (1 - collapse); ctx.strokeStyle = colors[i % colors.length]; ctx.lineWidth = 1;
+              ctx.beginPath(); agent.trail.forEach((point, index) => index ? ctx.lineTo(point.x, point.y) : ctx.moveTo(point.x, point.y)); ctx.stroke(); ctx.restore();
+            }
+            const rotation = agent.heading + Math.sin(seconds * 7 + i) * .055 * swim * free;
+            drawCursor(agent.x, agent.y, colors[i % colors.length], smooth(t / .03) * (1 - collapse), 1.15 * (1 - collapse), gather > .1 ? "arrow" : cursorType, rotation);
           }
           if (t > .92) drawStar(start.x, start.y, 26 * Math.sin(clamp((t - .92) / .08) * Math.PI), 1 - smooth((t - .97) / .03));
           if (t < 1) frame = requestAnimationFrame(paint); else resolve();

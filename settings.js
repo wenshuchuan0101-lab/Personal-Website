@@ -6,6 +6,7 @@ const SCENE_SETTINGS = {
   englishLines: ["Tread softly because you tread", "on my dreams."],
   transition: {
     milliseconds: 6200,
+    swimStrength: 1,
     colors: ["#ffab4d", "#f4eee3", "#b7c9ff"],
   },
   meteor: {
