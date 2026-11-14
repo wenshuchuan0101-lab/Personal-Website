@@ -4,6 +4,10 @@ const SCENE_SETTINGS = {
   image: "./assets/hero-orbit.png",
   chinese: "关于想象力的一切",
   englishLines: ["Tread softly because you tread", "on my dreams."],
+  transition: {
+    milliseconds: 2300,
+    colors: ["#ffab4d", "#f4eee3", "#b7c9ff"],
+  },
   meteor: {
     intervalMilliseconds: 420,
     flightMilliseconds: 1900,

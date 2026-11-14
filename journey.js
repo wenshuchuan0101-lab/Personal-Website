@@ -48,16 +48,18 @@ function showProfile() {
   setPhase("profile");
 }
 
-entry.addEventListener("click", async () => {
+entry.addEventListener("click", async (event) => {
   if (phase !== "intro") return;
   setPhase("entering");
   entry.disabled = true;
-  await animate(intro, [{ opacity: 1 }, { opacity: 0 }], 850, {
-    delay: reduceMotion.matches ? 0 : 200,
+  languageStar.disabled = true;
+  await window.PortfolioTransition.run({
+    root: quickView,
+    origin: { x: event.clientX, y: event.clientY },
+    background: "#123fce",
+    prepare() { intro.hidden = true; showProfile(); },
   });
-  intro.hidden = true;
-  showProfile();
-  await animate(quickView, [{ opacity: 0 }, { opacity: 1 }], 650);
+  languageStar.disabled = false;
 });
 
 languageStar.addEventListener("click", () => {
@@ -82,6 +84,18 @@ async function choose(option) {
   ], selection.revealMilliseconds);
   status.textContent = selection.labels[language].selected + " · " + selection.labels[language][mode];
   document.body.dataset.destination = mode;
+  if (mode === "quick") {
+    const bounds = option.getBoundingClientRect();
+    await window.PortfolioTransition.run({
+      root: quickView,
+      background: "#080820",
+      origin: { x: bounds.left + bounds.width / 2, y: bounds.top + bounds.height / 2 },
+      prepare() { window.PortfolioQuick.setView("quick"); },
+    });
+    languageStar.disabled = false;
+    setPhase(mode);
+    return;
+  }
   fade.style.backgroundColor = mode === "quick" ? "#f5efe4" : "#000";
   fade.hidden = false;
   setPhase("fading");
