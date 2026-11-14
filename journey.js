@@ -69,6 +69,7 @@ languageStar.addEventListener("click", () => {
 
 async function choose(option) {
   if (phase !== "profile") return;
+  const started = performance.now();
   const mode = option.dataset.mode;
   if (mode !== "quick" && mode !== "showcase") return;
   setPhase("selecting");
@@ -88,6 +89,8 @@ async function choose(option) {
     const bounds = option.getBoundingClientRect();
     await window.PortfolioTransition.run({
       root: quickView,
+      includeVisual: true,
+      budgetMilliseconds: Math.max(1000, 10000 - (performance.now() - started)),
       background: "#080820",
       origin: { x: bounds.left + bounds.width / 2, y: bounds.top + bounds.height / 2 },
       prepare() { window.PortfolioQuick.setView("quick"); },
