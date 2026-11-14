@@ -16,7 +16,7 @@
     try {
       if (motion.matches) { prepare(); return; }
       const config = SCENE_SETTINGS.transition || {};
-      const duration = Math.max(2400, Number(config.milliseconds) || 6200);
+      const duration = Math.max(3500, Number(config.milliseconds) || 7600);
       const width = innerWidth, height = innerHeight;
       const ratio = Math.min(devicePixelRatio || 1, 2);
       canvas = document.createElement("canvas");
@@ -59,12 +59,12 @@
       }).filter((r) => r && r.w > 4 && r.h > 4).sort((a, b) => a.y - b.y || a.x - b.x);
       if (!tasks.length) tasks.push({ x: 0, y: 0, w: width, h: height });
       const colors = config.colors || ["#ffab4d", "#f4eee3", "#b7c9ff"];
-      const count = Math.max(width < 600 ? 6 : 9, tasks.length);
+      const count = Math.max(tasks.length, Math.min(48, Number(width < 600 ? config.mobileCursorCount : config.cursorCount) || (width < 600 ? 22 : 32)));
       const start = { x: Math.max(65, Math.min(width - 65, origin?.x ?? width / 2)), y: Math.max(80, Math.min(height - 80, origin?.y ?? height / 2)) };
       const fish = Array.from({ length: count }, (_, i) => {
         const angle = i * 2.39996;
-        return { x: width / 2 + Math.cos(angle) * width * .68,
-          y: height / 2 + Math.sin(angle) * height * .68,
+        return { x: start.x + (i % 2 ? 1 : -1) * (80 + (i * 17 % 75)),
+          y: start.y + Math.sin(angle) * 80,
           vx: -Math.sin(angle) * 90, vy: Math.cos(angle) * 90,
           heading: angle + Math.PI / 2, pace: .82 + (i * .173 % .39), trail: [] };
       });
@@ -109,14 +109,14 @@
           const dt = Math.min(.034, Math.max(.001, (now - previous) / 1000));
           previous = now;
           const t = clamp((now - began) / duration);
-          canvas.dataset.stage = t < .23 ? "arriving" : t < .81 ? "building" : "departing";
+          canvas.dataset.stage = t < .20 ? "arriving" : t < .73 ? "building" : "departing";
           ctx.clearRect(0, 0, width, height);
           ctx.globalCompositeOperation = "source-over";
           ctx.fillStyle = background; ctx.fillRect(0, 0, width, height);
           tasks.forEach((task, i) => {
-            task.begin = .24 + i / tasks.length * .30;
-            task.drag = smooth((t - task.begin) / .08);
-            task.progress = clamp((t - task.begin - .08) / .16);
+            task.begin = .21 + i / tasks.length * .29;
+            task.drag = smooth((t - task.begin) / .07);
+            task.progress = clamp((t - task.begin - .07) / .14);
             ctx.globalCompositeOperation = "destination-out";
             ctx.fillStyle = "#000";
             if (task.letters?.length && task.progress < 1) {
@@ -124,9 +124,9 @@
             } else ctx.fillRect(task.x, task.y, task.w, task.h * smooth(task.progress));
           });
           // The finished page is uncovered before the cursors gather for their exit.
-          if (t > .78) {
+          if (t > .70) {
             ctx.globalCompositeOperation = "destination-out";
-            ctx.globalAlpha = smooth((t - .78) / .10); ctx.fillRect(0, 0, width, height); ctx.globalAlpha = 1;
+            ctx.globalAlpha = smooth((t - .70) / .08); ctx.fillRect(0, 0, width, height); ctx.globalAlpha = 1;
           }
           ctx.globalCompositeOperation = "source-over";
           tasks.forEach((task, i) => {
@@ -147,21 +147,18 @@
             ctx.fillText(`${Math.round(w)} × ${Math.round(h)}`, Math.min(width - 75, task.x + w + 10), Math.max(14, task.y + h - 8));
           });
           ctx.globalAlpha = 1;
-          if (t < .24) drawStar(start.x, start.y, 18 + Math.sin(t * 30) * 5, smooth(t / .06) * (1 - smooth((t - .17) / .07)));
+          if (t < .22) drawStar(start.x, start.y, 13 + Math.sin(t * 25) * 2, (1 - smooth((t - .16) / .06)));
           for (let i = 0; i < count; i++) {
             const agent = fish[i];
             const task = tasks[i % tasks.length];
             const seconds = (now - began) / 1000;
-            const angle = i * 2.39996 + seconds * agent.pace * 1.7;
+            const angle = (i % 2 ? Math.PI : 0) + (i / count) * 1.6 + seconds * agent.pace * 2.0;
             const radius = Math.min(width * .18, 75);
             const pulse = .8 + .22 * Math.sin(seconds * 2.1 + i * 1.7);
             const orbitX = start.x + Math.cos(angle) * radius * pulse;
             const orbitY = start.y + Math.sin(angle) * radius * .73 * pulse;
-            const arrive = smooth((t - i * .006) / .12);
-            let x = width / 2 + Math.cos(i * 2.4) * width * .85;
-            let y = height / 2 + Math.sin(i * 2.4) * height * .85;
-            x += (orbitX - x) * arrive; y += (orbitY - y) * arrive;
-            const spread = smooth((t - .16) / Math.max(.04, task.begin - .16));
+            let x = orbitX, y = orbitY;
+            const spread = smooth((t - .15) / Math.max(.04, task.begin - .15));
             const idle = task.progress >= 1 || t < task.begin;
             let targetX = task.x + task.w * task.drag, targetY = task.y + task.h * task.drag;
             let cursorType = "arrow";
@@ -170,17 +167,29 @@
               const letter = task.letters[Math.min(task.letters.length - 1, Math.floor(task.letters.length * task.progress))];
               targetX = letter.x + letter.w; targetY = letter.y + letter.h / 2; cursorType = "text";
             }
-            if (i >= tasks.length) { targetX = task.x - 12; targetY = task.y + task.h * task.drag; cursorType = "arrow"; }
+            if (i >= tasks.length) {
+              // Small teams swim around their working area, each on a separate arc.
+              const lane = Math.floor(i / tasks.length);
+              targetX = task.x + task.w * (.2 + .6 * task.drag) + Math.cos(angle + lane) * Math.min(task.w * .35, 90 + lane * 10);
+              targetY = task.y + task.h * .5 + Math.sin(angle + lane) * Math.min(task.h * .4, 60 + lane * 8);
+              cursorType = "arrow";
+            }
             if (idle) {
               targetX += Math.cos(angle + .8) * 25 * swim;
               targetY += Math.sin(angle * 1.13) * 19 * swim;
             }
             x += (targetX - x) * spread; y += (targetY - y) * spread;
-            const gather = smooth((t - .81 - (i % 3) * .01) / .12);
-            x += (start.x + Math.cos(angle) * radius * .4 - x) * gather;
-            y += (start.y + Math.sin(angle) * radius * .4 - y) * gather;
-            const collapse = smooth((t - .94) / .06);
-            x += (start.x - x) * collapse; y += (start.y - y) * collapse;
+            const gather = smooth((t - .73 - (i % 4) * .008) / .12);
+            const exitX = pointer.active ? Math.max(35, Math.min(width - 35, pointer.x)) : width - Math.min(85, width * .16);
+            const exitY = pointer.active ? Math.max(35, Math.min(height - 35, pointer.y)) : height - 85;
+            const loop = seconds * 2.8 - i * .30;
+            const shoalRadius = Math.min(width * .14, 80) * (.55 + (i % 5) * .11);
+            x += (exitX + Math.cos(loop) * shoalRadius - x) * gather;
+            y += (exitY + Math.sin(loop) * shoalRadius * .65 - y) * gather;
+            // The shoal curls towards the corner; it never collapses into a star.
+            const collapse = smooth((t - .965) / .035);
+            x += (width + 50 + i * 3 - x) * collapse;
+            y += (height + 35 + Math.sin(loop) * 25 - y) * collapse;
             const working = t >= task.begin && task.progress < 1 && gather < .1 && i < tasks.length;
             const free = working ? .12 : 1;
             const dx = x - agent.x, dy = y - agent.y, distance = Math.hypot(dx, dy);
@@ -197,8 +206,8 @@
               if (j === i) continue;
               const other = fish[j], sx = agent.x - other.x, sy = agent.y - other.y;
               const separation = Math.hypot(sx, sy);
-              if (separation < 43 && separation > .01) {
-                const repel = (1 - separation / 43) * 210 * free * (1 - collapse) * swim;
+              if (separation < 24 && separation > .01) {
+                const repel = (1 - separation / 24) * 180 * free * (1 - collapse) * swim;
                 desiredX += sx / separation * repel; desiredY += sy / separation * repel;
               }
               if (separation < 125) { alignX += other.vx; alignY += other.vy; neighbors++; }
@@ -224,13 +233,12 @@
             agent.trail.push({ x: agent.x, y: agent.y });
             if (agent.trail.length > 7) agent.trail.shift();
             if (!working && speed > 70) {
-              ctx.save(); ctx.globalAlpha = .14 * (1 - collapse); ctx.strokeStyle = colors[i % colors.length]; ctx.lineWidth = 1;
+              ctx.save(); ctx.globalAlpha = .07 * (1 - collapse); ctx.strokeStyle = colors[i % colors.length]; ctx.lineWidth = .7;
               ctx.beginPath(); agent.trail.forEach((point, index) => index ? ctx.lineTo(point.x, point.y) : ctx.moveTo(point.x, point.y)); ctx.stroke(); ctx.restore();
             }
             const rotation = agent.heading + Math.sin(seconds * 7 + i) * .055 * swim * free;
-            drawCursor(agent.x, agent.y, colors[i % colors.length], smooth(t / .03) * (1 - collapse), 1.15 * (1 - collapse), gather > .1 ? "arrow" : cursorType, rotation);
+            drawCursor(agent.x, agent.y, colors[i % colors.length], (1 - collapse), .65 + (i % 3) * .06, gather > .1 ? "arrow" : cursorType, rotation);
           }
-          if (t > .92) drawStar(start.x, start.y, 26 * Math.sin(clamp((t - .92) / .08) * Math.PI), 1 - smooth((t - .97) / .03));
           if (t < 1) frame = requestAnimationFrame(paint); else resolve();
         }
         frame = requestAnimationFrame(paint);

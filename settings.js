@@ -5,9 +5,11 @@ const SCENE_SETTINGS = {
   chinese: "关于想象力的一切",
   englishLines: ["Tread softly because you tread", "on my dreams."],
   transition: {
-    milliseconds: 6200,
+    milliseconds: 7600,
     swimStrength: 1,
-    colors: ["#ffab4d", "#f4eee3", "#b7c9ff"],
+    cursorCount: 32,
+    mobileCursorCount: 22,
+    colors: ["#ffab4d", "#f4eee3", "#b7c9ff", "#c8b4ed", "#aedcca", "#eeb5cb", "#f1d894"],
   },
   meteor: {
     intervalMilliseconds: 420,
