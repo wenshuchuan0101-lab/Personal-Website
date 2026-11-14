@@ -71,10 +71,22 @@
         if(!visible(node))return;const r=node.getBoundingClientRect(),points=[{x:r.left,y:r.top},{x:r.right,y:r.top},{x:r.right,y:r.bottom},{x:r.left,y:r.bottom},{x:r.left,y:r.top}],state=group(node);
         for(let i=0;i<4;i++)job({kind:'trace',title,start:start+i*.004,end:end+i*.004,points:[points[i],points[i+1]],color:'#ffb576',lineWidth:1,point:p=>pointOn([points[i],points[i+1]],p)},state);
       }
+      function dragBox(node,start,end){
+        if(!visible(node))return;
+        const r=node.getBoundingClientRect(),left=Math.max(8,r.left-5),top=Math.max(8,r.top-5),right=Math.min(width-8,r.right+5),bottom=Math.min(height-8,r.bottom+5);
+        if(right-left<16||bottom-top<16)return;
+        // Complete the layout drag before this region's actual content is placed.
+        for(const task of tasks){
+          const target=task.state?.node||task.node;
+          if(target&&node.contains(target)&&task.start<end){const delay=end-task.start;task.start+=delay;task.end+=delay;}
+        }
+        const bounds={left,top,width:right-left,height:bottom-top};
+        job({kind:'box',start,end,bounds,point:p=>{const growth=smooth(p/.78);return{x:left+bounds.width*growth,y:top+bounds.height*growth};}});
+      }
       function rule(node,start,end,title,side='bottom'){
         if(!visible(node))return;const r=node.getBoundingClientRect(),y=side==='top'?r.top:r.bottom;
         snapshot(node);node.style.setProperty(side==='top'?'border-top-color':'border-bottom-color','transparent');
-        job({kind:'trace',title,start,end,points:[{x:r.left,y},{x:r.right,y}],color:'#ffb576',lineWidth:.8,point:p=>({x:lerp(r.left,r.right,p),y}),endAction:()=>restore(node)});
+        job({kind:'trace',title,node,start,end,points:[{x:r.left,y},{x:r.right,y}],color:'#ffb576',lineWidth:.8,point:p=>({x:lerp(r.left,r.right,p),y}),endAction:()=>restore(node)});
       }
       function fillMountain(node,start,end){
         if(!visible(node))return;const ns='http://www.w3.org/2000/svg',svg=node.ownerSVGElement,b=node.getBBox(),state=group(node),count=14;
@@ -116,6 +128,13 @@
         root.querySelectorAll('.mode-option').forEach((button,i)=>{[...button.children].forEach((node,j)=>textJob(node,.72+i*.07+j*.006,.79+i*.07+j*.006,label('模式按钮文字','Mode button text')));borderJobs(button,.67+i*.07,.72+i*.07,label('按钮边框','Button frame'));});
         rule(root.querySelector('.profile-bottom'),.73,.79,label('页脚分隔线','Footer rule'),'top');
         root.querySelectorAll('.profile-roles > span').forEach((node,i)=>textJob(node,.77+i*.012,.84+i*.012,label('创作方向','Creative roles')));
+        dragBox(root.querySelector('.profile-topline'),.005,.06);
+        dragBox(root.querySelector('.profile-name'),.04,.13);
+        dragBox(root.querySelector('.profile-education'),.16,.23);
+        root.querySelectorAll('.profile-facts > div').forEach((node,i)=>dragBox(node,.22+i*.065,.29+i*.065));
+        dragBox(root.querySelector('.mode-console'),.16,.25);
+        root.querySelectorAll('.mode-option').forEach((node,i)=>dragBox(node,.60+i*.07,.68+i*.07));
+        dragBox(root.querySelector('.profile-bottom'),.68,.76);
       }else{
         root.querySelectorAll('.nav-home,.section-link').forEach((node,i)=>textJob(node,.025+i*.014,.10+i*.014,label('顶部导航','Navigation')));
         rule(root.querySelector('.quick-header'),.02,.10,label('导航栏','Navigation bar'));
@@ -143,6 +162,11 @@
           }});
         });
         job({kind:'overview',title:label('完整成长轨迹','Complete growth journey'),start:.77,end:.90,point:p=>{const path=root.querySelector('.growth-future'),point=path.getPointAtLength(path.getTotalLength()*p);return new DOMPoint(point.x,point.y).matrixTransform(path.getScreenCTM());},endAction:()=>{root.scrollTop=root.querySelector('#growth').offsetHeight-root.clientHeight;window.GrowthMountain.preview(null);}});
+        dragBox(root.querySelector('.quick-header'),.005,.065);
+        dragBox(heading,.025,.11);
+        dragBox(root.querySelector('.growth-chart'),.075,.21);
+        dragBox(root.querySelector('.growth-meta'),.34,.44);
+        dragBox(root.querySelector('.growth-controls'),.37,.47);
       }
       document.querySelector('.language-star svg')?.querySelectorAll('path').forEach((node,i)=>svgJobs(node,2,(profile ? .79 : .51)+i*.012,(profile ? .85 : .56)+i*.012,label('语言切换','Language switch')));
       const colors=config.colors||['#ffab4d','#f4eee3','#b7c9ff'],count=Math.max(4,Math.min(40,Number(width<600?config.mobileCursorCount:config.cursorCount)||(width<600?18:28)));
@@ -164,6 +188,11 @@
         if(!task.points||task.state?.restored||(!task.state&&task.complete))return;ctx.save();if(task.clip){ctx.beginPath();ctx.rect(task.clip.left,task.clip.top,task.clip.width,task.clip.height);ctx.clip();}
         ctx.strokeStyle=task.color;ctx.lineWidth=task.lineWidth;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();const last=Math.floor(p*(task.points.length-1));task.points.slice(0,last+1).forEach((point,i)=>i?ctx.lineTo(point.x,point.y):ctx.moveTo(point.x,point.y));const tip=pointOn(task.points,p);ctx.lineTo(tip.x,tip.y);ctx.stroke();ctx.restore();
       }
+      function drawDragBox(task,p){
+        const growth=smooth(p/.78),bounds=task.bounds;
+        ctx.save();ctx.globalAlpha=.9*(1-smooth((p-.85)/.15));ctx.strokeStyle=colors[task.agent%colors.length];ctx.lineWidth=1.1;
+        ctx.strokeRect(bounds.left,bounds.top,Math.max(1,bounds.width*growth),Math.max(1,bounds.height*growth));ctx.restore();
+      }
       function cursor(point,task,id,travel,angle,p){
         if(point.x<0||point.x>width||point.y<0||point.y>height)return false;
         if(!travel&&task.clip&&(point.x<task.clip.left||point.x>task.clip.right||point.y<task.clip.top||point.y>task.clip.bottom))return false;
@@ -183,7 +212,7 @@
         finish=resolve;const began=performance.now();
         function paint(now){
           const t=(now-began)/duration;ctx.clearRect(0,0,width,height);canvas.dataset.stage=t<.13?'arriving':t<.82?'building':'departing';canvas.dataset.progress=t.toFixed(4);
-          for(const task of tasks){if(t<task.start)continue;const p=clamp((t-task.start)/(task.end-task.start));if(!task.complete){task.update?.(p);if(p===1)complete(task);}if(task.kind==='trace')strokeTask(task,p);}
+          for(const task of tasks){if(t<task.start)continue;const p=clamp((t-task.start)/(task.end-task.start));if(!task.complete){task.update?.(p);if(p===1)complete(task);}if(task.kind==='trace')strokeTask(task,p);if(task.kind==='box'&&p<1)drawDragBox(task,p);}
           let active=0;
           for(const agent of agents){
             if(!agent.jobs.length)continue;
