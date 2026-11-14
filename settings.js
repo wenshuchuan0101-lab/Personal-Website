@@ -5,8 +5,8 @@ const SCENE_SETTINGS = {
   chinese: "关于想象力的一切",
   englishLines: ["Tread softly because you tread", "on my dreams."],
   transition: {
-    profileMilliseconds: 28000,
-    growthMilliseconds: 40000,
+    profileMilliseconds: 7600,
+    growthMilliseconds: 7600,
     cursorCount: 32,
     mobileCursorCount: 22,
     colors: ["#ffab4d", "#f4eee3", "#b7c9ff", "#c8b4ed", "#aedcca", "#eeb5cb", "#f1d894"],
