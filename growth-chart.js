@@ -152,6 +152,7 @@
     let lastIndex = -1;
     let lastSize = "";
     let progress = 0;
+    let demoProgress = null;
 
     function update() {
       if (root.hidden || section.hidden) return;
@@ -159,7 +160,7 @@
       const height = chart.clientHeight;
       if (width < 1 || height < 1) return;
       const distance = Math.max(0, section.offsetHeight - stage.offsetHeight);
-      progress = reducedMotion.matches || distance < 1 ? manualProgress : clamp((root.scrollTop - section.offsetTop) / distance);
+      progress = demoProgress ?? (reducedMotion.matches || distance < 1 ? manualProgress : clamp((root.scrollTop - section.offsetTop) / distance));
       const travel = clamp(progress / .72) * (items.length - 1);
       const index = Math.min(items.length - 1, Math.round(travel));
       const low = Math.floor(travel);
@@ -260,9 +261,9 @@
     });
     const observer = new ResizeObserver(update);
     observer.observe(chart);
-    controller = { update, dispose: () => observer.disconnect(), get progress() { return progress || manualProgress; } };
+    controller = { update, preview(value) { demoProgress = value == null ? null : clamp(value); update(); }, dispose: () => observer.disconnect(), get progress() { return progress || manualProgress; } };
     update();
   }
   reducedMotion.addEventListener("change", () => controller?.update());
-  window.GrowthMountain = { render, mount, update: () => controller?.update() };
+  window.GrowthMountain = { render, mount, update: () => controller?.update(), preview: (progress) => controller?.preview(progress) };
 })();

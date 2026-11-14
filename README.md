@@ -1,5 +1,9 @@
 # 关于想象力的一切
 
+入口光标动画按具体任务搭建真实网页：个人介绍约 28 秒，逐字排入姓名、教育经历、四条介绍和按钮文字，分段绘制圆环、72 个刻度、星形及按钮边框，并演示白色「孟紫幽」与橙色「梅子雨」的左右翻页再翻回。成长页约 40 秒，分别搭建时间轴、曲线、山体明暗、节点、向下连线、日期和控件，随后依次演示全部 14 个成长阶段，最后停在山体全景。光标只在执行任务及前往、离开任务时出现，不再在屏幕中心游动；相邻任务标签自动避让。Esc 可跳过，系统减少动态效果时直接进入页面。
+
+动画时长、颜色和光标数量上限在 `settings.js` 的 `transition` 编辑；细分任务与节奏在 `swarm-transition.js` 编辑。成长演示通过 `GrowthMountain.preview()` 临时驱动真实图表，结束后交回原有滚动及阶段按钮。此流程保留原页面内容、配色和交互。
+
 Zephyrus 详情为三页：「作品介绍」展示 `assets/zephyrus-introduction.jpg`、日期与介绍原文；「开场动画」展示 `assets/zephyrus-opening.mp4`（完整画幅、声音及约 44.65 秒时长，1080p 网页版）；「海报展示」沿原顺序展示五张海报，悬停横向展开，手机可点按。内容、日期、媒体路径、尺寸及页序均在 `portfolio-data.js` 的 Zephyrus `detail` 内修改：`showcase`、`promo`、`conceptGallery`、`sectionOrder` 分别控制第一页、视频页、海报页和页面顺序。原始视频与图片文件保留不变。
 
 「星期八 / The Eighth Day」的作品选择页已接入可交互的 Three.js 办公室背景。只保留主办公区内的 WASD 行走和右键拖动转头，视点高度固定，桌椅及墙体有碰撞限制。原办公室工程独立保留；可编辑源代码、配置和构建说明见 [scene-source/eighth-day/README.md](scene-source/eighth-day/README.md)。`portfolio-data.js` 中该作品的 `liveScene`、`poster` 可分别更换交互场景与备用海报。页面只在选中作品后加载场景，轮盘打开时暂停，离开作品时卸载。
