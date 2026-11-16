@@ -238,6 +238,13 @@ const PORTFOLIO_CONTENT = {
           coverPosition: "center",
           detail: {
             description: { zh: "", en: "" },
+            showcaseFullWidth: true,
+            showcase: [
+              {
+                type: "video", src: "./assets/flower-room-showcase-video.mp4", poster: "./assets/flower-room-showcase-video-cover.jpg",
+                width: 2520, height: 1080, emphasis: true, text: { zh: "", en: "" },
+              },
+            ],
             images: [],
             video: "",
             posterImages: [],
