@@ -68,9 +68,9 @@
       prepare();root.inert=true;await Promise.race([document.fonts.ready,aborted]);await nextFrame();
       if(interrupted)return;
       const profile=root.dataset.view==='profile',duration=Math.min(9400,Math.max(4500,Number(profile?config.profileMilliseconds:config.growthMilliseconds)||9400));
-      const combined=includeVisual&&!profile&&Boolean(firstVisualId),introEnd=.16,buildEnd=.86,visualAt=.45,wheelAt=.66,returnAt=.88;
+      const combined=includeVisual&&!profile&&Boolean(firstVisualId),introEnd=.16,buildEnd=.72,visualAt=.40,wheelAt=.56,returnAt=.72;
       const en=document.documentElement.lang==='en',label=(zh,english)=>en?english:zh;
-      if(!profile)window.GrowthMountain.preview(1);
+      if(!profile){window.GrowthMountain.preview(1);root.scrollTop=Math.max(0,root.querySelector('#growth').offsetHeight-root.clientHeight);}
       root.querySelectorAll('.console-ticks,.console-orbits').forEach(node=>{snapshot(node);node.style.animationPlayState='paused';});
       phaseStyle=document.createElement('style');phaseStyle.textContent='body[data-swarm-transition] .reveal{opacity:1!important;transform:none!important;transition:none!important}body[data-swarm-transition] .work-wheel,body[data-swarm-transition] .wheel-work{transition:none!important}';document.head.append(phaseStyle);
       await nextFrame();
@@ -82,8 +82,8 @@
         return true;
       };
       const group=node=>{snapshot(node);node.style.setProperty('visibility','hidden','important');return{node,remaining:0,restored:false};};
-      const job=(options,state)=>{const task={...options,state,complete:false};if(state)state.remaining++;tasks.push(task);return task;};
-      const complete=task=>{if(task.complete)return;task.complete=true;task.update?.(1);if(task.state&&--task.state.remaining===0){restore(task.state.node);task.state.restored=true;}task.endAction?.();};
+      const job=(options,state)=>{const task={...options,id:tasks.length,state,complete:false};if(state)state.remaining++;tasks.push(task);return task;};
+      const complete=task=>{if(task.complete)return;task.complete=true;task.update?.(1);if(Number.isInteger(task.milestoneIndex)&&!report.visitedMilestones.includes(task.milestoneIndex))report.visitedMilestones.push(task.milestoneIndex);if(task.state&&--task.state.remaining===0){restore(task.state.node);task.state.restored=true;}task.endAction?.();};
       function pointOn(points,p){const i=clamp(p)*(points.length-1),lo=Math.floor(i),hi=Math.min(points.length-1,lo+1);return{x:lerp(points[lo].x,points[hi].x,i-lo),y:lerp(points[lo].y,points[hi].y,i-lo)};}
       function textJob(node,start,end,title){
         if(!visible(node))return;const bounds=node.getBoundingClientRect(),letters=[],sx=node.offsetWidth/bounds.width||1,sy=node.offsetHeight/bounds.height||1;
@@ -97,12 +97,24 @@
           const amount=Math.floor(p*letters.length);if(last===amount)return;last=amount;node.style.setProperty('visibility','visible','important');node.style.clipPath=amount?`path("${letters.slice(0,amount).map(l=>l.path).join('')}")`:'inset(0 100% 0 0)';
         }},state);
       }
-      function mediaJob(node,start,end){
+      function mediaJob(node,start,end,cells=1){
         if(!visible(node))return;
-        const r=node.getBoundingClientRect(),state=group(node);
-        job({kind:'media',start,end,point:p=>({x:lerp(r.left,r.right,smooth(p)),y:r.top+r.height*.5}),update:p=>{
-          node.style.setProperty('visibility','visible','important');node.style.clipPath=`inset(0 ${(1-smooth(p))*100}% 0 0)`;
-        }},state);
+        const r=node.getBoundingClientRect(),state=group(node),columns=cells===24?6:cells,rows=cells===24?4:1;
+        let clip;
+        if(cells>1){
+          const ns='http://www.w3.org/2000/svg',holder=document.createElementNS(ns,'svg');holder.setAttribute('width','0');holder.setAttribute('height','0');holder.setAttribute('aria-hidden','true');holder.style.position='absolute';
+          const defs=document.createElementNS(ns,'defs');clip=document.createElementNS(ns,'clipPath');clip.id=`swarm-media-${tasks.length}`;clip.setAttribute('clipPathUnits','objectBoundingBox');defs.append(clip);holder.append(defs);document.body.append(holder);cleanup.push(()=>holder.remove());
+          node.style.clipPath=`url(#${clip.id})`;
+        }
+        for(let index=0;index<cells;index++){
+          const col=index%columns,row=Math.floor(index/columns),left=r.left+r.width*col/columns,top=r.top+r.height*row/rows;
+          let tile;if(clip){tile=document.createElementNS('http://www.w3.org/2000/svg','rect');tile.setAttribute('x',col/columns);tile.setAttribute('y',row/rows);tile.setAttribute('width','0');tile.setAttribute('height','0');clip.append(tile);}
+          job({kind:'media',start:start+index*.002,end:end+index*.002,point:p=>({x:left+r.width/columns*smooth(p),y:top+r.height/rows*(cells===1?.5:smooth(p))}),update:p=>{
+            const value=smooth(p);node.style.setProperty('visibility','visible','important');
+            if(tile){tile.setAttribute('width',(1/columns+.001)*value);tile.setAttribute('height',(1/rows+.001)*value);}
+            else node.style.clipPath=`inset(0 ${(1-value)*100}% 0 0)`;
+          }},state);
+        }
       }
       function svgTextJob(node,start,end){
         if(!visible(node))return;
@@ -206,22 +218,11 @@
         svgJobs(root.querySelector('.growth-future'),18,.30,.48,label('未来山脊','Future ridge'));
         svgJobs(root.querySelector('.growth-now-line'),2,.40,.46,label('现在的轨迹','Present segment'));
         root.querySelectorAll('.growth-date-guides line,.growth-date-ticks line').forEach((node,i)=>svgJobs(node,1,.30+i*.003,.37+i*.003,label('节点日期连线','Date connector')));
-        root.querySelectorAll('.growth-vertex').forEach((vertex,i)=>vertex.querySelectorAll('circle').forEach((node,j)=>svgJobs(node,1,.31+i*.009+j*.002,.355+i*.009+j*.002,label(vertex.dataset.kind==='work'?'作品节点':'学习节点',vertex.dataset.kind==='work'?'Work node':'Learning node'))));
+        root.querySelectorAll('.growth-vertex').forEach((vertex,i)=>vertex.querySelectorAll('circle').forEach((node,j)=>{const offset=tasks.length;svgJobs(node,1,.31+i*.009+j*.002,.355+i*.009+j*.002,label(vertex.dataset.kind==='work'?'作品节点':'学习节点',vertex.dataset.kind==='work'?'Work node':'Learning node'));tasks.slice(offset).forEach(task=>{task.milestoneIndex=i;});}));
         root.querySelectorAll('.growth-head circle').forEach((node,i)=>svgJobs(node,1,.44+i*.008,.49+i*.008,label('现在标记','Present marker')));
         [...root.querySelectorAll('.growth-label > span,.growth-axis-date > span,.growth-now-label')].filter(visible).forEach((node,i)=>textJob(node,.38+i*.004,.47+i*.004,label('节点标注','Milestone label')));
         root.querySelectorAll('.growth-legend > span,.growth-scroll,.growth-readout-date,.growth-readout-label').forEach((node,i)=>textJob(node,.43+i*.012,.52+i*.012,label('阶段说明','Milestone readout')));
         root.querySelectorAll('.growth-controls button').forEach((node,i)=>borderJobs(node,.46+i*.025,.52+i*.025,label('阶段切换','Milestone control')));
-        const vertices=[...root.querySelectorAll('.growth-vertex')];
-        vertices.forEach((vertex,i)=>{
-          const r=vertex.querySelector('.vertex-core').getBoundingClientRect(),chart=root.querySelector('.growth-chart').getBoundingClientRect(),date=root.querySelector(`[data-date-index="${i}"]`).getBoundingClientRect();
-          const node={x:r.left+r.width/2,y:r.top+r.height/2},axis={x:Math.max(chart.left+8,Math.min(chart.right-8,node.x)),y:date.top};
-          job({kind:'milestone',title:label(`阶段 ${String(i+1).padStart(2,'0')}`,`Milestone ${String(i+1).padStart(2,'0')}`),start:.51+i*.013,end:.56+i*.013,update:p=>{if(p>=.22&&!report.visitedMilestones.includes(i))report.visitedMilestones.push(i);},point:p=>{
-            return {x:lerp(node.x,axis.x,smooth(p)),y:lerp(node.y,axis.y,smooth(p))};
-          }});
-        });
-        const future=root.querySelector('.growth-future'),futureLength=future.getTotalLength(),futureMatrix=future.getScreenCTM();
-        const futurePoints=Array.from({length:120},(_,i)=>{const point=future.getPointAtLength(futureLength*i/119);return new DOMPoint(point.x,point.y).matrixTransform(futureMatrix);});
-        job({kind:'overview',title:label('完整成长轨迹','Complete growth journey'),start:.77,end:.90,point:p=>pointOn(futurePoints,p),endAction:()=>{root.scrollTop=root.querySelector('#growth').offsetHeight-root.clientHeight;window.GrowthMountain.preview(null);}});
         dragBox(root.querySelector('.quick-header'),.005,.065);
         dragBox(heading,.025,.11);
         dragBox(root.querySelector('.growth-chart'),.075,.21);
@@ -244,11 +245,12 @@
       }
       function schedule(batch,from,to){
         const sourceEnd=Math.max(...batch.map(task=>task.end));
+        const pool=batch.some(task=>['interaction','overview'].includes(task.kind))?agents.slice(1):agents,assigned=new Set();
         batch.forEach(task=>{
           task.from=task.point(0);task.to=task.point(1);
           // One drawing/typing pace across every scene, rather than squeezing each
           // scene's original timeline by a different amount. Stagger the starts.
-          task.start=from+task.start/sourceEnd*(to-from)*.38;
+          task.start=from+task.start/sourceEnd*(to-from)*.08;
           task.end=task.start+taskSeconds(task)*cadence/(duration/1000);
           if(task.kind==='interaction'){task.start=.30;task.end=.65;}
         });
@@ -258,15 +260,26 @@
             const a=previous.to,b=task.from,travel=Math.hypot(a.x-b.x,a.y-b.y)/travelPace/(duration/1000);
             return Math.max(task.start,agent.available+travel);
           };
-          const agent=['interaction','overview'].includes(task.kind)?tour:agents.slice(1).reduce((a,b)=>arrival(a)<=arrival(b)?a:b),requested=task.start;
+          const fresh=pool.filter(agent=>!assigned.has(agent.id)),candidates=fresh.length?fresh:pool;
+          const agent=['interaction','overview'].includes(task.kind)?tour:candidates.reduce((a,b)=>arrival(a)<=arrival(b)?a:b),requested=task.start;
+          assigned.add(agent.id);
           task.start=arrival(agent);task.end+=task.start-requested;agent.jobs.push(task);agent.available=task.end;task.agent=agent.id;
         });
         const latest=Math.max(...batch.map(task=>task.end));
         pacing.push({from,to,scale:Math.min(1,(to-from)/(latest-from))});
         if(latest>to)batch.forEach(task=>{task.start=from+(task.start-from)*(to-from)/(latest-from);task.end=from+(task.end-from)*(to-from)/(latest-from);});
+        // Keep every worker constructing until the handoff instead of leaving
+        // early finishers parked on their last element. Each chain keeps its order.
+        for(const agent of agents){
+          const chain=batch.filter(task=>task.agent===agent.id);if(!chain.length)continue;
+          const first=chain[0].start,last=chain.at(-1).end,stretch=(to-first)/Math.max(.001,last-first);
+          chain.forEach(task=>{task.start=first+(task.start-first)*stretch;task.end=first+(task.end-first)*stretch;});
+          chain.at(-1).end=to;
+        }
+        pacing.at(-1).workers=new Set(batch.map(task=>task.agent)).size;
         agents.forEach(agent=>{agent.available=Math.max(0,...agent.jobs.map(task=>task.end));});
       }
-      schedule(tasks,introEnd,combined ? visualAt-.015 : buildEnd);
+      schedule(tasks,introEnd,combined ? visualAt : buildEnd);
       const end=1;
       report={runId:++runSerial,view:profile?'profile':'growth',phases:[profile?'profile':'growth'],taskCount:tasks.length,cursorCount:count,duration:Math.round(duration*end),nameFlips:0,completed:0,idleCursors:0,visitedMilestones:[],pacing,types:tasks.reduce((all,task)=>(all[task.kind]=(all[task.kind]||0)+1,all),{})};
       function freezeTasks(){
@@ -281,7 +294,7 @@
         const fadeScene=holdScene();
         window.PortfolioQuick.showProject(firstVisualId);visualStarted=true;canvas.dataset.contentPhase='visual';report.phases.push('visual');
         const article=root.querySelector(`#project-${firstVisualId}`),offset=tasks.length;
-        mediaJob(article.querySelector('.project-poster'),.10,.55);
+        mediaJob(article.querySelector('.project-poster'),.10,.55,24);
         article.querySelectorAll('.project-kicker > span').forEach((node,i)=>textJob(node,.12+i*.04,.37+i*.04,label('作品分区','Project category')));
         textJob(article.querySelector('h2'),.24,.56,label('作品名称','Project title'));
         article.querySelectorAll('.project-meta p').forEach((node,i)=>textJob(node,.40+i*.06,.65+i*.06,label('作品信息','Project information')));
@@ -292,7 +305,7 @@
         dragBox(article.querySelector('.project-poster'),.005,.15);
         dragBox(article.querySelector('.project-brief'),.08,.27);
         dragBox(article.querySelector('.project-enter'),.55,.70);
-        schedule(tasks.slice(offset),visualAt+.02,wheelAt-.015);
+        schedule(tasks.slice(offset),visualAt,wheelAt);
         updateReport();fadeScene();
       }
       function beginWheel(){
@@ -314,7 +327,7 @@
           dragBox(card,.29+delay,.45+delay);
         });
         const close=wheel.querySelector('.work-wheel-close');textJob(close,.80,.94,label('关闭轮盘','Close selector'));borderJobs(close,.73,.81,label('关闭按钮','Close button'));
-        schedule(tasks.slice(offset),wheelAt+.025,buildEnd);
+        schedule(tasks.slice(offset),wheelAt,buildEnd);
         report.wheel={ticks:ticks.length,numerals:numerals.length,cards:cards.length,tasks:tasks.length-offset};updateReport();fadeScene();
       }
       function swim(a,b,p,id){const dx=b.x-a.x,dy=b.y-a.y,d=Math.max(1,Math.hypot(dx,dy)),bend=Math.min(110,d*.28)*(id%2?1:-1),u=1-p,c1={x:a.x+dx/3-dy/d*bend,y:a.y+dy/3+dx/d*bend},c2={x:a.x+dx*2/3-dy/d*bend*.6,y:a.y+dy*2/3+dx/d*bend*.6};return{x:u*u*u*a.x+3*u*u*p*c1.x+3*u*p*p*c2.x+p*p*p*b.x,y:u*u*u*a.y+3*u*u*p*c1.y+3*u*p*p*c2.y+p*p*p*b.y};}
@@ -338,7 +351,7 @@
       }
       canvas.style.background='transparent';
       const start={x:width/2,y:height/2};
-      const lastPositions=new Map();let departureSide;
+      let closing;
       const schoolPaths=[
         [[-155,-35],[-75,-130],[155,-80],[70,90]],
         [[70,-145],[190,-25],[100,145],[-45,75]],
@@ -374,7 +387,34 @@
         m.x+=m.vx*dt;m.y+=m.vy*dt;
         const desired=Math.atan2(m.vy,m.vx),turn=Math.atan2(Math.sin(desired-agent.heading),Math.cos(desired-agent.heading));
         agent.heading+=Math.max(-3.8*dt,Math.min(3.8*dt,turn*(1-Math.exp(-7*dt))));
-        const point={x:m.x,y:m.y};lastPositions.set(agent.id,point);return point;
+        return{x:m.x,y:m.y};
+      }
+      function closingOrbit(agent,turn){
+        const radius=Math.min(92,width*.18,height*.13)*(.90+agent.depth*.10)+(agent.lane-1)*9;
+        const angle=-1.2-agent.order*.20-agent.lane*.30+Math.PI*2*turn;
+        return{x:start.x+Math.cos(angle)*radius+Math.sin(angle*3+agent.lane)*3,
+          y:start.y+Math.sin(angle)*radius*.72+Math.sin(angle*2+agent.lane)*3};
+      }
+      function beginClosing(){
+        const total=(1-returnAt)*duration/1000;
+        closing={gather:total*.43,circle:total*.45,fade:total*.12};
+        for(const agent of agents){agent.closing={...agent.motion};agent.trip=null;}
+        report.closing={center:{...start},...closing};
+      }
+      function closingPoint(agent,seconds){
+        const entry=closingOrbit(agent,0),step=.0001,next=closingOrbit(agent,step);
+        const velocity={x:(next.x-entry.x)/step/closing.circle,y:(next.y-entry.y)/step/closing.circle};
+        if(seconds<closing.gather){
+          const p=clamp(seconds/closing.gather),p2=p*p,p3=p2*p,from=agent.closing;
+          const h00=2*p3-3*p2+1,h10=p3-2*p2+p,h01=-2*p3+3*p2,h11=p3-p2;
+          return{x:h00*from.x+h10*from.vx*closing.gather+h01*entry.x+h11*velocity.x*closing.gather,
+            y:h00*from.y+h10*from.vy*closing.gather+h01*entry.y+h11*velocity.y*closing.gather};
+        }
+        const turn=(seconds-closing.gather)/closing.circle;
+        if(turn<=1)return closingOrbit(agent,turn);
+        // Complete one full turn before fading, then coast along its tangent.
+        const end=closingOrbit(agent,1),fade=clamp((seconds-closing.gather-closing.circle)/closing.fade),coast=closing.fade*(fade-fade*fade/2);
+        return{x:end.x+velocity.x*coast,y:end.y+velocity.y*coast};
       }
       await new Promise(resolve=>{
         finish=resolve;const began=performance.now();let previousTime=began;revealScene();
@@ -384,33 +424,41 @@
           if(combined&&!visualStarted&&t>=visualAt)beginVisual();
           if(combined&&!wheelStarted&&t>=wheelAt)beginWheel();
           if(combined&&!growthReturned&&t>=returnAt){freezeTasks();returnToGrowth();}
+          if(!closing&&t>=returnAt)beginClosing();
           canvas.dataset.contentPhase=growthReturned?'growth':wheelStarted?'wheel':visualStarted?'visual':profile?'profile':'growth';
           for(const task of tasks){if(t<task.start)continue;const p=clamp((t-task.start)/(task.end-task.start));if(!task.complete){task.update?.(p);if(p===1)complete(task);}if(task.kind==='trace')strokeTask(task,p);if(task.kind==='box'&&p<1)drawDragBox(task,p);}
           let active=0;
           for(const agent of depthOrder){
             if(t<introEnd){
+              agent.activity='arriving';agent.taskId=null;agent.taskKind=null;
               const point=steer(agent,openingPoint(agent,(now-began)/1000),dt,false);
               const fade=clamp(((now-began)/1000-agent.order*.018)/.30);ctx.save();ctx.globalAlpha=smooth(fade);
               active+=Number(cursor(point,agent.jobs[0]||{},agent.id,true,agent.heading,0));ctx.restore();continue;
             }
             if(t>=returnAt){
-              if(departureSide==null){const positions=[...lastPositions.values()];departureSide=positions.reduce((sum,p)=>sum+p.x,0)/Math.max(1,positions.length)<width/2?-1:1;}
-              const last=agent.jobs.at(-1)||{},seconds=(t-returnAt)*duration/1000,lag=agent.order*.035+(1-agent.depth)*.12,p=smooth((seconds-lag)/1.3);
-              const target=swim({x:width*(departureSide<0?.19:.81),y:height*.77},{x:departureSide<0?-170:width+170,y:height+70},p,agent.lane);
-              target.x-=departureSide*agent.order*9;target.y+=(agent.lane-1.5)*13+Math.sin(seconds*2.4-agent.order*.2)*13;
-              const point=steer(agent,target,dt,true);ctx.save();ctx.globalAlpha=1-smooth((t-.91)/.09);
+              const last=agent.jobs.at(-1)||{},seconds=(t-returnAt)*duration/1000,point=closingPoint(agent,seconds),ahead=closingPoint(agent,seconds+.001);
+              agent.motion={x:point.x,y:point.y,vx:(ahead.x-point.x)*1000,vy:(ahead.y-point.y)*1000};
+              const desired=Math.atan2(ahead.y-point.y,ahead.x-point.x),turn=Math.atan2(Math.sin(desired-agent.heading),Math.cos(desired-agent.heading));agent.heading+=Math.max(-7*dt,Math.min(7*dt,turn));
+              agent.activity=seconds<closing.gather?'gathering':seconds<closing.gather+closing.circle?'circling':'fading';agent.orbitTurns=clamp((seconds-closing.gather)/closing.circle);
+              ctx.save();ctx.globalAlpha=1-smooth((seconds-closing.gather-closing.circle)/closing.fade);
               active+=Number(cursor(point,last,agent.id,true,agent.heading,0));ctx.restore();continue;
             }
             const current=agent.jobs.find(task=>t>=task.start&&t<task.end),next=agent.jobs.find(task=>task.start>t),previous=agent.jobs.findLast(task=>task.end<=t);
             const task=current||next||previous||{},p=current?clamp((t-current.start)/(current.end-current.start)):0;
-            const target=current?current.point(clamp(p+.035/Math.max(.05,(current.end-current.start)*duration/1000))):next?.from||previous?.to||start;
+            agent.activity=current?'drawing':next?'travel':'unassigned';agent.taskId=task.id;agent.taskKind=task.kind;
+            let target;
+            if(current){agent.trip=null;target=current.point(clamp(p+.035/Math.max(.05,(current.end-current.start)*duration/1000)));}
+            else if(next){
+              if(agent.trip?.task!==next)agent.trip={task:next,from:{x:agent.motion.x,y:agent.motion.y},start:t};
+              target=swim(agent.trip.from,next.from,smooth((t-agent.trip.start)/Math.max(.001,next.start-agent.trip.start)),agent.id);
+            }else target=previous?.to||start;
             const destination={x:Math.max(10,Math.min(width-16,target.x)),y:Math.max(10,Math.min(height-24,target.y))};
             const point=steer(agent,destination,dt,false);
             active+=Number(cursor(point,task,agent.id,true,agent.heading,p));
           }
           report.completed=tasks.filter(task=>task.complete).length;canvas.dataset.activeCursors=String(active);canvas.dataset.taskCount=String(tasks.length);
           report.frameTime=now;
-          report.cursors=agents.filter(agent=>agent.motion).map(agent=>({id:agent.id,x:agent.motion.x,y:agent.motion.y,heading:agent.heading,depth:agent.depth}));
+          report.cursors=agents.filter(agent=>agent.motion).map(agent=>({id:agent.id,x:agent.motion.x,y:agent.motion.y,heading:agent.heading,depth:agent.depth,activity:agent.activity,taskId:agent.taskId,taskKind:agent.taskKind,orbitTurns:agent.orbitTurns||0}));
           if(t<end)frame=requestAnimationFrame(paint);else resolve();
         }
         frame=requestAnimationFrame(paint);
