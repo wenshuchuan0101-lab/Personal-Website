@@ -79,10 +79,15 @@
     projectFrame.title = project.title?.[language] || project.title?.zh || id;
     projectFrame.allow = 'autoplay; fullscreen';
     projectFrame.allowFullscreen = true;
-    const url = new URL('./project.html', location.href);
+    const spatialWork = id === 'yulong-dance';
+    const url = new URL(spatialWork ? './scenes/yulong-dance/index.html' : './project.html', location.href);
     url.searchParams.set('work', id);
     url.searchParams.set('lang', language);
     url.searchParams.set('from', 'showcase');
+    if (spatialWork) {
+      url.searchParams.set('v', 'yulong-city41');
+      if (new URLSearchParams(location.search).has('test')) url.searchParams.set('test', '1');
+    }
     projectFrame.src = url.href;
     projectPanel.replaceChildren(projectFrame);
     projectFrame.addEventListener('load', () => projectFrame?.focus({ preventScroll:true }), { once:true });
