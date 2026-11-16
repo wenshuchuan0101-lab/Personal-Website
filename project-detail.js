@@ -2,11 +2,20 @@
   const parameters = new URLSearchParams(location.search);
   const id = parameters.get("work");
   let language = parameters.get("lang") === "en" ? "en" : "zh";
+  const showcaseReturn = parameters.get('from') === 'showcase';
+  const embeddedShowcase = showcaseReturn && parent !== window;
+  const notifyShowcase = (type) => { if (embeddedShowcase) parent.postMessage({ type, language }, location.origin); };
   const group = PORTFOLIO_CONTENT.groups.find((group) => group.projects.some((project) => project.id === id));
   const project = group?.projects.find((project) => project.id === id);
   const text = (value) => typeof value === "string" ? value : value?.[language] || value?.zh || "";
   const body = document.querySelector(".work-detail-body");
   const back = document.querySelector(".work-detail-back");
+  back.addEventListener('click', event => {
+    if (!embeddedShowcase) return;
+    event.preventDefault();
+    body.querySelectorAll('video').forEach(video => video.pause());
+    notifyShowcase('showcase:work-close');
+  });
   const languageButton = document.querySelector(".detail-language");
   const imageViewer = document.querySelector(".detail-image-viewer");
   const originalImage = imageViewer.querySelector("img");
@@ -331,8 +340,8 @@
     document.title = project ? `${text(project.title)} · ${words.title}` : words.title;
     document.querySelector("#work-detail-title").textContent = project ? text(project.title) : words.title;
     document.querySelector(".work-detail-category").textContent = group ? text(group.title) : "";
-    back.querySelector("span:last-child").textContent = words.back;
-    back.href = project ? `./index.html?view=work&work=${encodeURIComponent(id)}&lang=${language}` : "./index.html";
+    back.querySelector("span:last-child").textContent = showcaseReturn ? (language === 'zh' ? '返回殿堂' : 'Back to the hall') : words.back;
+    back.href = showcaseReturn ? `./index.html?view=showcase&lang=${language}` : project ? `./index.html?view=work&work=${encodeURIComponent(id)}&lang=${language}` : "./index.html";
     languageButton.setAttribute("aria-label", language === "zh" ? "Switch to English" : "切换为中文");
     body.replaceChildren();
     const detail = project?.detail;
@@ -409,6 +418,14 @@
     url.searchParams.set("lang", language);
     history.replaceState(null, "", url);
     render();
+    notifyShowcase('showcase:language');
+  });
+  document.addEventListener('keydown', event => {
+    if (embeddedShowcase && event.key === 'Escape' && !imageViewer.open) {
+      event.preventDefault();
+      body.querySelectorAll('video').forEach(video => video.pause());
+      notifyShowcase('showcase:work-close');
+    }
   });
   window.addEventListener("popstate", () => {
     body.querySelectorAll("video").forEach((video) => video.pause());

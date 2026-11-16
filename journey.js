@@ -24,6 +24,7 @@ function applyLanguage() {
   returnProfileButton.textContent = labels.back;
   showcaseView.setAttribute("aria-label", labels.showcase);
   window.PortfolioQuick.setLanguage(language, position);
+  window.ShowcaseMode?.setLanguage(language);
 }
 
 function setPhase(next) {
@@ -41,11 +42,32 @@ function animate(node, frames, milliseconds, options = {}) {
 }
 
 function showProfile() {
+  window.ShowcaseMode?.hide();
   showcaseView.hidden = true;
   quickView.hidden = false;
   window.PortfolioQuick.setView("profile");
   document.body.dataset.destination = "profile";
   setPhase("profile");
+  const url = new URL(location.href);
+  if (url.searchParams.get('view') === 'showcase') {
+    url.searchParams.delete('view');
+    history.replaceState(null, '', url);
+  }
+}
+
+function showShowcase() {
+  intro.hidden = true;
+  quickView.hidden = true;
+  showcaseView.hidden = false;
+  document.body.dataset.destination = 'showcase';
+  setPhase('showcase');
+  window.ShowcaseMode.show(language);
+  returnProfileButton.focus({ preventScroll:true });
+  const url = new URL(location.href);
+  url.searchParams.set('view', 'showcase');
+  url.searchParams.set('lang', language);
+  url.searchParams.delete('work');
+  history.replaceState(null, '', url);
 }
 
 entry.addEventListener("click", async (event) => {
@@ -106,9 +128,7 @@ async function choose(option) {
   if (mode === "quick") {
     window.PortfolioQuick.setView("quick");
   } else {
-    quickView.hidden = true;
-    showcaseView.hidden = false;
-    returnProfileButton.focus({ preventScroll: true });
+    showShowcase();
   }
   fade.hidden = true;
   languageStar.disabled = false;
@@ -123,6 +143,11 @@ quickView.addEventListener("portfolio:profile", () => {
   if (phase === "quick") showProfile();
 });
 returnProfileButton.addEventListener("click", showProfile);
+window.addEventListener('showcase:exit', showProfile);
+window.addEventListener('showcase:language', event => {
+  language = event.detail.language === 'en' ? 'en' : 'zh';
+  applyLanguage();
+});
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && phase === "showcase") showProfile();
 });
@@ -139,4 +164,8 @@ if (returnParameters.get("view") === "work") {
     quickView.hidden = false;
     setPhase("quick");
   }
+} else if (returnParameters.get('view') === 'showcase') {
+  language = returnParameters.get('lang') === 'en' ? 'en' : 'zh';
+  applyLanguage();
+  showShowcase();
 }

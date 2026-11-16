@@ -16,13 +16,15 @@
   <link rel="stylesheet" href="./work-posters.css?v=eighth-day1">
   <link rel="stylesheet" href="./work-clock.css">
   <link rel="stylesheet" href="./poster-panels.css">
+  <link rel="stylesheet" href="./showcase-mode.css?v=showcase-integration39">
   <script src="./settings.js?v=swarm-circle11" defer></script>
   <script src="./portfolio-data.js?v=flower-room-video2" defer></script>
   <script src="./app.js" defer></script>
   <script src="./growth-chart.js?v=swarm-detailed5" defer></script>
   <script src="./portfolio.js?v=eighth-day1" defer></script>
   <script src="./swarm-transition.js?v=swarm-circle11" defer></script>
-  <script src="./journey.js?v=swarm-circle11" defer></script>
+  <script src="./showcase-mode.js?v=showcase-integration39" defer></script>
+  <script src="./journey.js?v=showcase-integration39" defer></script>
 </head>
 <body>
   <main class="scene" aria-labelledby="title">
@@ -51,7 +53,10 @@
     </button>
   </main>
   <section class="showcase-view" aria-label="观赏模式" hidden>
+    <div class="showcase-stage"></div>
+    <div class="showcase-loading" role="status" aria-live="polite"><p>梦境正在展开…</p><button class="showcase-retry" type="button" hidden>重新加载</button></div>
     <button class="return-profile" type="button">返回个人介绍</button>
+    <section class="showcase-project" role="dialog" aria-modal="true" aria-label="作品详情" hidden></section>
   </section>
   <button class="language-star" type="button" aria-label="Switch to English" title="English">
     <svg viewBox="0 0 100 140" aria-hidden="true">
