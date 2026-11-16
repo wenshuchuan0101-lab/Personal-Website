@@ -11,3 +11,12 @@
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 body[data-embedded=true] .wordmark{display:none}body[data-embedded=true] .masthead{justify-content:flex-end}
 #open-work{pointer-events:auto;margin-top:8px;padding:10px 20px;border:1px solid #e8d8b866;border-radius:3px;background:#080f2b99;color:#f4e7c9;font-size:12px;letter-spacing:.12em;backdrop-filter:blur(8px)}
+.gate-confirm{width:min(430px,86vw);max-height:80svh;margin:auto;padding:36px 28px 30px;border:1px solid #eee2c975;border-radius:14px;background:#111b2be8;color:#f3e9d2;box-shadow:0 0 45px #ead5a41a,0 24px 85px #0008;backdrop-filter:blur(18px);text-align:center}
+.gate-confirm::backdrop{background:#03071466;backdrop-filter:blur(6px)}
+.gate-confirm>p{margin:0 0 29px;font-size:clamp(17px,4.3vw,22px);font-weight:300;line-height:1.8;letter-spacing:.08em;overflow-wrap:anywhere}
+.gate-confirm-actions{display:flex;justify-content:center;gap:34px}
+.gate-confirm-actions button{width:78px;min-height:84px;padding:10px 0 8px;border:1px solid #e9dcc15c;border-radius:10px;background:#e4d5ad0b;color:#e9dec8;display:grid;place-items:center;gap:9px;transition:background .18s,box-shadow .18s}
+.gate-confirm-actions button:first-child{border-color:#f1dfac88;color:#f8e9bf;background:#e5d09919;box-shadow:0 0 24px #f0d69412}
+.gate-confirm-actions button:hover{background:#e6d3a52b;box-shadow:0 0 22px #ebd6a324}
+.gate-confirm-actions span{font:300 32px/1 'Segoe UI Symbol',Arial,sans-serif}
+.gate-confirm-actions small{font:inherit;font-size:11px;letter-spacing:.15em}

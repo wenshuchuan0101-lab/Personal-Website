@@ -6,12 +6,12 @@
   <meta name="theme-color" content="#080f2b">
   <title>梅子雨的梦 · 梦境章节</title>
   <link rel="icon" href="./assets/star.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./style.css?v=gate-confirm40">
   <script type="importmap">{"imports":{"three":"./vendor/three.module.js","three/addons/":"./vendor/addons/"}}</script>
-  <script type="module" src="./main.js?v=showcase-integration39"></script>
+  <script type="module" src="./main.js?v=gate-confirm40"></script>
 </head>
 <body>
-  <canvas id="world" aria-label="可交互的向上拱廊与八扇门星空大厅"></canvas>
+  <canvas id="world" tabindex="0" aria-label="可交互的向上拱廊与八扇门星空大厅"></canvas>
   <div class="vignette" aria-hidden="true"></div>
   <header class="masthead">
     <a class="wordmark" href="./" aria-label="回到梦的序章"><span class="brand-star">✦</span><span><span id="dream-name">梅子雨的梦</span><small>DREAM CHAPTERS</small></span></a>
@@ -26,6 +26,13 @@
   </section>
   <div id="reticle" class="reticle" aria-hidden="true"></div>
   <div id="door-hint" class="door-hint" hidden><span class="door-hint-index"></span><h2></h2><p>这一章，尚未开启</p><button id="open-work" type="button" hidden>进入作品</button></div>
+  <dialog id="gate-confirm" class="gate-confirm" aria-labelledby="gate-confirm-question">
+    <p id="gate-confirm-question"></p>
+    <div class="gate-confirm-actions">
+      <button id="gate-confirm-yes" type="button" aria-label="确认进入"><span aria-hidden="true">✓</span><small>进入</small></button>
+      <button id="gate-confirm-no" type="button" aria-label="取消进入"><span aria-hidden="true">✕</span><small>取消</small></button>
+    </div>
+  </dialog>
   <aside id="movement" class="movement" aria-label="移动方向摇杆">
     <div class="joystick" id="joystick" role="group" aria-label="拖动摇杆移动，也可以使用 WASD 或方向键">
       <span class="pad-arrow north">⌃</span><span class="pad-arrow east">›</span><span class="pad-arrow south">⌄</span><span class="pad-arrow west">‹</span>

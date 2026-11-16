@@ -4,6 +4,7 @@ export const CONFIG = {
   corridor: { width:8.4, steps:64, stepDepth:.78, stepRise:.18, stepGap:.22, treadThickness:.10, bayLength:7.1, archHeight:7.6 },
   hall: { radius:32, stretch:1.12, depthStretch:1.7, entryVestibule:12, height:60, doorRadius:26, gateScale:1.55, arcadeBays:32, arcadeLevels:1, clerestoryBays:16, museClearance:5.4, museHeight:14.5 },
   player: { eyeHeight:1.67, radius:.3, walkSpeed:3.6, cameraEaseDistance:2.34, mouseSensitivity:.0022, touchSensitivity:.0035 },
+  gateInteraction: { halfWidth:2.8, frontDepth:3.2, backDepth:3.2, rearmPadding:.8 },
   materials: { structureOpacity:.22, treadOpacity:.34, doorOpacity:.28, transmission:.45, structureOpacityBoost:.16, reliefOpacity:.76, museOpacity:.92, workGateOpacity:.76, workGateGold:0xf1ead8 },
   construction: { initialSteps:8, aheadSteps:14, frameAhead:15, treadSeconds:1.4, frameSeconds:1.8, linkSeconds:1.3 },
   // 仅用于起点后方的无限下行视觉，不加入可行走区域。

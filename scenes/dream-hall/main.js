@@ -4,21 +4,22 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { Reflector } from 'three/addons/objects/Reflector.js';
-import { CONFIG as C } from './scene.config.js';
+import { CONFIG as C } from './scene.config.js?v=gate-confirm40';
 import { buildColosseum } from './colosseum.js';
 import { loadSculptureAssets } from './sculpture-gallery.js';
 import { paleInlay } from './baroque-materials.js';
 import { buildWorkGate } from './work-gates.js';
 import { loadWorkPosters } from './work-portal-effects.js';
 import { installPortfolioBridge } from './portfolio-bridge.js';
+import { installGateInteraction } from './gate-interaction.js';
 
 const $=s=>document.querySelector(s),canvas=$('#world'),enter=$('#enter'),welcome=$('#welcome');
 const mobile=matchMedia('(pointer:coarse)').matches,reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
 const embedded=new URLSearchParams(location.search).get('embedded')==='1'&&parent!==window;
-let viewLanguage=new URLSearchParams(location.search).get('lang')==='en'?'en':'zh',hostSuspended=embedded,portfolioBridge,lastOpenedDoor=null;
+let viewLanguage=new URLSearchParams(location.search).get('lang')==='en'?'en':'zh',hostSuspended=embedded,portfolioBridge,gateInteraction;
 const ui={
-  zh:{pause:'暂停漫游 <span>Ⅱ</span>',resume:'继续漫游 <span>▷</span>',first:'第一章 <i></i> 悬浮回廊',second:'第二章 <i></i> 八扇梦门',locked:'鼠标环视 · WASD / 方向键移动 · Esc 释放鼠标',drag:'拖动鼠标环视 · WASD / 方向键移动',pending:'这一章，尚未开启',open:'进入作品',enterHint:'走近进入 · E / Enter 查看作品',chapter:'翻开第一章'},
-  en:{pause:'Pause <span>Ⅱ</span>',resume:'Resume <span>▷</span>',first:'Chapter I <i></i> The Floating Corridor',second:'Chapter II <i></i> Eight Dream Gates',locked:'Mouse to look · WASD / arrows to move · Esc to release',drag:'Drag to look · WASD / arrows to move',pending:'This chapter is yet to open',open:'Enter project',enterHint:'Walk closer · E / Enter to view',chapter:'Begin Chapter I'}
+  zh:{pause:'暂停漫游 <span>Ⅱ</span>',resume:'继续漫游 <span>▷</span>',first:'第一章 <i></i> 悬浮回廊',second:'第二章 <i></i> 八扇梦门',locked:'鼠标环视 · WASD / 方向键移动 · Esc 释放鼠标',drag:'拖动鼠标环视 · WASD / 方向键移动',pending:'这一章，尚未开启',open:'进入作品',enterHint:'走近门或按 E / Enter 确认进入',chapter:'翻开第一章'},
+  en:{pause:'Pause <span>Ⅱ</span>',resume:'Resume <span>▷</span>',first:'Chapter I <i></i> The Floating Corridor',second:'Chapter II <i></i> Eight Dream Gates',locked:'Mouse to look · WASD / arrows to move · Esc to release',drag:'Drag to look · WASD / arrows to move',pending:'This chapter is yet to open',open:'Enter project',enterHint:'Walk closer · E / Enter to confirm',chapter:'Begin Chapter I'}
 };
 const words=()=>ui[viewLanguage],workTitle=work=>viewLanguage==='en'?(work.titleEn||work.title):work.title;
 const length=C.corridor.steps*C.corridor.stepDepth,rise=C.corridor.steps*C.corridor.stepRise;
@@ -293,18 +294,17 @@ function updateUI(){
   for(const door of doors){const delta=door.position.clone().sub(new THREE.Vector3(player.x,rise,player.z)),distance=delta.length();if(distance<best&&delta.normalize().dot(forward)>.05){best=distance;nearest=door;}door.label.material.opacity=mix(door.label.material.opacity,door===nearest?1:.88,.08);door.uniforms.uNear.value=mix(door.uniforms.uNear.value,clamp(1-distance/15,0,1),.12);}
   const hint=$('#door-hint');activeDoor=nearest;hint.hidden=!nearest;
   if(nearest){hint.querySelector('h2').textContent=workTitle(nearest.work);hint.querySelector('.door-hint-index').textContent=nearest.work.roman;hint.querySelector('p').textContent=embedded&&nearest.work.projectId?words().enterHint:words().pending;$('#open-work').hidden=!(embedded&&nearest.work.projectId);$('#open-work').textContent=words().open;}
-  if(lastOpenedDoor&&Math.hypot(player.x-lastOpenedDoor.position.x,player.z-lastOpenedDoor.position.z)>5)lastOpenedDoor=null;
-  if(embedded&&playing&&!paused&&nearest?.work.projectId&&nearest!==lastOpenedDoor&&best<1.85)enterWork(nearest);
 }
 function enterWork(door=activeDoor){
   if(!door)return;
   if(!portfolioBridge?.embedded||!door.work.projectId){notice(words().pending);return;}
-  lastOpenedDoor=door;hostSuspended=true;resetMovement();document.exitPointerLock?.();portfolioBridge.openWork(door.work.projectId);
+  hostSuspended=true;resetMovement();document.exitPointerLock?.();portfolioBridge.openWork(door.work.projectId);
 }
 function setViewLanguage(language){
   const next=language==='en'?'en':'zh',changed=next!==viewLanguage;viewLanguage=next;document.documentElement.lang=next==='en'?'en':'zh-CN';
   $('#pause').innerHTML=paused?words().resume:words().pause;$('#control-hint').textContent=document.pointerLockElement===canvas?words().locked:words().drag;$('#enter-label').textContent=words().chapter;
   if(changed)for(const door of doors){const old=door.label.material.map;door.label.material.map=doorLabel(door.work);old?.dispose();}
+  gateInteraction?.language();
 }
 let noticeTimer;
 function notice(text){clearTimeout(noticeTimer);$('#notice').textContent=text;$('#notice').classList.add('show');noticeTimer=setTimeout(()=>$('#notice').classList.remove('show'),2600);}
@@ -315,10 +315,14 @@ function start(options={}){
 function setPaused(value){paused=value;resetMovement();$('#pause').innerHTML=value?words().resume:words().pause;if(value)document.exitPointerLock?.();else if(!mobile)canvas.requestPointerLock?.()?.catch(()=>{});}
 function setupInput(){
   enter.addEventListener('click',start);
-  $('#open-work').addEventListener('click',()=>enterWork());
+  $('#open-work').addEventListener('click',()=>gateInteraction?.request(activeDoor));
   $('#pause').addEventListener('click',()=>setPaused(!paused));
   const movementKeys=new Set(['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight']);
   addEventListener('keydown',event=>{
+    if(gateInteraction?.isOpen()){
+      if(movementKeys.has(event.code)||event.code==='KeyE')event.preventDefault();
+      return;
+    }
     if(movementKeys.has(event.code)){
       if(!playing||paused||hostSuspended||document.hidden)return;
       event.preventDefault();
@@ -326,16 +330,16 @@ function setupInput(){
       if(event.repeat&&!keys.has(event.code))return;keys.add(event.code);
     }
     if(event.code==='Escape'&&playing)setPaused(true);
-    if((event.code==='KeyE'||event.code==='Enter')&&activeDoor&&playing&&!event.repeat){event.preventDefault();enterWork();}
+    if((event.code==='KeyE'||event.code==='Enter')&&activeDoor&&playing&&!event.repeat){event.preventDefault();gateInteraction?.request(activeDoor);}
   },{capture:true});
   addEventListener('keyup',event=>{keys.delete(event.code);stopIfReleased();},{capture:true});
   addEventListener('blur',resetMovement);addEventListener('focus',resetMovement);addEventListener('pagehide',resetMovement);
   document.addEventListener('visibilitychange',()=>{if(document.hidden&&playing)setPaused(true);else resetMovement();});
   document.addEventListener('pointerlockchange',()=>{resetMovement();$('#control-hint').textContent=document.pointerLockElement===canvas?words().locked:words().drag;});
   let dragging=null,stickPointer=null;clearPointerState=()=>{dragging=null;stickPointer=null;};
-  canvas.addEventListener('pointerdown',event=>{if(!playing||paused||document.pointerLockElement===canvas)return;dragging={id:event.pointerId,x:event.clientX,y:event.clientY};canvas.setPointerCapture(event.pointerId);});
+  canvas.addEventListener('pointerdown',event=>{if(!playing||paused||gateInteraction?.isOpen()||document.pointerLockElement===canvas)return;dragging={id:event.pointerId,x:event.clientX,y:event.clientY};canvas.setPointerCapture(event.pointerId);});
   addEventListener('pointermove',event=>{
-    if(!playing||paused)return;let dx=0,dy=0;
+    if(!playing||paused||gateInteraction?.isOpen())return;let dx=0,dy=0;
     if(document.pointerLockElement===canvas){dx=event.movementX;dy=event.movementY;}
     else if(dragging?.id===event.pointerId){dx=event.clientX-dragging.x;dy=event.clientY-dragging.y;dragging.x=event.clientX;dragging.y=event.clientY;}
     else return;
@@ -344,8 +348,8 @@ function setupInput(){
   });
   const clearDrag=event=>{if(dragging?.id===event.pointerId)dragging=null;};addEventListener('pointerup',clearDrag);addEventListener('pointercancel',clearDrag);
   const joystick=$('#joystick'),knob=$('#joystick-knob');
-  function dragStick(event){if(stickPointer!==event.pointerId)return;const bounds=joystick.getBoundingClientRect(),radius=bounds.width*.34;const dx=(event.clientX-bounds.left-bounds.width/2)/radius,dy=(event.clientY-bounds.top-bounds.height/2)/radius;stick.set(dx,-dy);if(stick.length()>1)stick.normalize();knob.style.transform=`translate(${stick.x*radius}px,${-stick.y*radius}px)`;}
-  joystick.addEventListener('pointerdown',event=>{if(!playing||paused)return;event.preventDefault();stickPointer=event.pointerId;joystick.setPointerCapture(event.pointerId);dragStick(event);});joystick.addEventListener('pointermove',dragStick);
+  function dragStick(event){if(stickPointer!==event.pointerId||gateInteraction?.isOpen())return;const bounds=joystick.getBoundingClientRect(),radius=bounds.width*.34;const dx=(event.clientX-bounds.left-bounds.width/2)/radius,dy=(event.clientY-bounds.top-bounds.height/2)/radius;stick.set(dx,-dy);if(stick.length()>1)stick.normalize();knob.style.transform=`translate(${stick.x*radius}px,${-stick.y*radius}px)`;}
+  joystick.addEventListener('pointerdown',event=>{if(!playing||paused||gateInteraction?.isOpen())return;event.preventDefault();stickPointer=event.pointerId;joystick.setPointerCapture(event.pointerId);dragStick(event);});joystick.addEventListener('pointermove',dragStick);
   const resetStick=event=>{if(stickPointer!==event.pointerId)return;stickPointer=null;stick.set(0,0);knob.style.transform='';stopIfReleased();};joystick.addEventListener('pointerup',resetStick);joystick.addEventListener('pointercancel',resetStick);joystick.addEventListener('lostpointercapture',resetStick);addEventListener('pointerup',resetStick);addEventListener('pointercancel',resetStick);
 }
 
@@ -354,7 +358,8 @@ function resize(){
 }
 function animate(now){
   if(contextLost)return;requestAnimationFrame(animate);const dt=Math.min(.05,Math.max(0,(now-last)/1000));last=now;if(hostSuspended||document.hidden)return;elapsed+=dt;
-  if(playing&&!paused){const input=movementInput();stepPhysics(input.x,input.z,dt);}
+  if(playing&&!paused&&!gateInteraction?.isOpen()){const input=movementInput();stepPhysics(input.x,input.z,dt);}
+  gateInteraction?.update();
   updateConstruction(dt);
   camera.position.set(player.x,player.y,player.z);camera.rotation.set(look.pitch,look.yaw,0,'YXZ');
   for(const uniforms of animatedUniforms)uniforms.uTime.value=reduce?0:elapsed;
@@ -382,9 +387,10 @@ async function init(){
     buildCorridor(stone,stoneDark,gold,light);buildInfiniteDescent(stone,gold);buildHall(stone,gold,light,sculptures,posters);applyMaterialBalance();addDust();player.y=cameraPathHeight(player.z)+C.player.eyeHeight;
     composer=new EffectComposer(renderer);composer.addPass(new RenderPass(scene,camera));bloom=new UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),C.bloom.strength,C.bloom.radius,C.bloom.threshold);composer.addPass(bloom);composer.addPass(new OutputPass());
     resize();addEventListener('resize',resize);setupInput();setViewLanguage(viewLanguage);enter.disabled=false;document.body.dataset.ready='true';
-    portfolioBridge=installPortfolioBridge({embedded,onPause:()=>{hostSuspended=true;resetMovement();document.exitPointerLock?.();},onResume:()=>{hostSuspended=false;resetMovement();if(!playing)start({lock:false});},onLanguage:setViewLanguage});
+    gateInteraction=installGateInteraction({doors,config:C.gateInteraction,getPosition:()=>player,getEnabled:()=>playing&&!paused&&!hostSuspended&&!document.hidden,getLanguage:()=>viewLanguage,getTitle:workTitle,onFreeze:()=>{resetMovement();document.exitPointerLock?.();},onConfirm:door=>enterWork(door),onDismiss:()=>canvas.focus({preventScroll:true})});
+    portfolioBridge=installPortfolioBridge({embedded,onPause:()=>{hostSuspended=true;gateInteraction.close();resetMovement();document.exitPointerLock?.();},onResume:()=>{hostSuspended=false;resetMovement();if(!playing)start({lock:false});},onLanguage:setViewLanguage});
     canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();contextLost=true;notice('画面暂时休息了，刷新页面即可继续');});
-    window.corridorDemo={inspect:()=>({ready:true,playing,paused,hostSuspended,position:{x:player.x,y:player.y,z:player.z},camera:{x:camera.position.x,y:camera.position.y,z:camera.position.z},input:{keys:[...keys],stick:{x:stick.x,y:stick.y},speed:velocity.length()},look:{...look},inHall:player.z<-length-C.hall.entryVestibule-.3,foundation:{arrived:hallArrived,visible:hallFoundation.visible,parts:hallFoundation.children.length},construction:{furthestDistance,stepsBuilt:treadBuilds.filter(item=>item.p===1).length,stepsVisible:treadBuilds.filter(item=>item.p>0).length,framesBuilt:structureBuilds.filter(item=>item.kind==='frame'&&item.p===1).length,portalsBuilt:structureBuilds.filter(item=>item.kind==='portal'&&item.p===1).length},doorCount:doors.length,doorTitles:doors.map(d=>d.work.title),activeDoor:activeDoor?.work.id||null,inside:isWalkable(player.x,player.z),floorHeight:floorHeight(player.z),renderer:{calls:renderer.info.render.calls,triangles:renderer.info.render.triangles},corridorLength:length,hallZ,rise}),config:C};
+    window.corridorDemo={inspect:()=>({ready:true,playing,paused,hostSuspended,gateInteraction:gateInteraction?.inspect(),position:{x:player.x,y:player.y,z:player.z},camera:{x:camera.position.x,y:camera.position.y,z:camera.position.z},input:{keys:[...keys],stick:{x:stick.x,y:stick.y},speed:velocity.length()},look:{...look},inHall:player.z<-length-C.hall.entryVestibule-.3,foundation:{arrived:hallArrived,visible:hallFoundation.visible,parts:hallFoundation.children.length},construction:{furthestDistance,stepsBuilt:treadBuilds.filter(item=>item.p===1).length,stepsVisible:treadBuilds.filter(item=>item.p>0).length,framesBuilt:structureBuilds.filter(item=>item.kind==='frame'&&item.p===1).length,portalsBuilt:structureBuilds.filter(item=>item.kind==='portal'&&item.p===1).length},doorCount:doors.length,doorTitles:doors.map(d=>d.work.title),activeDoor:activeDoor?.work.id||null,inside:isWalkable(player.x,player.z),floorHeight:floorHeight(player.z),renderer:{calls:renderer.info.render.calls,triangles:renderer.info.render.triangles},corridorLength:length,hallZ,rise}),config:C};
     if(new URLSearchParams(location.search).has('test'))window.corridorDemo.test={workGates:()=>doors.map(d=>{d.group.updateWorldMatrix(true,true);const bounds=new THREE.Box3().setFromObject(d.group),frame=d.group.getObjectByName('sculpted-work-gate-frame'),materials=new Set();frame.traverse(n=>{if(n.material?.isMeshPhysicalMaterial)materials.add(n.material);});return {id:d.work.id,...d.group.userData,bounds:{min:bounds.min.toArray(),max:bounds.max.toArray()},glassSurfaces:[...materials].map(m=>({opacity:m.opacity,transmission:m.transmission,color:m.color.getHex(),roughness:m.roughness,metalness:m.metalness})),scale:d.group.scale.x,height:bounds.max.y-rise,worldPosition:d.position.toArray(),yaw:d.group.rotation.y,posterLoaded:d.work.poster?!!d.curtain.material.uniforms.uMap.value.image:true,build:d.uniforms.uBuild.value,time:d.uniforms.uTime.value};}),detailRevision:()=>{
       const bays=hall.getObjectsByProperty('name','chapel-integrated-window-bay'),portals=hall.getObjectsByProperty('isGroup',true).filter(g=>g.userData.archDepth),muse=hall.getObjectByName('terpsichore-muse-scan');muse.updateWorldMatrix(true,true);const bounds=new THREE.Box3().setFromObject(muse);
       return{supportedWindows:bays.length,allWindowsSupported:bays.every(g=>g.userData.supported&&g.userData.wallBottom===0&&g.userData.pierJointGap===0),mainRoseWindows:hall.getObjectsByProperty('name','painted-rose-glass').length,windowConstructionCount:structureBuilds.filter(s=>s.kind==='stained-window').length,portalDetails:portals.map(g=>g.userData),solidSunDiscs:hall.getObjectsByProperty('name','lantern-gold-sun').length,maskedSkyDiscs:hall.getObjectsByProperty('name','aperture-masked-sky-dome').length,softSkyRays:hall.getObjectsByProperty('name','lantern-soft-daylight-ray').length,museHeight:bounds.max.y-bounds.min.y,museClearance:C.hall.museClearance};

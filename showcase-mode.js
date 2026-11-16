@@ -50,7 +50,7 @@
     const url = new URL('./scenes/dream-hall/index.html', location.href);
     url.searchParams.set('embedded', '1');
     url.searchParams.set('lang', language);
-    url.searchParams.set('v', 'showcase-integration39');
+    url.searchParams.set('v', 'gate-confirm40');
     if (new URLSearchParams(location.search).has('test')) url.searchParams.set('test', '1');
     frame.src = url.href;
     stage.replaceChildren(frame);

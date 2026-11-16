@@ -3,7 +3,7 @@ import { classicalColumn } from './architectural-details.js';
 import { architecturalStone, sculptureMarble, paleInlay } from './baroque-materials.js';
 import { batchStaticDetails } from './geometry-batches.js';
 import { workPortal } from './work-portal-effects.js';
-import { CONFIG as C } from './scene.config.js';
+import { CONFIG as C } from './scene.config.js?v=gate-confirm40';
 
 const PI=Math.PI,TAU=PI*2;
 let column;
